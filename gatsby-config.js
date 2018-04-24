@@ -1,6 +1,6 @@
 module.exports = {
   siteMetadata: {
-    title: 'Gatsby Default Starter',
+    title: 'NACO Investor Portal',
   },
   plugins: ['gatsby-plugin-react-helmet'],
 }
