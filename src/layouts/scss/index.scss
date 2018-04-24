@@ -1,0 +1,11 @@
+@import 'gatsby_defaults';
+@import 'header';
+@import url('https://fonts.googleapis.com/css?family=Roboto:300,400,500');
+
+html {
+  font-family: 'Roboto', sans-serif;
+}
+
+.body-wrapper {
+  margin: 50px 10% 30px 10%;
+}
