@@ -4,6 +4,7 @@ import FlatButton from 'material-ui/FlatButton';
 import Popover from 'material-ui/Popover';
 import Menu from 'material-ui/Menu';
 import MenuItem from 'material-ui/MenuItem';
+import Divider from 'material-ui/Divider';
 
 export default class Header extends Component {
 
@@ -103,6 +104,7 @@ export default class Header extends Component {
           >
             <Menu>
               <MenuItem primaryText="My Profile" />
+              <Divider />
               <MenuItem primaryText="Log Out" />
             </Menu>
           </Popover>
