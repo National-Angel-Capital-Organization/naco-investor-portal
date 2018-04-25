@@ -1,23 +1,23 @@
 /* HEADER */
 
 #header {
-    border-bottom: solid 1px #d3d3d3;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+	border-bottom: solid 1px #d3d3d3;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
 
-    >ul {
-        display: flex;
-        justify-content: space-between;
-    }
+	>ul {
+		display: flex;
+		justify-content: space-between;
+	}
 
-    >nav {
-        margin-right: 30px;
-    }
+	>nav {
+		margin-right: 30px;
+	}
 }
 
 #header-img {
-        width: 350px;
-        min-width: 250px;
-        margin: 20px;
+	width: 350px;
+	min-width: 250px;
+	margin: 20px;
 }

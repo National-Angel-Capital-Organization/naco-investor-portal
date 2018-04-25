@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import Link from 'gatsby-link'
+import { navigateTo } from "gatsby-link"
 import FlatButton from 'material-ui/FlatButton';
 import Popover from 'material-ui/Popover';
 import Menu from 'material-ui/Menu';
@@ -47,6 +48,10 @@ export default class Header extends Component {
     });
   };
 
+  handleItemClick = (event, menuItem) => {
+    navigateTo(menuItem.props['data-location'])
+    this.handleRequestClose()
+  }
 
   render() {
     const { siteTitle } = this.props;
@@ -58,6 +63,9 @@ export default class Header extends Component {
         <nav>
           <FlatButton
             label="GENERAL DASHBOARD"
+            containerElement={<Link to="/" />}
+            style={{ overflow: 'inherit'}}
+            primary={true}
           />
           <FlatButton
             onClick={this.handleClick}
@@ -70,9 +78,11 @@ export default class Header extends Component {
             targetOrigin={{ horizontal: 'left', vertical: 'top' }}
             onRequestClose={this.handleRequestClose}
           >
-            <Menu>
-              <MenuItem primaryText="My Deals" />
-              <MenuItem primaryText="Submit New Deal" />
+            <Menu
+              onItemClick={this.handleItemClick}
+            >
+              <MenuItem data-location="/my-deals" primaryText="My Deals" />
+              <MenuItem data-location="/submit-deal" primaryText="Submit New Deal" />
             </Menu>
           </Popover>
           <FlatButton
@@ -86,9 +96,11 @@ export default class Header extends Component {
             targetOrigin={{ horizontal: 'left', vertical: 'top' }}
             onRequestClose={this.handleRequestClose}
           >
-            <Menu>
-              <MenuItem primaryText="My Exits" />
-              <MenuItem primaryText="Submit New Exit" />
+            <Menu 
+              onItemClick={this.handleItemClick}
+            >
+              <MenuItem data-location="/my-exits" primaryText="My Exits" />
+              <MenuItem data-location="/submit-exit" primaryText="Submit New Exit" />
             </Menu>
           </Popover>
           <FlatButton
@@ -102,10 +114,12 @@ export default class Header extends Component {
             targetOrigin={{ horizontal: 'left', vertical: 'top' }}
             onRequestClose={this.handleRequestClose}
           >
-            <Menu>
-              <MenuItem primaryText="My Profile" />
+            <Menu
+              onItemClick={this.handleItemClick}
+            >
+              <MenuItem data-location="/my-profile" primaryText="My Profile" />
               <Divider />
-              <MenuItem primaryText="Log Out" />
+              <MenuItem data-location="/" primaryText="Log Out" />
             </Menu>
           </Popover>
         </nav>

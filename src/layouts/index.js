@@ -6,6 +6,17 @@ import Header from '../components/header'
 import './scss/index.scss'
 import Cookies from 'js-cookie'
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
+import getMuiTheme from 'material-ui/styles/getMuiTheme'
+
+const muiTheme = getMuiTheme({
+  palette: {
+    textColor: '#525252',
+    primary1Color: '#0079c1',
+    primary2Color: '#54bceb',
+    accent1Color: '#002f65',
+    accent2Color: '#f78e23',
+  },
+});
 
 
 export default class Layout extends Component {
@@ -16,7 +27,7 @@ export default class Layout extends Component {
   render() {
     const { data, children } = this.props;
     return (
-      <MuiThemeProvider>
+      <MuiThemeProvider muiTheme={muiTheme}>
         <div>
           <Helmet
             title={data.site.siteMetadata.title}
