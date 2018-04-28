@@ -23,7 +23,6 @@ export default class Layout extends Component {
 
   componentDidMount() {
     if (!Cookies.get('token')) {
-      console.log('getting token')
       this.getToken()
     }
   }
