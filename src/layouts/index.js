@@ -16,16 +16,37 @@ const muiTheme = getMuiTheme({
     accent1Color: '#002f65',
     accent2Color: '#f78e23',
   },
-});
-
+})
 
 export default class Layout extends Component {
-  static propTypes = {
-    children: PropTypes.func,
+  static propTypes = { children: PropTypes.func }
+
+  componentDidMount() {
+    if (!Cookies.get('token')) {
+      console.log('getting token')
+      this.getToken()
+    }
+  }
+
+  getToken = () => {
+    axios
+      .post(
+        `${process.env.API_AUTH_URL}`,
+        `grant_type=client_credentials&client_id=${
+          process.env.API_CLIENT_ID
+        }&client_secret=${process.env.API_CLIENT_SECRET}`
+      )
+      .then(res => {
+        console.log(res)
+        Cookies.set('token', res.data.access_token, { expires: 7 })
+      })
+      .catch(error => {
+        console.log(error)
+      })
   }
 
   render() {
-    const { data, children } = this.props;
+    const { data, children } = this.props
     return (
       <MuiThemeProvider muiTheme={muiTheme}>
         <div>
@@ -37,9 +58,7 @@ export default class Layout extends Component {
             ]}
           />
           <Header siteTitle={data.site.siteMetadata.title} />
-          <div className="body-wrapper">
-            {children()}
-          </div>
+          <div className="body-wrapper">{children()}</div>
         </div>
       </MuiThemeProvider>
     )
