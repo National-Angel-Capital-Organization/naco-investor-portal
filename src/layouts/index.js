@@ -37,7 +37,7 @@ export default class Layout extends Component {
       )
       .then(res => {
         console.log(res)
-        Cookies.set('token', res.data.access_token, { expires: 7 })
+        Cookies.set('token', res.data.access_token, { expires: 1 })
       })
       .catch(error => {
         console.log(error)
