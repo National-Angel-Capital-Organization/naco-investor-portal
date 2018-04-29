@@ -3,6 +3,7 @@ import Link from 'gatsby-link'
 import axios from 'axios'
 import Cookies from 'js-cookie'
 import TextField from 'material-ui/TextField'
+import DatePicker from 'material-ui/DatePicker'
 import RaisedButton from 'material-ui/RaisedButton'
 
 export default class SubmitDeal extends Component {
@@ -13,15 +14,20 @@ export default class SubmitDeal extends Component {
     IndvInvestor_CompanyWebsite: '',
     IndvInvestor_CompanyCity: '',
     IndvInvestor_CompanyProvince: '',
+    IndvInvestor_DealDate: '',
     IndvInvestor_DollarsInvested: '',
     Angel_Group_Other: '',
   }
 
-  handleChange = event => {
-    const target = event.target
-    const value = target.type === 'checkbox' ? target.checked : target.value
-    const name = target.name
-    this.setState({ [name]: value })
+  handleChange = (event, date) => {
+    if (date) {
+      this.setState({ IndvInvestor_DealDate: date })
+    } else {
+      const target = event.target
+      const value = target.type === 'checkbox' ? target.checked : target.value
+      const name = target.name
+      this.setState({ [name]: value })
+    }
   }
 
   handleSubmit = event => {
@@ -93,6 +99,17 @@ export default class SubmitDeal extends Component {
             onChange={this.handleChange}
             floatingLabelFixed={true}
             style={this.styles}
+          />
+          <br />
+          <DatePicker
+            hintText="Landscape Dialog"
+            mode="landscape"
+            hintText="Enter the date of the investment"
+            name="IndvInvestor_DealDate"
+            floatingLabelText="Deal Date"
+            onChange={this.handleChange}
+            floatingLabelFixed={true}
+            textFieldStyle={this.styles}
           />
           <br />
           <TextField
