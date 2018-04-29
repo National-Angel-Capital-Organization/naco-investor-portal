@@ -8,6 +8,20 @@ import SelectField from 'material-ui/SelectField'
 import MenuItem from 'material-ui/MenuItem'
 import RaisedButton from 'material-ui/RaisedButton'
 
+
+const names = [
+  'Oliver Hansen',
+  'Van Henry',
+  'April Tucker',
+  'Ralph Hubbard',
+  'Omar Alexander',
+  'Carlos Abbott',
+  'Miriam Wagner',
+  'Bradley Wilkerson',
+  'Virginia Andrews',
+  'Kelly Snyder',
+];
+
 export default class SubmitDeal extends Component {
   state = {
     IndvInvestor_FullName: '',
@@ -19,6 +33,7 @@ export default class SubmitDeal extends Component {
     IndvInvestor_DealDate: '',
     IndvInvestor_NeworFollowOn: '',
     IndvInvestor_DollarsInvested: '',
+    Angel_Group_Names: [],
     Angel_Group_Other: '',
   }
 
@@ -38,6 +53,20 @@ export default class SubmitDeal extends Component {
       this.setState({ [name]: value })
     }
   }
+
+  menuItems(values) {
+    return names.map((name) => (
+      <MenuItem
+        key={name}
+        insetChildren={true}
+        checked={values && values.indexOf(name) > -1}
+        value={name}
+        primaryText={name}
+        name="Angel_Group_Names"
+      />
+    ));
+  }
+
 
   handleSubmit = event => {
     console.log(this.state)
@@ -121,9 +150,13 @@ export default class SubmitDeal extends Component {
             textFieldStyle={this.styles}
           />
           <SelectField
+          floatingLabelFixed={true}
             floatingLabelText="New or Follow-On?"
             value={this.state.IndvInvestor_NeworFollowOn}
             onChange={this.handleDropdownChange}
+            style={this.styles}
+            hintText="-- Select --"
+            labelStyle={this.styles}
           >
             <MenuItem value={"New"} primaryText="New" name="IndvInvestor_NeworFollowOn" />
             <MenuItem value={"Follow-On"} primaryText="Follow-On" name="IndvInvestor_NeworFollowOn" />
@@ -137,6 +170,20 @@ export default class SubmitDeal extends Component {
             floatingLabelFixed={true}
             style={this.styles}
           />
+          <br />
+          <SelectField
+          floatingLabelFixed={true}
+            floatingLabelText="Names of the Angel Groups Involved"
+            value={this.state.Angel_Group_Names}
+            onChange={this.handleDropdownChange}
+            style={this.styles}
+            multiple={true}
+            hintText="-- Select all that apply --"
+            labelStyle={this.styles}
+          >
+           {this.menuItems(this.state.Angel_Group_Names)}
+
+          </SelectField>
           <br />
           <TextField
             hintText="Please Specify the Angel Group name"
