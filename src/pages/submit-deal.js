@@ -4,6 +4,8 @@ import axios from 'axios'
 import Cookies from 'js-cookie'
 import TextField from 'material-ui/TextField'
 import DatePicker from 'material-ui/DatePicker'
+import SelectField from 'material-ui/SelectField'
+import MenuItem from 'material-ui/MenuItem'
 import RaisedButton from 'material-ui/RaisedButton'
 
 export default class SubmitDeal extends Component {
@@ -15,8 +17,15 @@ export default class SubmitDeal extends Component {
     IndvInvestor_CompanyCity: '',
     IndvInvestor_CompanyProvince: '',
     IndvInvestor_DealDate: '',
+    IndvInvestor_NeworFollowOn: '',
     IndvInvestor_DollarsInvested: '',
     Angel_Group_Other: '',
+  }
+
+  handleDropdownChange = (event, index, value) => {
+    const target = event.target
+    const name = target.parentNode.parentNode.parentNode.attributes[0].nodeValue
+    this.setState({ [name]: value })
   }
 
   handleChange = (event, date) => {
@@ -111,6 +120,14 @@ export default class SubmitDeal extends Component {
             floatingLabelFixed={true}
             textFieldStyle={this.styles}
           />
+          <SelectField
+            floatingLabelText="New or Follow-On?"
+            value={this.state.IndvInvestor_NeworFollowOn}
+            onChange={this.handleDropdownChange}
+          >
+            <MenuItem value={"New"} primaryText="New" name="IndvInvestor_NeworFollowOn" />
+            <MenuItem value={"Follow-On"} primaryText="Follow-On" name="IndvInvestor_NeworFollowOn" />
+          </SelectField>
           <br />
           <TextField
             hintText="Enter the dollar amount invested"

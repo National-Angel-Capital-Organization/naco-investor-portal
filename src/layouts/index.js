@@ -15,6 +15,7 @@ const muiTheme = getMuiTheme({
     primary2Color: '#54bceb',
     accent1Color: '#002f65',
     accent2Color: '#f78e23',
+    pickerHeaderColor: '#0079c1'
   },
 })
 
