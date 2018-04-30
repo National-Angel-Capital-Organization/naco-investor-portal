@@ -6,10 +6,10 @@ import TextField from 'material-ui/TextField'
 import DatePicker from 'material-ui/DatePicker'
 import SelectField from 'material-ui/SelectField'
 import MenuItem from 'material-ui/MenuItem'
+import Toggle from 'material-ui/Toggle';
 import RaisedButton from 'material-ui/RaisedButton'
 
-
-const names = [
+const angelGroupNames = [
   'Oliver Hansen',
   'Van Henry',
   'April Tucker',
@@ -20,7 +20,15 @@ const names = [
   'Bradley Wilkerson',
   'Virginia Andrews',
   'Kelly Snyder',
-];
+]
+
+const IndvInvestorCompanySector = ['Sector 1', 'Sector 2', 'Sector 3']
+
+const IndvInvestorSyndicatePartners = [
+  'Syndicate Partner 1',
+  'Syndicate Partner 2',
+  'Syndicate Partner 3',
+]
 
 export default class SubmitDeal extends Component {
   state = {
@@ -33,8 +41,15 @@ export default class SubmitDeal extends Component {
     IndvInvestor_DealDate: '',
     IndvInvestor_NeworFollowOn: '',
     IndvInvestor_DollarsInvested: '',
+    Angel_Group_Involvement: "No",
     Angel_Group_Names: [],
     Angel_Group_Other: '',
+    IndvInvestor_CompanyMajorSector: '',
+    IndvInvestor_CompanySector: [],
+    IndvInvestor_OtherSector: '',
+    IndvInvestor_Syndicated: '',
+    IndvInvestor_SyndicatePartners: [],
+    IndvInvestor_OtherPartners: '',
   }
 
   handleDropdownChange = (event, index, value) => {
@@ -43,30 +58,38 @@ export default class SubmitDeal extends Component {
     this.setState({ [name]: value })
   }
 
-  handleChange = (event, date) => {
-    if (date) {
-      this.setState({ IndvInvestor_DealDate: date })
-    } else {
-      const target = event.target
-      const value = target.type === 'checkbox' ? target.checked : target.value
-      const name = target.name
-      this.setState({ [name]: value })
+  handleToggle = (event, isInputChecked) => {
+    const name = event.target.name
+    let value = "No"
+    if (isInputChecked) {
+      value = "Yes"
     }
+    this.setState({[name]: value})
+  }
+
+  handleChange = event => {
+    const target = event.target
+    const value = target.type === 'checkbox' ? target.checked : target.value
+    const name = target.name
+    this.setState({ [name]: value })
+  }
+
+  handleDateChange = (even, date) => {
+    this.setState({ IndvInvestor_DealDate: date })
   }
 
   menuItems(values, array, menuName) {
-    return names.map((array) => (
+    return array.map(i => (
       <MenuItem
-        key={array}
+        key={i}
         insetChildren={true}
-        checked={values && values.indexOf(array) > -1}
-        value={array}
-        primaryText={array}
+        checked={values && values.indexOf(i) > -1}
+        value={i}
+        primaryText={i}
         name={menuName}
       />
-    ));
+    ))
   }
-
 
   handleSubmit = event => {
     console.log(this.state)
@@ -145,12 +168,12 @@ export default class SubmitDeal extends Component {
             hintText="Enter the date of the investment"
             name="IndvInvestor_DealDate"
             floatingLabelText="Deal Date"
-            onChange={this.handleChange}
+            onChange={this.handleDateChange}
             floatingLabelFixed={true}
             textFieldStyle={this.styles}
           />
           <SelectField
-          floatingLabelFixed={true}
+            floatingLabelFixed={true}
             floatingLabelText="New or Follow-On?"
             value={this.state.IndvInvestor_NeworFollowOn}
             onChange={this.handleDropdownChange}
@@ -158,8 +181,16 @@ export default class SubmitDeal extends Component {
             hintText="-- Select --"
             labelStyle={this.styles}
           >
-            <MenuItem value={"New"} primaryText="New" name="IndvInvestor_NeworFollowOn" />
-            <MenuItem value={"Follow-On"} primaryText="Follow-On" name="IndvInvestor_NeworFollowOn" />
+            <MenuItem
+              value={'New'}
+              primaryText="New"
+              name="IndvInvestor_NeworFollowOn"
+            />
+            <MenuItem
+              value={'Follow-On'}
+              primaryText="Follow-On"
+              name="IndvInvestor_NeworFollowOn"
+            />
           </SelectField>
           <br />
           <TextField
@@ -170,9 +201,16 @@ export default class SubmitDeal extends Component {
             floatingLabelFixed={true}
             style={this.styles}
           />
-          <br />
+<br />
+<br />
+    <Toggle
+      label="An Angel Group was involved in this investment"
+      name="Angel_Group_Involvement"
+      onToggle={this.handleToggle}
+      style={this.styles}
+    />
           <SelectField
-          floatingLabelFixed={true}
+            floatingLabelFixed={true}
             floatingLabelText="Names of the Angel Groups Involved"
             value={this.state.Angel_Group_Names}
             onChange={this.handleDropdownChange}
@@ -181,8 +219,11 @@ export default class SubmitDeal extends Component {
             hintText="-- Select all that apply --"
             labelStyle={this.styles}
           >
-           {this.menuItems(this.state.Angel_Group_Names, names, 'Angel_Group_Names')}
-
+            {this.menuItems(
+              this.state.Angel_Group_Names,
+              angelGroupNames,
+              'Angel_Group_Names'
+            )}
           </SelectField>
           <br />
           <TextField
@@ -197,23 +238,115 @@ export default class SubmitDeal extends Component {
           <h2>Company Sector Details</h2>
           <hr />
 
+          <SelectField
+            floatingLabelFixed={true}
+            floatingLabelText="Company Predominant Sector"
+            value={this.state.IndvInvestor_CompanyMajorSector}
+            onChange={this.handleDropdownChange}
+            style={this.styles}
+            hintText="-- Select --"
+            labelStyle={this.styles}
+          >
+            <MenuItem
+              value={'Life Sciences'}
+              primaryText="Life Sciences"
+              name="IndvInvestor_CompanyMajorSector"
+            />
+            <MenuItem
+              value={'ICT'}
+              primaryText="ICT"
+              name="IndvInvestor_CompanyMajorSector"
+            />
+            <MenuItem
+              value={'Clean Technologies'}
+              primaryText="Clean Technologies"
+              name="IndvInvestor_CompanyMajorSector"
+            />
+            <MenuItem
+              value={'Manufacturing'}
+              primaryText="Manufacturing"
+              name="IndvInvestor_CompanyMajorSector"
+            />
+            <MenuItem
+              value={'Services'}
+              primaryText="Services"
+              name="IndvInvestor_CompanyMajorSector"
+            />
+            <MenuItem
+              value={'Energy'}
+              primaryText="Energy"
+              name="IndvInvestor_CompanyMajorSector"
+            />
+            <MenuItem
+              value={'Other'}
+              primaryText="Other"
+              name="IndvInvestor_CompanyMajorSector"
+            />
+          </SelectField>
+
+          <br />
+
+          <SelectField
+            floatingLabelFixed={true}
+            floatingLabelText="Company Sectors"
+            value={this.state.IndvInvestor_CompanySector}
+            onChange={this.handleDropdownChange}
+            style={this.styles}
+            multiple={true}
+            hintText="-- Select all that apply --"
+            labelStyle={this.styles}
+          >
+            {this.menuItems(
+              this.state.IndvInvestor_CompanySector,
+              IndvInvestorCompanySector,
+              'IndvInvestor_CompanySector'
+            )}
+          </SelectField>
+
+          <br />
           <TextField
             hintText="If Selected 'Other (Please Specify)'"
             name="IndvInvestor_OtherSector"
             floatingLabelText="Other Sectors"
             floatingLabelFixed={true}
             style={this.styles}
+            onChange={this.handleChange}
           />
 
           <h2>Syndicate Partner Details</h2>
           <hr />
+<br />
+    <Toggle
+      label="This investment was syndicated"
+      name="IndvInvestor_Syndicated"
+      onToggle={this.handleToggle}
+      style={this.styles}
+    />
 
+          <SelectField
+            floatingLabelFixed={true}
+            floatingLabelText="Syndicate Partners"
+            value={this.state.IndvInvestor_SyndicatePartners}
+            onChange={this.handleDropdownChange}
+            style={this.styles}
+            multiple={true}
+            hintText="-- Select all that apply --"
+            labelStyle={this.styles}
+          >
+            {this.menuItems(
+              this.state.IndvInvestor_SyndicatePartners,
+              IndvInvestorSyndicatePartners,
+              'IndvInvestor_SyndicatePartners'
+            )}
+          </SelectField>
+          <br />
           <TextField
             hintText="If Selected 'Others (Please Specify)'"
             name="IndvInvestor_OtherPartners"
             floatingLabelText="Other Syndicate Partners"
             floatingLabelFixed={true}
             style={this.styles}
+            onChange={this.handleChange}
           />
           <br />
           <br />
