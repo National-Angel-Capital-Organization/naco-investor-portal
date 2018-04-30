@@ -54,15 +54,15 @@ export default class SubmitDeal extends Component {
     }
   }
 
-  menuItems(values) {
-    return names.map((name) => (
+  menuItems(values, array, menuName) {
+    return names.map((array) => (
       <MenuItem
-        key={name}
+        key={array}
         insetChildren={true}
-        checked={values && values.indexOf(name) > -1}
-        value={name}
-        primaryText={name}
-        name="Angel_Group_Names"
+        checked={values && values.indexOf(array) > -1}
+        value={array}
+        primaryText={array}
+        name={menuName}
       />
     ));
   }
@@ -181,7 +181,7 @@ export default class SubmitDeal extends Component {
             hintText="-- Select all that apply --"
             labelStyle={this.styles}
           >
-           {this.menuItems(this.state.Angel_Group_Names)}
+           {this.menuItems(this.state.Angel_Group_Names, names, 'Angel_Group_Names')}
 
           </SelectField>
           <br />

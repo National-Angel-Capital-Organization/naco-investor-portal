@@ -25,6 +25,23 @@ export default class Layout extends Component {
   componentDidMount() {
     if (!Cookies.get('token')) {
       this.getToken()
+    } else {
+      axios.get(
+        `https://${process.env.API_INTEGRATION_URL}.caspio.com/rest/v2/applications`,
+        {
+          headers: {
+            accept: 'application/json',
+            Authorization: `bearer ${Cookies.get('token')}`,
+          }
+        }
+      )
+      .catch(error => {
+        if (error.response.status === 401) {
+          this.getToken()
+        } else {
+          console.log(error)
+        }
+      })
     }
   }
 
@@ -37,7 +54,6 @@ export default class Layout extends Component {
         }&client_secret=${process.env.API_CLIENT_SECRET}`
       )
       .then(res => {
-        console.log(res)
         Cookies.set('token', res.data.access_token, { expires: 1 })
       })
       .catch(error => {
