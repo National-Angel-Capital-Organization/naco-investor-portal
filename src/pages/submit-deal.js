@@ -9,6 +9,17 @@ import MenuItem from 'material-ui/MenuItem'
 import Toggle from 'material-ui/Toggle'
 import RaisedButton from 'material-ui/RaisedButton'
 
+function array_move(arr, old_index, new_index) {
+  if (new_index >= arr.length) {
+    var k = new_index - arr.length + 1
+    while (k--) {
+      arr.push(undefined)
+    }
+  }
+  arr.splice(new_index, 0, arr.splice(old_index, 1)[0])
+  return arr // for testing
+}
+
 const syndicatePartners = [
   'Angel Groups',
   'Individual Angel Investors',
@@ -16,8 +27,29 @@ const syndicatePartners = [
   'Government',
   'Strategic Partner (Supplier, Buyers, Competition)',
   'Unknown',
-  'Others (Please Specify)'
+  'Others (Please Specify)',
 ]
+
+// {
+//   IndvInvestor_FullName: '',
+//   IndvInvestor_Email: '',
+//   IndvInvestor_CompanyName: 'test',
+//   IndvInvestor_CompanyWebsite: 'test.com',
+//   IndvInvestor_CompanyCity: 'testville',
+//   IndvInvestor_CompanyProvince: 'on',
+//   IndvInvestor_CompanyMajorSector: 'ICT',
+//   IndvInvestor_CompanySector: 'ICT: Unspecified',
+//   IndvInvestor_OtherSector: '',
+//   IndvInvestor_DealDate: '',
+//   IndvInvestor_NeworFollowOn: 'New',
+//   IndvInvestor_DollarsInvested: 45332,
+//   IndvInvestor_Syndicated: 'No',
+//   IndvInvestor_SyndicatePartners: [],
+//   IndvInvestor_OtherPartners: '',
+//   Angel_Group_Involvement: 'Yes',
+//   Angel_Group_Names: ['Angel One', 'Anges Quebec'],
+//   Angel_Group_Other: '',
+//   }
 
 export default class SubmitDeal extends Component {
   state = {
@@ -41,6 +73,7 @@ export default class SubmitDeal extends Component {
     IndvInvestor_OtherPartners: '',
     importedLists: {
       angelGroupNames: ['Loading...'],
+      angelGroupNumbers: [],
       IndvInvestorCompanySector: ['Loading...'],
     },
   }
@@ -50,35 +83,54 @@ export default class SubmitDeal extends Component {
       .get(
         `https://${
           process.env.API_INTEGRATION_URL
-        }.caspio.com/rest/v2/tables/GroupInfo/records`,
+        }.caspio.com/rest/v2/tables/IndvInvestorDeals/fields/Angel_Group_Names`,
         {
           headers: {
             accept: 'application/json',
             Authorization: `bearer ${Cookies.get('token')}`,
           },
-          params: {
-            'q.select': 'Group_Name',
-            'q.where': 'Group_SubmissionYear>2016',
-            'q.groupBy': 'Group_Name',
-          },
         }
       )
       .then(res => {
-        let angelNameArray = []
-        const angelGroups = res.data.Result
-        for (let group of angelGroups) {
-          angelNameArray.push(group.Group_Name)
+        let angelGroupArray = []
+        for (let group in res.data.Result.ListField) {
+          angelGroupArray.push({
+            number: group,
+            angelGroup: res.data.Result.ListField[group],
+          })
         }
-        angelNameArray.push('Other')
+        angelGroupArray = angelGroupArray.sort(function(a, b) {
+          var nameA = a.angelGroup.toLowerCase(),
+            nameB = b.angelGroup.toLowerCase()
+          if (nameA < nameB)
+            //sort string ascending
+            return -1
+          if (nameA > nameB) return 1
+          return 0 //default return value (no sorting)
+        })
+        let otherPosition = angelGroupArray
+          .map(function(e) {
+            return e.angelGroup
+          })
+          .indexOf('Other')
+        let angelGroupArrayEnd = angelGroupArray.length - 1
+        array_move(angelGroupArray, otherPosition, angelGroupArrayEnd)
+        let angelGroupNames = []
+        let angelGroupNumbers = []
+        for (let group of angelGroupArray) {
+          angelGroupNames.push(group.angelGroup)
+          angelGroupNumbers.push(group.number)
+        }
         const importedLists = { ...this.state.importedLists }
-        importedLists.angelGroupNames = angelNameArray
+        importedLists.angelGroupNames = angelGroupNames
+        importedLists.angelGroupNumbers = angelGroupNumbers
         this.setState({ importedLists })
       })
       .catch(error => {
         console.log(error)
       })
 
-      axios
+    axios
       .get(
         `https://${
           process.env.API_INTEGRATION_URL
@@ -87,7 +139,7 @@ export default class SubmitDeal extends Component {
           headers: {
             accept: 'application/json',
             Authorization: `bearer ${Cookies.get('token')}`,
-          }
+          },
         }
       )
       .then(res => {
