@@ -6,28 +6,17 @@ import TextField from 'material-ui/TextField'
 import DatePicker from 'material-ui/DatePicker'
 import SelectField from 'material-ui/SelectField'
 import MenuItem from 'material-ui/MenuItem'
-import Toggle from 'material-ui/Toggle';
+import Toggle from 'material-ui/Toggle'
 import RaisedButton from 'material-ui/RaisedButton'
 
-const angelGroupNames = [
-  'Oliver Hansen',
-  'Van Henry',
-  'April Tucker',
-  'Ralph Hubbard',
-  'Omar Alexander',
-  'Carlos Abbott',
-  'Miriam Wagner',
-  'Bradley Wilkerson',
-  'Virginia Andrews',
-  'Kelly Snyder',
-]
-
-const IndvInvestorCompanySector = ['Sector 1', 'Sector 2', 'Sector 3']
-
-const IndvInvestorSyndicatePartners = [
-  'Syndicate Partner 1',
-  'Syndicate Partner 2',
-  'Syndicate Partner 3',
+const syndicatePartners = [
+  'Angel Groups',
+  'Individual Angel Investors',
+  'VC Funds',
+  'Government',
+  'Strategic Partner (Supplier, Buyers, Competition)',
+  'Unknown',
+  'Others (Please Specify)'
 ]
 
 export default class SubmitDeal extends Component {
@@ -41,7 +30,7 @@ export default class SubmitDeal extends Component {
     IndvInvestor_DealDate: '',
     IndvInvestor_NeworFollowOn: '',
     IndvInvestor_DollarsInvested: '',
-    Angel_Group_Involvement: "No",
+    Angel_Group_Involvement: 'No',
     Angel_Group_Names: [],
     Angel_Group_Other: '',
     IndvInvestor_CompanyMajorSector: '',
@@ -50,6 +39,71 @@ export default class SubmitDeal extends Component {
     IndvInvestor_Syndicated: '',
     IndvInvestor_SyndicatePartners: [],
     IndvInvestor_OtherPartners: '',
+    importedLists: {
+      angelGroupNames: ['Loading...'],
+      IndvInvestorCompanySector: ['Loading...'],
+    },
+  }
+
+  componentDidMount() {
+    axios
+      .get(
+        `https://${
+          process.env.API_INTEGRATION_URL
+        }.caspio.com/rest/v2/tables/GroupInfo/records`,
+        {
+          headers: {
+            accept: 'application/json',
+            Authorization: `bearer ${Cookies.get('token')}`,
+          },
+          params: {
+            'q.select': 'Group_Name',
+            'q.where': 'Group_SubmissionYear>2016',
+            'q.groupBy': 'Group_Name',
+          },
+        }
+      )
+      .then(res => {
+        let angelNameArray = []
+        const angelGroups = res.data.Result
+        for (let group of angelGroups) {
+          angelNameArray.push(group.Group_Name)
+        }
+        angelNameArray.push('Other')
+        const importedLists = { ...this.state.importedLists }
+        importedLists.angelGroupNames = angelNameArray
+        this.setState({ importedLists })
+      })
+      .catch(error => {
+        console.log(error)
+      })
+
+      axios
+      .get(
+        `https://${
+          process.env.API_INTEGRATION_URL
+        }.caspio.com/rest/v2/tables/IndvInvestor_Lists/records?q.select=Sector_Focus&q.where=DATALENGTH(Sector_Focus)%3E0%20AND%20Sector_Focus%3C%3E'No%20Sector%20Focus'%20AND%20Sector_Focus%3C%3E'Other%20(Please%20specify)'&q.groupBy=Sector_Focus&q.orderBy=Sector_Focus`,
+        {
+          headers: {
+            accept: 'application/json',
+            Authorization: `bearer ${Cookies.get('token')}`,
+          }
+        }
+      )
+      .then(res => {
+        let sectorArray = []
+        const sectors = res.data.Result
+        for (let sector of sectors) {
+          sectorArray.push(sector.Sector_Focus)
+        }
+        sectorArray.push('No Sector Focus', 'Other (Please specify)')
+        const importedLists = { ...this.state.importedLists }
+        importedLists.IndvInvestorCompanySector = sectorArray
+        this.setState({ importedLists })
+      })
+      .catch(error => {
+        console.log(error)
+      })
   }
 
   handleDropdownChange = (event, index, value) => {
@@ -60,11 +114,11 @@ export default class SubmitDeal extends Component {
 
   handleToggle = (event, isInputChecked) => {
     const name = event.target.name
-    let value = "No"
+    let value = 'No'
     if (isInputChecked) {
-      value = "Yes"
+      value = 'Yes'
     }
-    this.setState({[name]: value})
+    this.setState({ [name]: value })
   }
 
   handleChange = event => {
@@ -201,14 +255,14 @@ export default class SubmitDeal extends Component {
             floatingLabelFixed={true}
             style={this.styles}
           />
-<br />
-<br />
-    <Toggle
-      label="An Angel Group was involved in this investment"
-      name="Angel_Group_Involvement"
-      onToggle={this.handleToggle}
-      style={this.styles}
-    />
+          <br />
+          <br />
+          <Toggle
+            label="An Angel Group was involved in this investment"
+            name="Angel_Group_Involvement"
+            onToggle={this.handleToggle}
+            style={this.styles}
+          />
           <SelectField
             floatingLabelFixed={true}
             floatingLabelText="Names of the Angel Groups Involved"
@@ -221,7 +275,7 @@ export default class SubmitDeal extends Component {
           >
             {this.menuItems(
               this.state.Angel_Group_Names,
-              angelGroupNames,
+              this.state.importedLists.angelGroupNames,
               'Angel_Group_Names'
             )}
           </SelectField>
@@ -298,7 +352,7 @@ export default class SubmitDeal extends Component {
           >
             {this.menuItems(
               this.state.IndvInvestor_CompanySector,
-              IndvInvestorCompanySector,
+              this.state.importedLists.IndvInvestorCompanySector,
               'IndvInvestor_CompanySector'
             )}
           </SelectField>
@@ -315,13 +369,13 @@ export default class SubmitDeal extends Component {
 
           <h2>Syndicate Partner Details</h2>
           <hr />
-<br />
-    <Toggle
-      label="This investment was syndicated"
-      name="IndvInvestor_Syndicated"
-      onToggle={this.handleToggle}
-      style={this.styles}
-    />
+          <br />
+          <Toggle
+            label="This investment was syndicated"
+            name="IndvInvestor_Syndicated"
+            onToggle={this.handleToggle}
+            style={this.styles}
+          />
 
           <SelectField
             floatingLabelFixed={true}
@@ -335,7 +389,7 @@ export default class SubmitDeal extends Component {
           >
             {this.menuItems(
               this.state.IndvInvestor_SyndicatePartners,
-              IndvInvestorSyndicatePartners,
+              syndicatePartners,
               'IndvInvestor_SyndicatePartners'
             )}
           </SelectField>
