@@ -20,26 +20,6 @@ function array_move(arr, old_index, new_index) {
   return arr // for testing
 }
 
-// {
-//   IndvInvestor_FullName: '',
-//   IndvInvestor_Email: '',
-//   IndvInvestor_CompanyName: 'test',
-//   IndvInvestor_CompanyWebsite: 'test.com',
-//   IndvInvestor_CompanyCity: 'testville',
-//   IndvInvestor_CompanyProvince: 'on',
-//   IndvInvestor_CompanyMajorSector: 'ICT',
-//   IndvInvestor_CompanySector: 'ICT: Unspecified',
-//   IndvInvestor_OtherSector: '',
-//   IndvInvestor_DealDate: '',
-//   IndvInvestor_NeworFollowOn: 'New',
-//   IndvInvestor_DollarsInvested: 45332,
-//   IndvInvestor_Syndicated: 'No',
-//   IndvInvestor_SyndicatePartners: [],
-//   IndvInvestor_OtherPartners: '',
-//   Angel_Group_Involvement: 'Yes',
-//   Angel_Group_Names: ['Angel One', 'Anges Quebec'],
-//   Angel_Group_Other: '',
-//   }
 
 export default class SubmitDeal extends Component {
   state = {
@@ -223,9 +203,66 @@ export default class SubmitDeal extends Component {
     ))
   }
 
+  findListNumber(listNameArray, stateNames, stateNumbers) {
+    let indexes = []
+    let sendableListNumbers = []
+    for (let listItem of listNameArray) {
+      indexes.push(stateNames.indexOf(listItem))
+    }
+    for (let index of indexes) {
+      sendableListNumbers.push(stateNumbers[index])
+    }
+    return sendableListNumbers
+  }
+
   handleSubmit = event => {
-    console.log(this.state)
     event.preventDefault()
+    let {
+      IndvInvestor_FullName,
+      IndvInvestor_Email,
+      IndvInvestor_CompanyName,
+      IndvInvestor_CompanyWebsite,
+      IndvInvestor_CompanyCity,
+      IndvInvestor_CompanyProvince,
+      IndvInvestor_CompanyMajorSector,
+      IndvInvestor_CompanySector,
+      IndvInvestor_OtherSector,
+      IndvInvestor_DealDate,
+      IndvInvestor_NeworFollowOn,
+      IndvInvestor_DollarsInvested,
+      IndvInvestor_Syndicated,
+      IndvInvestor_SyndicatePartners,
+      IndvInvestor_OtherPartners,
+      Angel_Group_Involvement,
+      Angel_Group_Names,
+      Angel_Group_Other,
+    } = this.state
+
+    Angel_Group_Names = this.findListNumber(Angel_Group_Names, this.state.importedLists.angelGroupNames, this.state.importedLists.angelGroupNumbers)
+    IndvInvestor_CompanySector = this.findListNumber(IndvInvestor_CompanySector, this.state.importedLists.IndvInvestorCompanySector, this.state.importedLists.IndvInvestorCompanySectorNumbers)
+    IndvInvestor_SyndicatePartners = this.findListNumber(IndvInvestor_SyndicatePartners, this.state.importedLists.IndvInvestor_SyndicatePartners, this.state.importedLists.IndvInvestor_SyndicatePartnerNumbers)
+
+    const dealSubmission = {
+      IndvInvestor_FullName,
+      IndvInvestor_Email,
+      IndvInvestor_CompanyName,
+      IndvInvestor_CompanyWebsite,
+      IndvInvestor_CompanyCity,
+      IndvInvestor_CompanyProvince,
+      IndvInvestor_CompanyMajorSector,
+      IndvInvestor_CompanySector,
+      IndvInvestor_OtherSector,
+      IndvInvestor_DealDate,
+      IndvInvestor_NeworFollowOn,
+      IndvInvestor_DollarsInvested,
+      IndvInvestor_Syndicated,
+      IndvInvestor_SyndicatePartners,
+      IndvInvestor_OtherPartners,
+      Angel_Group_Involvement,
+      Angel_Group_Names,
+      Angel_Group_Other,
+    }
+    console.log(dealSubmission)
   }
 
   styles = {
