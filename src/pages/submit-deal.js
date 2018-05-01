@@ -210,7 +210,7 @@ export default class SubmitDeal extends Component {
       indexes.push(stateNames.indexOf(listItem))
     }
     for (let index of indexes) {
-      sendableListNumbers.push(stateNumbers[index])
+      sendableListNumbers.push(parseInt(stateNumbers[index]))
     }
     return sendableListNumbers
   }
@@ -263,6 +263,21 @@ export default class SubmitDeal extends Component {
       Angel_Group_Other,
     }
     console.log(dealSubmission)
+    axios({
+      method: 'post',
+      url: `https://${process.env.API_INTEGRATION_URL}.caspio.com/rest/v2/tables/IndvInvestorDeals/records`,
+      headers: {
+        accept: 'application/json',
+        Authorization: `bearer ${Cookies.get('token')}`,
+      },
+      data: dealSubmission,
+    })
+      .then(res => {
+        console.log(res)
+      })
+      .catch(error => {
+        console.log(error)
+      })
   }
 
   styles = {
