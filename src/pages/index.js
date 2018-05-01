@@ -19,12 +19,7 @@ state = {
              accept: 'application/json',
              Authorization: `bearer ${Cookies.get('token')}`,
            },
-           params: {
-             'q.select':
-               'Group_NameAndSubmissionYear, Deal_DollarInvested',
-             'q.where': "Group_NameAndSubmissionYear LIKE '%2016%'",
-             'q.limit': '1000',
-           },
+
          }
        )
        .then(res => {

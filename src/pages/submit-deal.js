@@ -20,16 +20,6 @@ function array_move(arr, old_index, new_index) {
   return arr // for testing
 }
 
-const syndicatePartners = [
-  'Angel Groups',
-  'Individual Angel Investors',
-  'VC Funds',
-  'Government',
-  'Strategic Partner (Supplier, Buyers, Competition)',
-  'Unknown',
-  'Others (Please Specify)',
-]
-
 // {
 //   IndvInvestor_FullName: '',
 //   IndvInvestor_Email: '',
@@ -75,14 +65,60 @@ export default class SubmitDeal extends Component {
       angelGroupNames: ['Loading...'],
       angelGroupNumbers: [],
       IndvInvestorCompanySector: ['Loading...'],
+      IndvInvestorCompanySectorNumbers: [],
+      IndvInvestor_SyndicatePartners: ['Loading...'],
+      IndvInvestor_SyndicatePartnerNumbers: []
     },
+  }
+
+  createResponseList(res) {
+    let resArray = []
+    for (let listItem in res.data.Result.ListField) {
+      resArray.push({
+        number: listItem,
+        value: res.data.Result.ListField[listItem],
+      })
+    }
+    resArray = resArray.sort(function (a, b) {
+      var nameA = a.value.toLowerCase(),
+        nameB = b.value.toLowerCase()
+      if (nameA < nameB)
+        //sort string ascending
+        return -1
+      if (nameA > nameB) return 1
+      return 0 //default return value (no sorting)
+    })
+    return resArray
+  }
+
+  moveToEndOfList(listItem, array) {
+    let itemPosition = array
+      .map(function (e) {
+        return e.value
+      })
+      .indexOf(listItem)
+    let listEnd = array.length - 1
+    array_move(array, itemPosition, listEnd)
+  }
+
+  listsToState(originalList, stateName, stateNumber) {
+    let listNames = []
+    let listNumbers = []
+    for (let listItem of originalList) {
+      listNames.push(listItem.value)
+      listNumbers.push(listItem.number)
+    }
+    const importedLists = { ...this.state.importedLists }
+    importedLists[stateName] = listNames
+    importedLists[stateNumber] = listNumbers
+    this.setState({ importedLists })
   }
 
   componentDidMount() {
     axios
       .get(
         `https://${
-          process.env.API_INTEGRATION_URL
+        process.env.API_INTEGRATION_URL
         }.caspio.com/rest/v2/tables/IndvInvestorDeals/fields/Angel_Group_Names`,
         {
           headers: {
@@ -92,49 +128,20 @@ export default class SubmitDeal extends Component {
         }
       )
       .then(res => {
-        let angelGroupArray = []
-        for (let group in res.data.Result.ListField) {
-          angelGroupArray.push({
-            number: group,
-            angelGroup: res.data.Result.ListField[group],
-          })
-        }
-        angelGroupArray = angelGroupArray.sort(function(a, b) {
-          var nameA = a.angelGroup.toLowerCase(),
-            nameB = b.angelGroup.toLowerCase()
-          if (nameA < nameB)
-            //sort string ascending
-            return -1
-          if (nameA > nameB) return 1
-          return 0 //default return value (no sorting)
-        })
-        let otherPosition = angelGroupArray
-          .map(function(e) {
-            return e.angelGroup
-          })
-          .indexOf('Other')
-        let angelGroupArrayEnd = angelGroupArray.length - 1
-        array_move(angelGroupArray, otherPosition, angelGroupArrayEnd)
-        let angelGroupNames = []
-        let angelGroupNumbers = []
-        for (let group of angelGroupArray) {
-          angelGroupNames.push(group.angelGroup)
-          angelGroupNumbers.push(group.number)
-        }
-        const importedLists = { ...this.state.importedLists }
-        importedLists.angelGroupNames = angelGroupNames
-        importedLists.angelGroupNumbers = angelGroupNumbers
-        this.setState({ importedLists })
+        let angelGroupArray = this.createResponseList(res)
+        this.moveToEndOfList('Other', angelGroupArray)
+        this.listsToState(angelGroupArray, 'angelGroupNames', 'angelGroupNumbers')
       })
       .catch(error => {
         console.log(error)
       })
 
+
     axios
       .get(
         `https://${
-          process.env.API_INTEGRATION_URL
-        }.caspio.com/rest/v2/tables/IndvInvestor_Lists/records?q.select=Sector_Focus&q.where=DATALENGTH(Sector_Focus)%3E0%20AND%20Sector_Focus%3C%3E'No%20Sector%20Focus'%20AND%20Sector_Focus%3C%3E'Other%20(Please%20specify)'&q.groupBy=Sector_Focus&q.orderBy=Sector_Focus`,
+        process.env.API_INTEGRATION_URL
+        }.caspio.com/rest/v2/tables/IndvInvestorDeals/fields/IndvInvestor_CompanySector`,
         {
           headers: {
             accept: 'application/json',
@@ -143,15 +150,34 @@ export default class SubmitDeal extends Component {
         }
       )
       .then(res => {
-        let sectorArray = []
-        const sectors = res.data.Result
-        for (let sector of sectors) {
-          sectorArray.push(sector.Sector_Focus)
+        const sectorArray = this.createResponseList(res)
+        this.moveToEndOfList('No Sector Focus', sectorArray)
+        this.moveToEndOfList('Other (Please specify)', sectorArray)
+        this.listsToState(sectorArray, 'IndvInvestorCompanySector', 'IndvInvestorCompanySectorNumbers')
+      })
+      .catch(error => {
+        console.log(error)
+      })
+
+
+    axios
+      .get(
+        `https://${
+        process.env.API_INTEGRATION_URL
+        }.caspio.com/rest/v2/tables/IndvInvestorDeals/fields/IndvInvestor_SyndicatePartners`,
+        {
+          headers: {
+            accept: 'application/json',
+            Authorization: `bearer ${Cookies.get('token')}`,
+          },
         }
-        sectorArray.push('No Sector Focus', 'Other (Please specify)')
-        const importedLists = { ...this.state.importedLists }
-        importedLists.IndvInvestorCompanySector = sectorArray
-        this.setState({ importedLists })
+      )
+      .then(res => {
+        const syndicatePartnerArray = this.createResponseList(res)
+        this.moveToEndOfList('Unknown', syndicatePartnerArray)
+        this.moveToEndOfList('No Syndicate Partner', syndicatePartnerArray)
+        this.moveToEndOfList('Others (Please Specify)', syndicatePartnerArray)
+        this.listsToState(syndicatePartnerArray, 'IndvInvestor_SyndicatePartners', 'IndvInvestor_SyndicatePartnerNumbers')
       })
       .catch(error => {
         console.log(error)
@@ -441,7 +467,7 @@ export default class SubmitDeal extends Component {
           >
             {this.menuItems(
               this.state.IndvInvestor_SyndicatePartners,
-              syndicatePartners,
+              this.state.importedLists.IndvInvestor_SyndicatePartners,
               'IndvInvestor_SyndicatePartners'
             )}
           </SelectField>
