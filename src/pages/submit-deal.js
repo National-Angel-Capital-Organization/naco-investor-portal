@@ -8,17 +8,7 @@ import SelectField from 'material-ui/SelectField'
 import MenuItem from 'material-ui/MenuItem'
 import Toggle from 'material-ui/Toggle'
 import RaisedButton from 'material-ui/RaisedButton'
-
-function array_move(arr, old_index, new_index) {
-  if (new_index >= arr.length) {
-    var k = new_index - arr.length + 1
-    while (k--) {
-      arr.push(undefined)
-    }
-  }
-  arr.splice(new_index, 0, arr.splice(old_index, 1)[0])
-  return arr // for testing
-}
+import submissionFunctions from '../submission-functions'
 
 const provinceOptions = ['AB', 'BC', 'MB', 'NB', 'NL', 'NT', 'NS', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT', 'N/A']
 
@@ -53,35 +43,6 @@ export default class SubmitDeal extends Component {
     },
   }
 
-  createResponseList(res) {
-    let resArray = []
-    for (let listItem in res.data.Result.ListField) {
-      resArray.push({
-        number: listItem,
-        value: res.data.Result.ListField[listItem],
-      })
-    }
-    resArray = resArray.sort(function (a, b) {
-      var nameA = a.value.toLowerCase(),
-        nameB = b.value.toLowerCase()
-      if (nameA < nameB)
-        //sort string ascending
-        return -1
-      if (nameA > nameB) return 1
-      return 0 //default return value (no sorting)
-    })
-    return resArray
-  }
-
-  moveToEndOfList(listItem, array) {
-    let itemPosition = array
-      .map(function (e) {
-        return e.value
-      })
-      .indexOf(listItem)
-    let listEnd = array.length - 1
-    array_move(array, itemPosition, listEnd)
-  }
 
   listsToState(originalList, stateName, stateNumber) {
     let listNames = []
@@ -110,8 +71,8 @@ export default class SubmitDeal extends Component {
         }
       )
       .then(res => {
-        let angelGroupArray = this.createResponseList(res)
-        this.moveToEndOfList('Other', angelGroupArray)
+        let angelGroupArray = submissionFunctions.createResponseList(res)
+        submissionFunctions.moveToEndOfList('Other', angelGroupArray)
         this.listsToState(angelGroupArray, 'angelGroupNames', 'angelGroupNumbers')
       })
       .catch(error => {
@@ -132,9 +93,9 @@ export default class SubmitDeal extends Component {
         }
       )
       .then(res => {
-        const sectorArray = this.createResponseList(res)
-        this.moveToEndOfList('No Sector Focus', sectorArray)
-        this.moveToEndOfList('Other (Please specify)', sectorArray)
+        const sectorArray = submissionFunctions.createResponseList(res)
+        submissionFunctions.moveToEndOfList('No Sector Focus', sectorArray)
+        submissionFunctions.moveToEndOfList('Other (Please specify)', sectorArray)
         this.listsToState(sectorArray, 'IndvInvestorCompanySector', 'IndvInvestorCompanySectorNumbers')
       })
       .catch(error => {
@@ -155,10 +116,10 @@ export default class SubmitDeal extends Component {
         }
       )
       .then(res => {
-        const syndicatePartnerArray = this.createResponseList(res)
-        this.moveToEndOfList('Unknown', syndicatePartnerArray)
-        this.moveToEndOfList('No Syndicate Partner', syndicatePartnerArray)
-        this.moveToEndOfList('Others (Please Specify)', syndicatePartnerArray)
+        const syndicatePartnerArray = submissionFunctions.createResponseList(res)
+        submissionFunctions.moveToEndOfList('Unknown', syndicatePartnerArray)
+        submissionFunctions.moveToEndOfList('No Syndicate Partner', syndicatePartnerArray)
+        submissionFunctions.moveToEndOfList('Others (Please Specify)', syndicatePartnerArray)
         this.listsToState(syndicatePartnerArray, 'IndvInvestor_SyndicatePartners', 'IndvInvestor_SyndicatePartnerNumbers')
       })
       .catch(error => {
@@ -188,7 +149,7 @@ export default class SubmitDeal extends Component {
     this.setState({ [name]: value })
   }
 
-  handleDateChange = (even, date) => {
+  handleDateChange = (event, date) => {
     this.setState({ IndvInvestor_DealDate: date })
   }
 
@@ -203,18 +164,6 @@ export default class SubmitDeal extends Component {
         name={menuName}
       />
     ))
-  }
-
-  findListNumber(listNameArray, stateNames, stateNumbers) {
-    let indexes = []
-    let sendableListNumbers = []
-    for (let listItem of listNameArray) {
-      indexes.push(stateNames.indexOf(listItem))
-    }
-    for (let index of indexes) {
-      sendableListNumbers.push(parseInt(stateNumbers[index]))
-    }
-    return sendableListNumbers
   }
 
   handleSubmit = event => {
@@ -240,9 +189,9 @@ export default class SubmitDeal extends Component {
       Angel_Group_Other,
     } = this.state
 
-    Angel_Group_Names = this.findListNumber(Angel_Group_Names, this.state.importedLists.angelGroupNames, this.state.importedLists.angelGroupNumbers)
-    IndvInvestor_CompanySector = this.findListNumber(IndvInvestor_CompanySector, this.state.importedLists.IndvInvestorCompanySector, this.state.importedLists.IndvInvestorCompanySectorNumbers)
-    IndvInvestor_SyndicatePartners = this.findListNumber(IndvInvestor_SyndicatePartners, this.state.importedLists.IndvInvestor_SyndicatePartners, this.state.importedLists.IndvInvestor_SyndicatePartnerNumbers)
+    Angel_Group_Names = submissionFunctions.findListNumber(Angel_Group_Names, this.state.importedLists.angelGroupNames, this.state.importedLists.angelGroupNumbers)
+    IndvInvestor_CompanySector = submissionFunctions.findListNumber(IndvInvestor_CompanySector, this.state.importedLists.IndvInvestorCompanySector, this.state.importedLists.IndvInvestorCompanySectorNumbers)
+    IndvInvestor_SyndicatePartners = submissionFunctions.findListNumber(IndvInvestor_SyndicatePartners, this.state.importedLists.IndvInvestor_SyndicatePartners, this.state.importedLists.IndvInvestor_SyndicatePartnerNumbers)
 
     const dealSubmission = {
       IndvInvestor_FullName,
@@ -295,7 +244,7 @@ export default class SubmitDeal extends Component {
           <h2>General Information</h2>
           <hr />
           <TextField
-            hintText="Enter your name"
+            hintText="Enter your full name"
             name="IndvInvestor_FullName"
             floatingLabelText="Investor Name"
             onChange={this.handleChange}
