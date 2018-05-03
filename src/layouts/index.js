@@ -22,7 +22,7 @@ const muiTheme = getMuiTheme({
 export default class Layout extends Component {
   static propTypes = { children: PropTypes.func }
 
-  componentDidMount() {
+  componentWillMount() {
     if (!Cookies.get('token')) {
       this.getToken()
     } else {

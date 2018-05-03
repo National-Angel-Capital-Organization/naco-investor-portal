@@ -20,6 +20,8 @@ function array_move(arr, old_index, new_index) {
   return arr // for testing
 }
 
+const provinceOptions = ['AB', 'BC', 'MB', 'NB', 'NL', 'NT', 'NS', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT', 'N/A']
+
 
 export default class SubmitDeal extends Component {
   state = {
@@ -337,14 +339,24 @@ export default class SubmitDeal extends Component {
             style={this.styles}
           />
           <br />
-          <TextField
-            hintText="Enter the investee company's province"
-            name="IndvInvestor_CompanyProvince"
-            floatingLabelText="Company Province"
-            onChange={this.handleChange}
+          <SelectField
             floatingLabelFixed={true}
+            floatingLabelText="Company Province"
+            value={this.state.IndvInvestor_CompanyProvince}
+            onChange={this.handleDropdownChange}
             style={this.styles}
-          />
+            hintText="-- Select --"
+            labelStyle={this.styles}
+          >
+            {provinceOptions.map(i => (
+              <MenuItem
+                key={i}
+                value={i}
+                primaryText={i}
+                name='IndvInvestor_CompanyProvince'
+              />
+            ))}
+          </SelectField>
           <br />
           <DatePicker
             hintText="Landscape Dialog"
