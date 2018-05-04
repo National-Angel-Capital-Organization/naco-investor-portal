@@ -6,11 +6,13 @@
   "dependencies": {
     "axios": "^0.18.0",
     "gatsby": "^1.9.247",
+    "gatsby-cli": "^1.1.51",
     "gatsby-link": "^1.6.40",
     "gatsby-plugin-react-helmet": "^2.0.10",
     "gatsby-plugin-sass": "^1.0.26",
     "js-cookie": "^2.2.0",
     "material-ui": "^0.20.0",
+    "netlify-identity-widget": "^1.4.11",
     "react-helmet": "^5.2.0"
   },
   "keywords": [

@@ -6,6 +6,7 @@ import Popover from 'material-ui/Popover';
 import Menu from 'material-ui/Menu';
 import MenuItem from 'material-ui/MenuItem';
 import Divider from 'material-ui/Divider';
+import netlifyIdentity from 'netlify-identity-widget'
 
 export default class Header extends Component {
 
@@ -51,6 +52,10 @@ export default class Header extends Component {
   handleItemClick = (event, menuItem) => {
     navigateTo(menuItem.props['data-location'])
     this.handleRequestClose()
+  }
+  handleLogIn() {
+    // You can import the widget into any component and interact with it.
+    netlifyIdentity.open()
   }
 
   render() {
@@ -122,6 +127,9 @@ export default class Header extends Component {
               <MenuItem data-location="/" primaryText="Log Out" />
             </Menu>
           </Popover>
+          <div>
+            <button onClick={this.handleLogIn} >Log in with netlify</button>
+          </div>
         </nav>
       </div>
     )

@@ -7,6 +7,9 @@ import './scss/index.scss'
 import Cookies from 'js-cookie'
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
 import getMuiTheme from 'material-ui/styles/getMuiTheme'
+import netlifyIdentity from 'netlify-identity-widget';
+
+
 
 const muiTheme = getMuiTheme({
   palette: {
@@ -62,6 +65,9 @@ export default class Layout extends Component {
   }
 
   render() {
+    window.netlifyIdentity = netlifyIdentity
+    // You must run this once before trying to interact with the widget
+    netlifyIdentity.init()
     const { data, children } = this.props
     return (
       <MuiThemeProvider muiTheme={muiTheme}>
