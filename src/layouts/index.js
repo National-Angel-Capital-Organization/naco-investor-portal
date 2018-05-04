@@ -7,7 +7,8 @@ import './scss/index.scss'
 import Cookies from 'js-cookie'
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
 import getMuiTheme from 'material-ui/styles/getMuiTheme'
-import netlifyIdentity from 'netlify-identity-widget';
+const netlifyIdentity = require("netlify-identity-widget")
+
 
 
 
@@ -48,6 +49,10 @@ export default class Layout extends Component {
     }
   }
 
+  componentDidMount() {
+    netlifyIdentity.init();
+  }
+
   getToken = () => {
     axios
       .post(
@@ -65,20 +70,22 @@ export default class Layout extends Component {
   }
 
   render() {
-    window.netlifyIdentity = netlifyIdentity
-    // You must run this once before trying to interact with the widget
-    netlifyIdentity.init()
+
     const { data, children } = this.props
     return (
       <MuiThemeProvider muiTheme={muiTheme}>
+        
         <div>
+
           <Helmet
             title={data.site.siteMetadata.title}
             meta={[
               { name: 'description', content: 'Sample' },
               { name: 'keywords', content: 'sample, something' },
-            ]}
-          />
+            ]}>
+            <script type="text/javascript" src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+            </Helmet>
+          
           <Header siteTitle={data.site.siteMetadata.title} />
           <div className="body-wrapper">{children()}</div>
         </div>

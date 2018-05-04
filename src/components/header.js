@@ -53,10 +53,10 @@ export default class Header extends Component {
     navigateTo(menuItem.props['data-location'])
     this.handleRequestClose()
   }
-  handleLogIn() {
+  handleLogIn () {
     // You can import the widget into any component and interact with it.
     netlifyIdentity.open()
-  }
+}
 
   render() {
     const { siteTitle } = this.props;
