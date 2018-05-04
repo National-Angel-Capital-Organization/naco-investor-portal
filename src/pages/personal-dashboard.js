@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import Link from 'gatsby-link'
 
 export default class PersonalDashboard extends Component {
-
+  state = {}
   render() {
     return (
       <div>

@@ -13,7 +13,8 @@
     "js-cookie": "^2.2.0",
     "material-ui": "^0.20.0",
     "netlify-identity-widget": "^1.4.11",
-    "react-helmet": "^5.2.0"
+    "react-helmet": "^5.2.0",
+    "netlify-lambda": "^0.4.0"
   },
   "keywords": [
     "gatsby"
@@ -22,6 +23,7 @@
   "scripts": {
     "build": "gatsby build",
     "develop": "gatsby develop",
+    "functions": "netlify-lambda serve ./src/functions",
     "format": "prettier --write 'src/**/*.js'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

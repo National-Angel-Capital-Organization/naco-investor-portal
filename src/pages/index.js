@@ -28,6 +28,7 @@ state = {
        .catch(error => {
          console.log(error)
        })
+
    }
 
   render() {
@@ -36,6 +37,7 @@ state = {
         <h1>General Dashboard</h1>
         <p>Here you can find general investment information.</p>
         <p>Deals: {this.state.deals.length}</p>
+
       </div>
     )
   }

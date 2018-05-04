@@ -8,7 +8,7 @@ import './scss/index.scss'
 import Cookies from 'js-cookie'
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
 import getMuiTheme from 'material-ui/styles/getMuiTheme'
-const netlifyIdentity = require("netlify-identity-widget")
+import netlifyIdentity from 'netlify-identity-widget'
 
 
 
@@ -28,6 +28,7 @@ netlifyIdentity.on("login", (user) => {
   netlifyIdentity.close()
   navigateTo('/personal-dashboard')
 });
+
 
 
 export default class Layout extends Component {
@@ -90,7 +91,7 @@ export default class Layout extends Component {
               { name: 'description', content: 'Sample' },
               { name: 'keywords', content: 'sample, something' },
             ]}>
-            <script type="text/javascript" src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+            
             </Helmet>
           
           <Header siteTitle={data.site.siteMetadata.title} />
