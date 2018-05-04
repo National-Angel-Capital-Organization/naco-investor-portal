@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import Helmet from 'react-helmet'
 import axios from 'axios'
+import { navigateTo } from "gatsby-link"
 import Header from '../components/header'
 import './scss/index.scss'
 import Cookies from 'js-cookie'
@@ -22,6 +23,12 @@ const muiTheme = getMuiTheme({
     pickerHeaderColor: '#0079c1'
   },
 })
+
+netlifyIdentity.on("login", (user) => {
+  netlifyIdentity.close()
+  navigateTo('/personal-dashboard')
+});
+
 
 export default class Layout extends Component {
   static propTypes = { children: PropTypes.func }
