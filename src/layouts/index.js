@@ -24,10 +24,10 @@ const muiTheme = getMuiTheme({
   },
 })
 
-netlifyIdentity.on("login", (user) => {
-  netlifyIdentity.close()
-  navigateTo('/personal-dashboard')
-});
+// netlifyIdentity.on("login", (user) => {
+//   netlifyIdentity.close()
+//   navigateTo('/personal-dashboard')
+// });
 
 
 

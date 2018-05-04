@@ -2,13 +2,23 @@ import React, { Component } from 'react'
 import Link from 'gatsby-link'
 import axios from 'axios'
 import Cookies from 'js-cookie'
-
+import netlifyIdentity from 'netlify-identity-widget'
 
 export default class IndexPage extends Component {
 
 state = {
   deals: []
 }
+
+  generateHeaders() {
+    const headers = { "Content-Type": "application/json" };
+    if (netlifyIdentity.currentUser()) {
+      return netlifyIdentity.currentUser().jwt().then((token) => {
+        return { ...headers, Authorization: `Bearer ${token}` };
+      })
+    }
+    return Promise.resolve(headers);
+  }
 
    componentDidMount() {
      axios
@@ -28,6 +38,25 @@ state = {
        .catch(error => {
          console.log(error)
        })
+
+     this.generateHeaders().then((headers) => {
+       axios('http://localhost:8000/.netlify/functions/hello-world', { 
+           method: 'GET',
+           headers}
+       )
+       .then (res => {
+         console.log(res)
+       })
+         .catch(error => {
+           console.log("inner error")
+           console.log(error)
+         })
+     })
+       .catch(error => {
+         console.log("outer error")
+         console.log(error)
+       })
+
 
    }
 
