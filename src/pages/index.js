@@ -10,11 +10,8 @@ state = {
   deals: []
 }
 
-componentWillMount() {
-  netlifyIdentity.init()
-}
-
   generateHeaders() {
+    netlifyIdentity.init()
     const headers = { "Content-Type": "application/json" };
     
     if (netlifyIdentity.currentUser()) {
