@@ -42,7 +42,7 @@ state = {
        })
 
      this.generateHeaders().then((headers) => {
-       axios('http://localhost:8000/.netlify/functions/hello-world', { 
+       axios('/.netlify/functions/hello-world', { 
            method: 'GET',
            headers}
        )
