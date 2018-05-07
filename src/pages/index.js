@@ -10,11 +10,16 @@ state = {
   deals: []
 }
 
+componentWillMount() {
+  netlifyIdentity.init()
+}
+
   generateHeaders() {
     const headers = { "Content-Type": "application/json" };
+    
     if (netlifyIdentity.currentUser()) {
       return netlifyIdentity.currentUser().jwt().then((token) => {
-        return { ...headers, Authorization: `Bearer ${token}` };
+        return { ...headers, "Authorization": `Bearer ${token}` };
       })
     }
     return Promise.resolve(headers);
@@ -48,15 +53,12 @@ state = {
          console.log(res)
        })
          .catch(error => {
-           console.log("inner error")
            console.log(error)
          })
      })
        .catch(error => {
-         console.log("outer error")
          console.log(error)
        })
-
 
    }
 

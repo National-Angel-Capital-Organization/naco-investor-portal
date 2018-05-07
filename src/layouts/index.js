@@ -24,18 +24,19 @@ const muiTheme = getMuiTheme({
   },
 })
 
-// netlifyIdentity.on("login", (user) => {
-//   netlifyIdentity.close()
-//   navigateTo('/personal-dashboard')
-// });
 
 
 
 export default class Layout extends Component {
   static propTypes = { children: PropTypes.func }
 
-  componentWillMount() {
+  state = {
+    apiToken: false
+  }
+
+  checkForToken() {
     if (!Cookies.get('token')) {
+      this.setState({apiToken: false})
       this.getToken()
     } else {
       axios.get(
@@ -47,14 +48,22 @@ export default class Layout extends Component {
           }
         }
       )
-      .catch(error => {
-        if (error.response.status === 401) {
-          this.getToken()
-        } else {
-          console.log(error)
-        }
+      .then(res => {
+        this.setState({apiToken: true})
       })
+        .catch(error => {
+          if (error.response.status === 401) {
+            this.getToken()
+          } else {
+            this.setState({apiToken: false})
+            console.log(error)
+          }
+        })
     }
+  }
+
+  componentWillMount() {
+    this.checkForToken()
   }
 
   componentDidMount() {
@@ -71,6 +80,7 @@ export default class Layout extends Component {
       )
       .then(res => {
         Cookies.set('token', res.data.access_token, { expires: 1 })
+        this.setState({apiToken: true})
       })
       .catch(error => {
         console.log(error)
