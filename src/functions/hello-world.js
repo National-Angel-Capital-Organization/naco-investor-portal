@@ -1,5 +1,5 @@
 export function handler(event, context, callback) {
-  console.log(context)
+  console.log(context.clientContext.user.email)
   console.log(event.headers.host)
   let userEmail = ''
   if (event.headers.host === 'localhost:8000') {
