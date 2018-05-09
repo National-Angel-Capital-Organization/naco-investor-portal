@@ -12,21 +12,23 @@ export function handler(event, context, callback) {
     cookies[splitCookie[0]] = splitCookie[1]
   }
 
-  axios.get(
-    `https://${process.env.API_INTEGRATION_URL}.caspio.com/rest/v2/applications`,
-    {
-      headers: {
-        accept: 'application/json',
-        Authorization: `bearer ${data.token}`,
-      }
-    }
-  )
-  .then(res => {
-    console.log(res)
-  })
-  .catch(err => {
-    console.log(err)
-  })
+  console.log(process.env.API_INTEGRATION_URL)
+
+  // axios.get(
+  //   `https://${process.env.API_INTEGRATION_URL}.caspio.com/rest/v2/applications`,
+  //   {
+  //     headers: {
+  //       accept: 'application/json',
+  //       Authorization: `bearer ${data.token}`,
+  //     }
+  //   }
+  // )
+  // .then(res => {
+  //   console.log(res)
+  // })
+  // .catch(err => {
+  //   console.log(err)
+  // })
 
   callback(null, {
     statusCode: 200,
