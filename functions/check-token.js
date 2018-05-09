@@ -1234,6 +1234,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function handler(event, context, callback) {
 
   if (event.headers.cookie) {
+    console.log('there are cookies');
     let cookieString = event.headers.cookie;
     cookieString = cookieString.split("; ");
     let cookies = {};
@@ -1242,8 +1243,6 @@ function handler(event, context, callback) {
       cookies[splitCookie[0]] = splitCookie[1];
     }
   }
-
-  console.log($API_INTEGRATION_URL);
 
   // axios.get(
   //   `https://${process.env.API_INTEGRATION_URL}.caspio.com/rest/v2/applications`,
