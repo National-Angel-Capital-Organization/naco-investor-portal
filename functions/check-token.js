@@ -1242,6 +1242,8 @@ function handler(event, context, callback) {
       let splitCookie = cookie.split("=");
       cookies[splitCookie[0]] = splitCookie[1];
     }
+  } else {
+    console.log("there are no cookies");
   }
 
   // axios.get(
