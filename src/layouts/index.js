@@ -53,7 +53,7 @@ export default class Layout extends Component {
     } else {
       this.generateHeaders().then((headers) => {
         axios('/.netlify/functions/check-token', {
-          method: 'POST',
+          method: 'GET',
           headers
         }
         )
