@@ -52,10 +52,8 @@ export default class Layout extends Component {
       this.getToken()
     } else {
       this.generateHeaders().then((headers) => {
-        axios('/.netlify/functions/check-token', {
-          method: 'GET',
+        axios.get('/.netlify/functions/check-token', 
           headers
-        }
         )
           .then(res => {
             console.log(res)
@@ -63,6 +61,9 @@ export default class Layout extends Component {
           .catch(error => {
             console.log(error)
           })
+      })
+      .then(res => {
+        console.log(res)
       })
         .catch(error => {
           if (error.response.status === 401) {
