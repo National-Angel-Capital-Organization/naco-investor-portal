@@ -77,17 +77,17 @@ exports.handler = handler;
 function handler(event, context, callback) {
   console.log(context);
   console.log(event.headers.host);
+  let userEmail = '';
   if (event.headers.host === 'localhost:8000') {
-    callback(null, {
-      statusCode: 200,
-      body: "Hello, LocalHost!"
-    });
+    userEmail = 'bhunter@nacocanada.com';
   } else {
-    callback(null, {
-      statusCode: 200,
-      body: "Hello, World!"
-    });
+    userEmail = context.clientContext.identity.user.email;
   }
+
+  callback(null, {
+    statusCode: 200,
+    body: `Hello, ${userEmail}`
+  });
 }
 
 /***/ })
