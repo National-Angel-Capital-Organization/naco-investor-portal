@@ -60,11 +60,12 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 0);
+/******/ 	return __webpack_require__(__webpack_require__.s = 46);
 /******/ })
 /************************************************************************/
-/******/ ([
-/* 0 */
+/******/ ({
+
+/***/ 46:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -75,15 +76,13 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.handler = handler;
 function handler(event, context, callback) {
-  console.log("this is the context: ", context);
-  console.log("this is the event: ", event);
+
   let userEmail = '';
   if (event.headers.host === 'localhost:8000') {
     userEmail = 'bhunter@nacocanada.com';
   } else {
-    userEmail = context.clientContext.user.email;
+    userEmail = JSON.parse(context.clientContext.user.email);
   }
-  console.log(userEmail);
 
   callback(null, {
     statusCode: 200,
@@ -92,4 +91,5 @@ function handler(event, context, callback) {
 }
 
 /***/ })
-/******/ ])));
+
+/******/ })));

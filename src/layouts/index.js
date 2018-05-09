@@ -34,22 +34,35 @@ export default class Layout extends Component {
     apiToken: false
   }
 
+  generateHeaders() {
+    netlifyIdentity.init()
+    const headers = { "Content-Type": "application/json" };
+
+    if (netlifyIdentity.currentUser()) {
+      return netlifyIdentity.currentUser().jwt().then((token) => {
+        return { ...headers, "Authorization": `Bearer ${token}` };
+      })
+    }
+    return Promise.resolve(headers);
+  }
+
   checkForToken() {
     if (!Cookies.get('token')) {
       this.setState({apiToken: false})
       this.getToken()
     } else {
-      axios.get(
-        `https://${process.env.API_INTEGRATION_URL}.caspio.com/rest/v2/applications`,
-        {
-          headers: {
-            accept: 'application/json',
-            Authorization: `bearer ${Cookies.get('token')}`,
-          }
+      this.generateHeaders().then((headers) => {
+        axios('/.netlify/functions/check-token', {
+          method: 'POST',
+          headers
         }
-      )
-      .then(res => {
-        this.setState({apiToken: true})
+        )
+          .then(res => {
+            console.log(res)
+          })
+          .catch(error => {
+            console.log(error)
+          })
       })
         .catch(error => {
           if (error.response.status === 401) {
