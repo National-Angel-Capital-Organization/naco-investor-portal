@@ -13,7 +13,7 @@ export function handler(event, context, callback) {
   }
   }
 
-  console.log(process.env.API_INTEGRATION_URL)
+  console.log($API_INTEGRATION_URL)
 
   // axios.get(
   //   `https://${process.env.API_INTEGRATION_URL}.caspio.com/rest/v2/applications`,
