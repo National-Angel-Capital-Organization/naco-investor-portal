@@ -3,7 +3,7 @@ import axios from 'axios'
 
 export function handler(event, context, callback) {
 
-  
+  if (event.headers.cookie) {
   let cookieString = event.headers.cookie
   cookieString = cookieString.split("; ")
   let cookies = {}
@@ -11,7 +11,8 @@ export function handler(event, context, callback) {
     let splitCookie = cookie.split("=")
     cookies[splitCookie[0]] = splitCookie[1]
   }
-
+  }
+  
   console.log(API_INTEGRATION_URL)
 
   // axios.get(

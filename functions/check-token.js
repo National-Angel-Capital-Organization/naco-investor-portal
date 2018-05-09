@@ -1233,12 +1233,14 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function handler(event, context, callback) {
 
-  let cookieString = event.headers.cookie;
-  cookieString = cookieString.split("; ");
-  let cookies = {};
-  for (let cookie of cookieString) {
-    let splitCookie = cookie.split("=");
-    cookies[splitCookie[0]] = splitCookie[1];
+  if (event.headers.cookie) {
+    let cookieString = event.headers.cookie;
+    cookieString = cookieString.split("; ");
+    let cookies = {};
+    for (let cookie of cookieString) {
+      let splitCookie = cookie.split("=");
+      cookies[splitCookie[0]] = splitCookie[1];
+    }
   }
 
   console.log(API_INTEGRATION_URL);
