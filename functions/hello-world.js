@@ -81,7 +81,7 @@ function handler(event, context, callback) {
   if (event.headers.host === 'localhost:8000') {
     userEmail = 'bhunter@nacocanada.com';
   } else {
-    userEmail = 'troubleshooting';
+    userEmail = 'context.clientContext.user.email';
   }
   console.log(userEmail);
 
