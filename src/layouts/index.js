@@ -57,6 +57,11 @@ export default class Layout extends Component {
 
   componentWillMount() {
     this.checkForToken()
+    
+  }
+
+  componentDidMount() {
+    netlifyIdentity.init();
     this.generateHeaders().then((headers) => {
       axios.get('/.netlify/functions/check-token',
         headers
@@ -79,10 +84,6 @@ export default class Layout extends Component {
           console.log(error)
         }
       })
-  }
-
-  componentDidMount() {
-    netlifyIdentity.init();
   }
 
   getToken = () => {
