@@ -51,33 +51,34 @@ export default class Layout extends Component {
       this.setState({apiToken: false})
       this.getToken()
     } else {
-      this.generateHeaders().then((headers) => {
-        axios.get('/.netlify/functions/check-token', 
-          headers
-        )
-          .then(res => {
-            console.log(res)
-          })
-          .catch(error => {
-            console.log(error)
-          })
-      })
-      .then(res => {
-        console.log(res)
-      })
-        .catch(error => {
-          if (error.response.status === 401) {
-            this.getToken()
-          } else {
-            this.setState({apiToken: false})
-            console.log(error)
-          }
-        })
+      console.log("Check for Valid Token")
     }
   }
 
   componentWillMount() {
     this.checkForToken()
+    this.generateHeaders().then((headers) => {
+      axios.get('/.netlify/functions/check-token',
+        headers
+      )
+        .then(res => {
+          console.log(res)
+        })
+        .catch(error => {
+          console.log(error)
+        })
+    })
+      .then(res => {
+        console.log(res)
+      })
+      .catch(error => {
+        if (error.response.status === 401) {
+          this.getToken()
+        } else {
+          this.setState({ apiToken: false })
+          console.log(error)
+        }
+      })
   }
 
   componentDidMount() {
