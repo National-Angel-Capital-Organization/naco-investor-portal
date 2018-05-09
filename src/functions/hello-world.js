@@ -5,7 +5,7 @@ export function handler(event, context, callback) {
   if (event.headers.host === 'localhost:8000') {
     userEmail = 'bhunter@nacocanada.com'
   } else {
-    userEmail = context.clientContext.identity.user.email
+    userEmail = context.clientContext
   }
 
   callback(null, {
