@@ -1,11 +1,10 @@
 export function handler(event, context, callback) {
-  console.log(context.clientContext.user.email)
-  console.log(event.headers.host)
+  console.log("this is the context: ", context)
   let userEmail = ''
   if (event.headers.host === 'localhost:8000') {
     userEmail = 'bhunter@nacocanada.com'
   } else {
-    userEmail = context
+    userEmail = 'troubleshooting'
   }
 
   callback(null, {
