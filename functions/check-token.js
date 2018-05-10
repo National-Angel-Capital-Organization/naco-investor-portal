@@ -1245,6 +1245,7 @@ function handler(event, context, callback) {
   } else {
     console.log("there are no cookies");
   }
+  console.log(process.env);
 
   // axios.get(
   //   `https://${process.env.API_INTEGRATION_URL}.caspio.com/rest/v2/applications`,
