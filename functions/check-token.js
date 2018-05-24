@@ -1245,7 +1245,7 @@ function handler(event, context, callback) {
   } else {
     console.log("there are no cookies");
   }
-  console.log(process.env);
+  console.log(process.env.API_INTEGRATION_URL);
 
   // axios.get(
   //   `https://${process.env.API_INTEGRATION_URL}.caspio.com/rest/v2/applications`,
@@ -1265,7 +1265,7 @@ function handler(event, context, callback) {
 
   callback(null, {
     statusCode: 200,
-    body: `Token: ${cookies.token}`
+    body: `Token: ${cookies.token} io: ${cookies.io}`
   });
 }
 
