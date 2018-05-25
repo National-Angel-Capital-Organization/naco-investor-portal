@@ -15,6 +15,7 @@
     "material-ui": "^0.20.0",
     "netlify-identity-widget": "^1.4.11",
     "netlify-lambda": "^0.4.0",
+    "http-proxy-middleware": "^0.18.0",
     "react-helmet": "^5.2.0"
   },
   "keywords": [
@@ -29,7 +30,6 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
-    "http-proxy-middleware": "^0.18.0",
     "prettier": "^1.12.0"
   }
 }
