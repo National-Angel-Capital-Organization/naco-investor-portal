@@ -1,5 +1,4 @@
-
-var proxy = require("http-proxy-middleware");
+const proxy = require("http-proxy-middleware")
 
 module.exports = {
   siteMetadata: {
@@ -16,8 +15,8 @@ module.exports = {
         target: "http://localhost:9000",
         pathRewrite: {
           "/.netlify/functions/": "",
-        },
+        }
       })
-    );
-  },
+    )
+  }
 }
