@@ -9,7 +9,7 @@ import Cookies from 'js-cookie'
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
 import getMuiTheme from 'material-ui/styles/getMuiTheme'
 import netlifyIdentity from 'netlify-identity-widget'
-
+import getDataFunctions from '../get-data-functions'
 
 
 
@@ -35,18 +35,6 @@ export default class Layout extends Component {
     validToken: false,
   }
 
-  generateHeaders() {
-    netlifyIdentity.init()
-    const headers = { "Content-Type": "application/json" };
-
-    if (netlifyIdentity.currentUser()) {
-      return netlifyIdentity.currentUser().jwt().then((token) => {
-        return { ...headers, "Authorization": `Bearer ${token}` };
-      })
-    }
-    return Promise.resolve(headers);
-  }
-
   checkForToken() {
     if (!Cookies.get('token')) {
       this.setState({ tokenCookie: false })
@@ -63,7 +51,7 @@ export default class Layout extends Component {
   componentDidMount() {
     netlifyIdentity.init();
     if (this.state.tokenCookie) {
-      this.generateHeaders().then((headers) => {
+      getDataFunctions.generateHeaders().then((headers) => {
         axios.get('/.netlify/functions/check-token',
           headers
         )

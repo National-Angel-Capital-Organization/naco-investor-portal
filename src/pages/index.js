@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import Link from 'gatsby-link'
 import axios from 'axios'
 import Cookies from 'js-cookie'
-import netlifyIdentity from 'netlify-identity-widget'
+import getDataFunctions from '../get-data-functions'
 
 export default class IndexPage extends Component {
 
@@ -10,38 +10,27 @@ state = {
   deals: []
 }
 
-  generateHeaders() {
-    netlifyIdentity.init()
-    const headers = { "Content-Type": "application/json" };
-    
-    if (netlifyIdentity.currentUser()) {
-      return netlifyIdentity.currentUser().jwt().then((token) => {
-        return { ...headers, "Authorization": `Bearer ${token}` };
-      })
-    }
-    return Promise.resolve(headers);
-  }
-
    componentDidMount() {
-     axios
-       .get(
-         `https://${process.env.API_INTEGRATION_URL}.caspio.com/rest/v2/tables/Deals/records`,
-         {
-           headers: {
-             accept: 'application/json',
-             Authorization: `bearer ${Cookies.get('token')}`,
-           },
 
-         }
+     getDataFunctions.generateHeaders().then((headers) => {
+       axios('/.netlify/functions/get', {
+         method: 'GET',
+         headers,
+         params: { path: "rest/v2/tables/Deals/records" }
+       }
        )
-       .then(res => {
-         this.setState({ deals: res.data.Result })
-       })
+         .then(res => {
+           this.setState({ deals: res.data.Result })
+         })
+         .catch(error => {
+           throw error
+         })
+     })
        .catch(error => {
          console.log(error)
        })
 
-     this.generateHeaders().then((headers) => {
+     getDataFunctions.generateHeaders().then((headers) => {
        axios('/.netlify/functions/hello-world', { 
            method: 'GET',
            headers}
