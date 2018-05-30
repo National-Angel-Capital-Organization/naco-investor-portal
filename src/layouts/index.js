@@ -88,20 +88,18 @@ export default class Layout extends Component {
   }
 
   getToken = () => {
-    axios
-      .post(
-        `${process.env.API_AUTH_URL}`,
-        `grant_type=client_credentials&client_id=${
-        process.env.API_CLIENT_ID
-        }&client_secret=${process.env.API_CLIENT_SECRET}`
+    const headers = { "Content-Type": "application/json" };
+      axios.get('/.netlify/functions/get-token',
+        headers
       )
-      .then(res => {
-        Cookies.set('token', res.data.access_token, { expires: 1 })
-        this.setState({ validToken: true })
-      })
-      .catch(error => {
-        console.log(error)
-      })
+        .then(res => {
+          Cookies.set('token', res.data, { expires: 1 })
+          this.setState({ validToken: true })
+        })
+        .catch(error => {
+            this.setState({ validToken: false })
+            console.log(error)
+        })
   }
 
   render() {

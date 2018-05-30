@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 46);
+/******/ 	return __webpack_require__(__webpack_require__.s = 47);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -3157,7 +3157,8 @@ module.exports = require("fs");
 module.exports = require("path");
 
 /***/ }),
-/* 46 */
+/* 46 */,
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3178,36 +3179,15 @@ __webpack_require__(43).config();
 
 function handler(event, context, callback) {
 
-  let cookies = {};
-
-  if (event.headers.cookie) {
-    let cookieString = event.headers.cookie;
-    cookieString = cookieString.split("; ");
-    for (let cookie of cookieString) {
-      let splitCookie = cookie.split("=");
-      cookies[splitCookie[0]] = splitCookie[1];
-    }
-  } else {
-    callback(null, {
-      statusCode: 401,
-      body: `No Cookies`
-    });
-  }
-
-  _axios2.default.get(`https://${process.env.API_INTEGRATION_URL}.caspio.com/rest/v2/applications`, {
-    headers: {
-      accept: 'application/json',
-      Authorization: `bearer ${cookies.token}`
-    }
-  }).then(res => {
+  _axios2.default.post(`${process.env.API_AUTH_URL}`, `grant_type=client_credentials&client_id=${process.env.API_CLIENT_ID}&client_secret=${process.env.API_CLIENT_SECRET}`).then(res => {
     callback(null, {
       statusCode: 200,
-      body: `Token Valid`
+      body: `${res.data.access_token}`
     });
   }).catch(err => {
     callback(null, {
-      statusCode: 401,
-      body: `Token Not Valid`
+      statusCode: 500,
+      body: `${err}`
     });
   });
 }
