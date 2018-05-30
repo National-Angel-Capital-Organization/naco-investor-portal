@@ -31,7 +31,8 @@ export default class Layout extends Component {
   static propTypes = { children: PropTypes.func }
 
   state = {
-    apiToken: false
+    tokenCookie: false,
+    validToken: false,
   }
 
   generateHeaders() {
@@ -48,42 +49,42 @@ export default class Layout extends Component {
 
   checkForToken() {
     if (!Cookies.get('token')) {
-      this.setState({apiToken: false})
+      this.setState({ tokenCookie: false })
       this.getToken()
     } else {
-      console.log("Check for Valid Token")
+      this.setState({ tokenCookie: true })
     }
   }
 
   componentWillMount() {
     this.checkForToken()
-    
   }
 
   componentDidMount() {
     netlifyIdentity.init();
-    this.generateHeaders().then((headers) => {
-      axios.get('/.netlify/functions/check-token',
-        headers
-      )
-        .then(res => {
-          console.log(res)
-        })
+    if (this.state.tokenCookie) {
+      this.generateHeaders().then((headers) => {
+        axios.get('/.netlify/functions/check-token',
+          headers
+        )
+          .then(res => {
+            this.setState({ validToken: true })
+          })
+          .catch(error => {
+            if (error.response.status === 401) {
+              this.getToken()
+            } else {
+              this.setState({ validToken: false })
+              console.log(error)
+            }
+          })
+      })
         .catch(error => {
-          console.log(error)
+          throw error
         })
-    })
-      .then(res => {
-        console.log(res)
-      })
-      .catch(error => {
-        if (error.response.status === 401) {
-          this.getToken()
-        } else {
-          this.setState({ apiToken: false })
-          console.log(error)
-        }
-      })
+    } else {
+      this.getToken()
+    }
   }
 
   getToken = () => {
@@ -91,12 +92,12 @@ export default class Layout extends Component {
       .post(
         `${process.env.API_AUTH_URL}`,
         `grant_type=client_credentials&client_id=${
-          process.env.API_CLIENT_ID
+        process.env.API_CLIENT_ID
         }&client_secret=${process.env.API_CLIENT_SECRET}`
       )
       .then(res => {
         Cookies.set('token', res.data.access_token, { expires: 1 })
-        this.setState({apiToken: true})
+        this.setState({ validToken: true })
       })
       .catch(error => {
         console.log(error)
@@ -108,7 +109,7 @@ export default class Layout extends Component {
     const { data, children } = this.props
     return (
       <MuiThemeProvider muiTheme={muiTheme}>
-        
+
         <div>
 
           <Helmet
@@ -117,9 +118,9 @@ export default class Layout extends Component {
               { name: 'description', content: 'Sample' },
               { name: 'keywords', content: 'sample, something' },
             ]}>
-            
-            </Helmet>
-          
+
+          </Helmet>
+
           <Header siteTitle={data.site.siteMetadata.title} />
           <div className="body-wrapper">{children()}</div>
         </div>
