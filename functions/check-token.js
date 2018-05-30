@@ -1231,7 +1231,7 @@ var _axios2 = _interopRequireDefault(_axios);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-__webpack_require__(45).config();
+__webpack_require__(44).config();
 
 function handler(event, context, callback) {
 
@@ -1245,29 +1245,27 @@ function handler(event, context, callback) {
       cookies[splitCookie[0]] = splitCookie[1];
     }
   } else {
-    console.log("there are no cookies");
+    callback(null, {
+      statusCode: 401,
+      body: `No Cookies`
+    });
   }
-  console.log(process.env.API_INTEGRATION_URL);
 
-  // axios.get(
-  //   `https://${process.env.API_INTEGRATION_URL}.caspio.com/rest/v2/applications`,
-  //   {
-  //     headers: {
-  //       accept: 'application/json',
-  //       Authorization: `bearer ${cookies.token}`,
-  //     }
-  //   }
-  // )
-  // .then(res => {
-  //   console.log(res)
-  // })
-  // .catch(err => {
-  //   console.log(err)
-  // })
-
-  callback(null, {
-    statusCode: 200,
-    body: `Token: ${cookies.token} io: ${cookies.io}`
+  _axios2.default.get(`https://${process.env.API_INTEGRATION_URL}.caspio.com/rest/v2/applications`, {
+    headers: {
+      accept: 'application/json',
+      Authorization: `bearer ${cookies.token}`
+    }
+  }).then(res => {
+    callback(null, {
+      statusCode: 200,
+      body: `Token Valid`
+    });
+  }).catch(err => {
+    callback(null, {
+      statusCode: 401,
+      body: `Token Not Valid`
+    });
   });
 }
 
@@ -3117,15 +3115,14 @@ module.exports = function spread(callback) {
 
 
 /***/ }),
-/* 44 */,
-/* 45 */
+/* 44 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-const fs = __webpack_require__(46)
-const path = __webpack_require__(47)
+const fs = __webpack_require__(45)
+const path = __webpack_require__(46)
 
 /*
  * Parses a string or buffer into an object
@@ -3204,13 +3201,13 @@ module.exports.parse = parse
 
 
 /***/ }),
-/* 46 */
+/* 45 */
 /***/ (function(module, exports) {
 
 module.exports = require("fs");
 
 /***/ }),
-/* 47 */
+/* 46 */
 /***/ (function(module, exports) {
 
 module.exports = require("path");

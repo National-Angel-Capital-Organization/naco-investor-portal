@@ -14,28 +14,33 @@ export function handler(event, context, callback) {
       cookies[splitCookie[0]] = splitCookie[1]
     }
   } else {
-    console.log("there are no cookies")
+    callback(null, {
+      statusCode: 401,
+      body: `No Cookies`
+    });
   }
-  console.log(process.env.API_INTEGRATION_URL)
 
-  // axios.get(
-  //   `https://${process.env.API_INTEGRATION_URL}.caspio.com/rest/v2/applications`,
-  //   {
-  //     headers: {
-  //       accept: 'application/json',
-  //       Authorization: `bearer ${cookies.token}`,
-  //     }
-  //   }
-  // )
-  // .then(res => {
-  //   console.log(res)
-  // })
-  // .catch(err => {
-  //   console.log(err)
-  // })
+  axios.get(
+    `https://${process.env.API_INTEGRATION_URL}.caspio.com/rest/v2/applications`,
+    {
+      headers: {
+        accept: 'application/json',
+        Authorization: `bearer ${cookies.token}`,
+      }
+    }
+  )
+  .then(res => {
+    callback(null, {
+      statusCode: 200,
+      body: `Token Valid`
+    });
+  })
+  .catch(err => {
+    callback(null, {
+      statusCode: 401,
+      body: `Token Not Valid`
+    });
+  })
 
-  callback(null, {
-    statusCode: 200,
-    body: `Token: ${cookies.token} io: ${cookies.io}`
-  });
+
 }
