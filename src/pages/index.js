@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import Link from 'gatsby-link'
 import axios from 'axios'
 import Cookies from 'js-cookie'
-import getDataFunctions from '../get-data-functions'
+import axiosHeaders from '../axios-headers'
 
 export default class IndexPage extends Component {
 
@@ -12,7 +12,7 @@ state = {
 
    componentDidMount() {
 
-     getDataFunctions.generateHeaders().then((headers) => {
+     axiosHeaders.generateHeaders().then((headers) => {
        axios('/.netlify/functions/get', {
          method: 'GET',
          headers,
@@ -30,7 +30,7 @@ state = {
          console.log(error)
        })
 
-     getDataFunctions.generateHeaders().then((headers) => {
+     axiosHeaders.generateHeaders().then((headers) => {
        axios('/.netlify/functions/hello-world', { 
            method: 'GET',
            headers}

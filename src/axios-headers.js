@@ -1,6 +1,6 @@
 import netlifyIdentity from 'netlify-identity-widget'
 
-const getDataFunctions = {
+const axiosHeaders = {
 
   generateHeaders() {
     netlifyIdentity.init()
@@ -15,4 +15,4 @@ const getDataFunctions = {
   },
 }
 
-export default getDataFunctions
+export default axiosHeaders

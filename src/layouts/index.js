@@ -9,7 +9,7 @@ import Cookies from 'js-cookie'
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
 import getMuiTheme from 'material-ui/styles/getMuiTheme'
 import netlifyIdentity from 'netlify-identity-widget'
-import getDataFunctions from '../get-data-functions'
+import axiosHeaders from '../axios-headers'
 
 
 
@@ -51,7 +51,7 @@ export default class Layout extends Component {
   componentDidMount() {
     netlifyIdentity.init();
     if (this.state.tokenCookie) {
-      getDataFunctions.generateHeaders().then((headers) => {
+      axiosHeaders.generateHeaders().then((headers) => {
         axios.get('/.netlify/functions/check-token',
           headers
         )

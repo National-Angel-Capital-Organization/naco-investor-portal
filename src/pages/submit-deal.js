@@ -9,6 +9,7 @@ import MenuItem from 'material-ui/MenuItem'
 import Toggle from 'material-ui/Toggle'
 import RaisedButton from 'material-ui/RaisedButton'
 import submissionFunctions from '../submission-functions'
+import axiosHeaders from '../axios-headers'
 
 const provinceOptions = ['AB', 'BC', 'MB', 'NB', 'NL', 'NT', 'NS', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT', 'N/A']
 
@@ -58,74 +59,103 @@ export default class SubmitDeal extends Component {
   }
 
   componentDidMount() {
-    axios
-      .get(
-        `https://${
-        process.env.API_INTEGRATION_URL
-        }.caspio.com/rest/v2/tables/IndvInvestorDeals/fields/Angel_Group_Names`,
-        {
-          headers: {
-            accept: 'application/json',
-            Authorization: `bearer ${Cookies.get('token')}`,
-          },
-        }
+
+
+    // GET LIST OF ANGEL GROUPS
+
+    axiosHeaders.generateHeaders().then((headers) => {
+      axios('/.netlify/functions/get', {
+        method: 'GET',
+        headers,
+        params: { path: "rest/v2/tables/IndvInvestorDeals/fields/Angel_Group_Names" }
+      }
       )
-      .then(res => {
-        let angelGroupArray = submissionFunctions.createResponseList(res)
-        submissionFunctions.moveToEndOfList('Other', angelGroupArray)
-        this.listsToState(angelGroupArray, 'angelGroupNames', 'angelGroupNumbers')
-      })
+        .then(res => {
+          let angelGroupArray = submissionFunctions.createResponseList(res)
+          submissionFunctions.moveToEndOfList('Other', angelGroupArray)
+          this.listsToState(angelGroupArray, 'angelGroupNames', 'angelGroupNumbers')
+        })
+        .catch(error => {
+          throw error
+        })
+    })
       .catch(error => {
         console.log(error)
       })
 
 
-    axios
-      .get(
-        `https://${
-        process.env.API_INTEGRATION_URL
-        }.caspio.com/rest/v2/tables/IndvInvestorDeals/fields/IndvInvestor_CompanySector`,
-        {
-          headers: {
-            accept: 'application/json',
-            Authorization: `bearer ${Cookies.get('token')}`,
-          },
-        }
+
+    axiosHeaders.generateHeaders().then((headers) => {
+      axios('/.netlify/functions/get', {
+        method: 'GET',
+        headers,
+        params: { path: "rest/v2/tables/IndvInvestorDeals/fields/IndvInvestor_CompanySector" }
+      }
       )
-      .then(res => {
-        const sectorArray = submissionFunctions.createResponseList(res)
-        submissionFunctions.moveToEndOfList('No Sector Focus', sectorArray)
-        submissionFunctions.moveToEndOfList('Other (Please specify)', sectorArray)
-        this.listsToState(sectorArray, 'IndvInvestorCompanySector', 'IndvInvestorCompanySectorNumbers')
-      })
+        .then(res => {
+          const sectorArray = submissionFunctions.createResponseList(res)
+          submissionFunctions.moveToEndOfList('No Sector Focus', sectorArray)
+          submissionFunctions.moveToEndOfList('Other (Please specify)', sectorArray)
+          this.listsToState(sectorArray, 'IndvInvestorCompanySector', 'IndvInvestorCompanySectorNumbers')
+        })
+        .catch(error => {
+          throw error
+        })
+    })
       .catch(error => {
         console.log(error)
       })
 
 
-    axios
-      .get(
-        `https://${
-        process.env.API_INTEGRATION_URL
-        }.caspio.com/rest/v2/tables/IndvInvestorDeals/fields/IndvInvestor_SyndicatePartners`,
-        {
-          headers: {
-            accept: 'application/json',
-            Authorization: `bearer ${Cookies.get('token')}`,
-          },
-        }
+// GET LIST OF COMPANY SECTORS
+
+    axiosHeaders.generateHeaders().then((headers) => {
+      axios('/.netlify/functions/get', {
+        method: 'GET',
+        headers,
+        params: { path: "rest/v2/tables/IndvInvestorDeals/fields/IndvInvestor_CompanySector" }
+      }
       )
-      .then(res => {
-        const syndicatePartnerArray = submissionFunctions.createResponseList(res)
-        submissionFunctions.moveToEndOfList('Unknown', syndicatePartnerArray)
-        submissionFunctions.moveToEndOfList('No Syndicate Partner', syndicatePartnerArray)
-        submissionFunctions.moveToEndOfList('Others (Please Specify)', syndicatePartnerArray)
-        this.listsToState(syndicatePartnerArray, 'IndvInvestor_SyndicatePartners', 'IndvInvestor_SyndicatePartnerNumbers')
-      })
+        .then(res => {
+          const sectorArray = submissionFunctions.createResponseList(res)
+          submissionFunctions.moveToEndOfList('No Sector Focus', sectorArray)
+          submissionFunctions.moveToEndOfList('Other (Please specify)', sectorArray)
+          this.listsToState(sectorArray, 'IndvInvestorCompanySector', 'IndvInvestorCompanySectorNumbers')
+        })
+        .catch(error => {
+          throw error
+        })
+    })
       .catch(error => {
         console.log(error)
       })
-  }
+
+    
+// GET LIST OF SYNDICATE PARTNERS
+
+    axiosHeaders.generateHeaders().then((headers) => {
+      axios('/.netlify/functions/get', {
+        method: 'GET',
+        headers,
+        params: { path: "rest/v2/tables/IndvInvestorDeals/fields/IndvInvestor_SyndicatePartners" }
+      }
+      )
+        .then(res => {
+          const syndicatePartnerArray = submissionFunctions.createResponseList(res)
+          submissionFunctions.moveToEndOfList('Unknown', syndicatePartnerArray)
+          submissionFunctions.moveToEndOfList('No Syndicate Partner', syndicatePartnerArray)
+          submissionFunctions.moveToEndOfList('Others (Please Specify)', syndicatePartnerArray)
+          this.listsToState(syndicatePartnerArray, 'IndvInvestor_SyndicatePartners', 'IndvInvestor_SyndicatePartnerNumbers')
+        })
+        .catch(error => {
+          throw error
+        })
+    })
+      .catch(error => {
+        console.log(error)
+      })
+
+    }
 
   handleDropdownChange = (event, index, value) => {
     const target = event.target
