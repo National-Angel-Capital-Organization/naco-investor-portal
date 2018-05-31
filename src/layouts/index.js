@@ -10,6 +10,7 @@ import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
 import getMuiTheme from 'material-ui/styles/getMuiTheme'
 import netlifyIdentity from 'netlify-identity-widget'
 import axiosHeaders from '../axios-headers'
+import { Link } from 'react-router-dom';
 
 
 
@@ -33,6 +34,7 @@ export default class Layout extends Component {
   state = {
     tokenCookie: false,
     validToken: false,
+    loggedIn: false,
   }
 
   checkForToken() {
@@ -50,6 +52,14 @@ export default class Layout extends Component {
 
   componentDidMount() {
     netlifyIdentity.init();
+    const user = netlifyIdentity.currentUser();
+    if (user) {
+      this.setState({loggedIn: true})
+    } else {
+      this.setState({loggedIn: false})
+    }
+    netlifyIdentity.on("login", user => this.setState({ loggedIn: true }));
+    netlifyIdentity.on("logout", () => this.setState({ loggedIn: false }));
     if (this.state.tokenCookie) {
       axiosHeaders.generateHeaders().then((headers) => {
         axios.get('/.netlify/functions/check-token',
@@ -90,8 +100,16 @@ export default class Layout extends Component {
         })
   }
 
-  render() {
+  loggedIn = () => {
+    const { data, children } = this.props
+    if (this.state.loggedIn) {
+      return (<div className="body-wrapper">{children()}</div>);
+    } else {
+      return (<div>Not logged in.</div>);
+    }
+  }
 
+  render() {
     const { data, children } = this.props
     return (
       <MuiThemeProvider muiTheme={muiTheme}>
@@ -108,7 +126,8 @@ export default class Layout extends Component {
           </Helmet>
 
           <Header siteTitle={data.site.siteMetadata.title} />
-          <div className="body-wrapper">{children()}</div>
+
+          {this.loggedIn()}
         </div>
       </MuiThemeProvider>
     )
