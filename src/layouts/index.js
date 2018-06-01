@@ -35,6 +35,7 @@ export default class Layout extends Component {
     tokenCookie: false,
     validToken: false,
     loggedIn: false,
+    loading: true,
   }
 
   checkForToken() {
@@ -55,8 +56,10 @@ export default class Layout extends Component {
     const user = netlifyIdentity.currentUser();
     if (user) {
       this.setState({ loggedIn: true })
+      this.setState({ loading: false })
     } else {
       this.setState({ loggedIn: false })
+      this.setState({ loading: false })
     }
     netlifyIdentity.on("login", (user) => {
       netlifyIdentity.close()
@@ -107,13 +110,15 @@ export default class Layout extends Component {
   }
 
   handleLogIn() {
-    // You can import the widget into any component and interact with it.
     netlifyIdentity.open()
   }
 
   loggedIn = () => {
     const { data, children } = this.props
-    if (this.state.loggedIn) {
+    if (this.state.loading) {
+      return (<div>Loading</div>)
+    }
+    else if (this.state.loggedIn) {
       return (<div>
         <Header siteTitle={data.site.siteMetadata.title} />
         <div className="body-wrapper">{children()}</div>
