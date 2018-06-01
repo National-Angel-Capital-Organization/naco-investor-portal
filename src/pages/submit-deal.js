@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import axios from 'axios'
-import Cookies from 'js-cookie'
 import TextField from 'material-ui/TextField'
 import DatePicker from 'material-ui/DatePicker'
 import SelectField from 'material-ui/SelectField'

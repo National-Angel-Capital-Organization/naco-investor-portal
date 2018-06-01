@@ -20,7 +20,7 @@ const muiTheme = getMuiTheme({
     primary1Color: '#0079c1',
     primary2Color: '#54bceb',
     accent1Color: '#002f65',
-    accent2Color: '#f78e23',
+    accent2Color: '#e0edf8',
     pickerHeaderColor: '#0079c1'
   },
 })

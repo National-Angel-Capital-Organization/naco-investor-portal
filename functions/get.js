@@ -3180,6 +3180,13 @@ __webpack_require__(43).config();
 
 function handler(event, context, callback) {
 
+  let userEmail = '';
+  if (event.headers.host === 'localhost:8000') {
+    userEmail = 'bhunter@nacocanada.com';
+  } else {
+    userEmail = context.clientContext.user.email;
+  }
+
   let cookies = {};
 
   if (event.headers.cookie) {
@@ -3197,6 +3204,17 @@ function handler(event, context, callback) {
   }
 
   let path = event.queryStringParameters.path;
+  if (event.queryStringParameters.userSpecific) {
+    path += `?q.where=IndvInvestor_email%3D'${userEmail}'`;
+  }
+
+  // if (event.queryStringParameters.params) {
+  //   let params = JSON.parse(event.queryStringParameters.params)  
+  // for (let param in params) {
+  //   path += `?q.${param}=${params[param]}`
+  // }
+  // }
+
   _axios2.default.get(`https://${process.env.API_INTEGRATION_URL}.caspio.com/${path}`, {
     headers: {
       accept: 'application/json',
