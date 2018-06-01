@@ -14,12 +14,19 @@ export default class Header extends Component {
     dealsOpen: false,
     exitsOpen: false,
     userOpen: false,
+    dashboardsOpen: false,
   }
 
   handleClick = (event) => {
     // This prevents ghost click.
     event.preventDefault();
     switch (event.currentTarget.textContent) {
+      case "DASHBOARDS":
+        this.setState({
+          dashboardsOpen: true,
+          anchorEl: event.currentTarget,
+        });
+      break;
       case "DEALS":
         this.setState({
           dealsOpen: true,
@@ -46,17 +53,17 @@ export default class Header extends Component {
       dealsOpen: false,
       exitsOpen: false,
       userOpen: false,
+      dashboardsOpen: false,
     });
   };
 
   handleItemClick = (event, menuItem) => {
+    if (menuItem.props['data-type'] === 'log-out') {
+      netlifyIdentity.logout();
+    }
     navigateTo(menuItem.props['data-location'])
     this.handleRequestClose()
   }
-  handleLogIn () {
-    // You can import the widget into any component and interact with it.
-    netlifyIdentity.open()
-}
 
   render() {
     const { siteTitle } = this.props;
@@ -67,11 +74,23 @@ export default class Header extends Component {
         </div>
         <nav>
           <FlatButton
-            label="GENERAL DASHBOARD"
-            containerElement={<Link to="/" />}
-            style={{ overflow: 'inherit'}}
-            primary={true}
+            onClick={this.handleClick}
+            label="DASHBOARDS"
           />
+          <Popover
+            open={this.state.dashboardsOpen}
+            anchorEl={this.state.anchorEl}
+            anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
+            targetOrigin={{ horizontal: 'left', vertical: 'top' }}
+            onRequestClose={this.handleRequestClose}
+          >
+            <Menu
+              onItemClick={this.handleItemClick}
+            >
+              <MenuItem data-location="/" primaryText="General" />
+              <MenuItem data-location="/personal-dashboard" primaryText="Personal" />
+            </Menu>
+          </Popover>
           <FlatButton
             onClick={this.handleClick}
             label="DEALS"
@@ -124,12 +143,10 @@ export default class Header extends Component {
             >
               <MenuItem data-location="/my-profile" primaryText="My Profile" />
               <Divider />
-              <MenuItem data-location="/" primaryText="Log Out" />
+              <MenuItem data-location="/" data-type="log-out" primaryText="Log Out" />
             </Menu>
           </Popover>
-          <div>
-            <button onClick={this.handleLogIn} >Log in with netlify</button>
-          </div>
+
         </nav>
       </div>
     )

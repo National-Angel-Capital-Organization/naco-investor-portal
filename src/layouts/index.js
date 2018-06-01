@@ -54,12 +54,18 @@ export default class Layout extends Component {
     netlifyIdentity.init();
     const user = netlifyIdentity.currentUser();
     if (user) {
-      this.setState({loggedIn: true})
+      this.setState({ loggedIn: true })
     } else {
-      this.setState({loggedIn: false})
+      this.setState({ loggedIn: false })
     }
-    netlifyIdentity.on("login", user => this.setState({ loggedIn: true }));
-    netlifyIdentity.on("logout", () => this.setState({ loggedIn: false }));
+    netlifyIdentity.on("login", (user) => {
+      netlifyIdentity.close()
+      this.setState({ loggedIn: true })
+    });
+    netlifyIdentity.on("logout", (user) => {
+      netlifyIdentity.close()
+      this.setState({ loggedIn: false })
+    });
     if (this.state.tokenCookie) {
       axiosHeaders.generateHeaders().then((headers) => {
         axios.get('/.netlify/functions/check-token',
@@ -87,25 +93,35 @@ export default class Layout extends Component {
 
   getToken = () => {
     const headers = { "Content-Type": "application/json" };
-      axios.get('/.netlify/functions/get-token',
-        headers
-      )
-        .then(res => {
-          Cookies.set('token', res.data, { expires: 1 })
-          this.setState({ validToken: true })
-        })
-        .catch(error => {
-            this.setState({ validToken: false })
-            console.log(error)
-        })
+    axios.get('/.netlify/functions/get-token',
+      headers
+    )
+      .then(res => {
+        Cookies.set('token', res.data, { expires: 1 })
+        this.setState({ validToken: true })
+      })
+      .catch(error => {
+        this.setState({ validToken: false })
+        console.log(error)
+      })
+  }
+
+  handleLogIn() {
+    // You can import the widget into any component and interact with it.
+    netlifyIdentity.open()
   }
 
   loggedIn = () => {
     const { data, children } = this.props
     if (this.state.loggedIn) {
-      return (<div className="body-wrapper">{children()}</div>);
+      return (<div>
+        <Header siteTitle={data.site.siteMetadata.title} />
+        <div className="body-wrapper">{children()}</div>
+        </div>);
     } else {
-      return (<div>Not logged in.</div>);
+      return (<div>
+        <button onClick={this.handleLogIn} >Log In</button>
+      </div>);
     }
   }
 
@@ -124,8 +140,6 @@ export default class Layout extends Component {
             ]}>
 
           </Helmet>
-
-          <Header siteTitle={data.site.siteMetadata.title} />
 
           {this.loggedIn()}
         </div>
