@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import Link from 'gatsby-link'
 import axios from 'axios'
 import Cookies from 'js-cookie'
 import TextField from 'material-ui/TextField'
@@ -10,6 +9,7 @@ import Toggle from 'material-ui/Toggle'
 import RaisedButton from 'material-ui/RaisedButton'
 import submissionFunctions from '../submission-functions'
 import axiosHeaders from '../axios-headers'
+import { navigateTo, Link } from "gatsby-link"
 
 const provinceOptions = ['AB', 'BC', 'MB', 'NB', 'NL', 'NT', 'NS', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT', 'N/A']
 
@@ -243,23 +243,28 @@ export default class SubmitDeal extends Component {
       Angel_Group_Names,
       Angel_Group_Other,
     }
-    console.log(dealSubmission)
-    axios({
-      method: 'post',
-      url: `https://${process.env.API_INTEGRATION_URL}.caspio.com/rest/v2/tables/IndvInvestorDeals/records`,
-      headers: {
-        accept: 'application/json',
-        Authorization: `bearer ${Cookies.get('token')}`,
-      },
-      data: dealSubmission,
+
+    axiosHeaders.generateHeaders().then((headers) => {
+      axios('/.netlify/functions/post', {
+        method: 'POST',
+        headers,
+        data: dealSubmission,
+        params: { path: "rest/v2/tables/IndvInvestorDeals/records" }
+      }
+      )
+      .catch(error => {
+          throw error
+        })
     })
-      .then(res => {
-        console.log(res)
+      .then(() => {
+        navigateTo('/personal-dashboard')
       })
       .catch(error => {
         console.log(error)
       })
+
   }
+
 
   styles = {
     width: '450px',
