@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import Link from 'gatsby-link'
 import axios from 'axios'
 import Cookies from 'js-cookie'
 import TextField from 'material-ui/TextField'
@@ -9,6 +8,8 @@ import MenuItem from 'material-ui/MenuItem'
 import Toggle from 'material-ui/Toggle'
 import RaisedButton from 'material-ui/RaisedButton'
 import submissionFunctions from '../submission-functions'
+import axiosHeaders from '../axios-headers'
+import { navigateTo, Link } from "gatsby-link"
 
 const exitTypes = [
   'Sale to / Merger with another company', 
@@ -57,23 +58,27 @@ export default class SubmitExit extends Component {
   }
 
   componentDidMount() {
-    axios
-      .get(
-        `https://${
-        process.env.API_INTEGRATION_URL
-        }.caspio.com/rest/v2/tables/IndvInvestorExits/fields/Angel_Group_Names`,
-        {
-          headers: {
-            accept: 'application/json',
-            Authorization: `bearer ${Cookies.get('token')}`,
-          },
-        }
+
+
+
+    // GET LIST OF ANGEL GROUPS
+
+    axiosHeaders.generateHeaders().then((headers) => {
+      axios('/.netlify/functions/get', {
+        method: 'GET',
+        headers,
+        params: { path: "rest/v2/tables/IndvInvestorExits/fields/Angel_Group_Names" }
+      }
       )
-      .then(res => {
-        let angelGroupArray = submissionFunctions.createResponseList(res)
-        submissionFunctions.moveToEndOfList('Other', angelGroupArray)
-        this.listsToState(angelGroupArray, 'angelGroupNames', 'angelGroupNumbers')
-      })
+        .then(res => {
+          let angelGroupArray = submissionFunctions.createResponseList(res)
+          submissionFunctions.moveToEndOfList('Other', angelGroupArray)
+          this.listsToState(angelGroupArray, 'angelGroupNames', 'angelGroupNumbers')
+        })
+        .catch(error => {
+          throw error
+        })
+    })
       .catch(error => {
         console.log(error)
       })
@@ -155,22 +160,27 @@ export default class SubmitExit extends Component {
       IndvInvestor_ExitFTE,
       IndvInvestor_TotalInvestment,
     }
-    console.log(exitSubmission)
-    axios({
-      method: 'post',
-      url: `https://${process.env.API_INTEGRATION_URL}.caspio.com/rest/v2/tables/IndvInvestorExits/records`,
-      headers: {
-        accept: 'application/json',
-        Authorization: `bearer ${Cookies.get('token')}`,
-      },
-      data: exitSubmission,
+
+    
+    axiosHeaders.generateHeaders().then((headers) => {
+      axios('/.netlify/functions/post', {
+        method: 'POST',
+        headers,
+        data: exitSubmission,
+        params: { path: "rest/v2/tables/IndvInvestorExits/records" }
+      }
+      )
+        .catch(error => {
+          throw error
+        })
     })
-      .then(res => {
-        console.log(res)
+      .then(() => {
+        navigateTo('/personal-dashboard')
       })
       .catch(error => {
         console.log(error)
       })
+
   }
 
   styles = {

@@ -6,7 +6,7 @@ export default class PersonalDashboard extends Component {
   render() {
     return (
       <div>
-        <h2>Personal Dashboard</h2>
+        <h1>Personal Dashboard</h1>
         <p>Here you can find personal investment information.</p>
       </div>
     )
