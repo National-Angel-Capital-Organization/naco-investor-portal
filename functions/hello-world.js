@@ -66,29 +66,9 @@
 /******/ ({
 
 /***/ 49:
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, exports) {
 
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.handler = handler;
-function handler(event, context, callback) {
-
-  let userEmail = '';
-  if (event.headers.host === 'localhost:8000') {
-    userEmail = 'bhunter@nacocanada.com';
-  } else {
-    userEmail = context.clientContext.user.email;
-  }
-
-  callback(null, {
-    statusCode: 200,
-    body: `Hello, ${userEmail}`
-  });
-}
+throw new Error("Module build failed: Error: ENOENT: no such file or directory, open '/Users/bryanhunter/Documents/naco-investor-portal/src/functions/hello-world.js'");
 
 /***/ })
 

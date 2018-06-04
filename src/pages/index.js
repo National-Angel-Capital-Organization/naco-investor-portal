@@ -30,22 +30,6 @@ state = {
          console.log(error)
        })
 
-     axiosHeaders.generateHeaders().then((headers) => {
-       axios('/.netlify/functions/hello-world', { 
-           method: 'GET',
-           headers}
-       )
-       .then (res => {
-         console.log(res)
-       })
-         .catch(error => {
-           console.log(error)
-         })
-     })
-       .catch(error => {
-         console.log(error)
-       })
-
    }
 
   render() {
