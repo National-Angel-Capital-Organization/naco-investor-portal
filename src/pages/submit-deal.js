@@ -175,6 +175,11 @@ export default class SubmitDeal extends Component {
     const target = event.target
     const value = target.type === 'checkbox' ? target.checked : target.value
     const name = target.name
+    const error = `${name}Error`
+    this.setState({ [error]: "" })
+    if (value.trim() === '') {
+      this.setState({ [error]: "Please enter a value."})
+    }
     this.setState({ [name]: value })
   }
 
@@ -284,6 +289,7 @@ export default class SubmitDeal extends Component {
             onChange={this.handleChange}
             floatingLabelFixed={true}
             style={this.styles}
+            errorText={this.state.IndvInvestor_FullNameError}
           />
           <br />
           <TextField
@@ -293,6 +299,7 @@ export default class SubmitDeal extends Component {
             onChange={this.handleChange}
             floatingLabelFixed={true}
             style={this.styles}
+            errorText={this.state.IndvInvestor_EmailError}
           />
           <br />
           <TextField
@@ -302,6 +309,7 @@ export default class SubmitDeal extends Component {
             onChange={this.handleChange}
             floatingLabelFixed={true}
             style={this.styles}
+            errorText={this.state.IndvInvestor_CompanyNameError}
           />
           <br />
           <TextField
@@ -311,6 +319,7 @@ export default class SubmitDeal extends Component {
             onChange={this.handleChange}
             floatingLabelFixed={true}
             style={this.styles}
+            errorText={this.state.IndvInvestor_CompanyWebsiteError}
           />
           <br />
           <TextField
@@ -320,6 +329,7 @@ export default class SubmitDeal extends Component {
             onChange={this.handleChange}
             floatingLabelFixed={true}
             style={this.styles}
+            errorText={this.state.IndvInvestor_CompanyCityError}
           />
           <br />
           <SelectField
@@ -330,6 +340,7 @@ export default class SubmitDeal extends Component {
             style={this.styles}
             hintText="-- Select --"
             labelStyle={this.styles}
+            errorText={this.state.IndvInvestor_CompanyProvinceError}
           >
             {provinceOptions.map(i => (
               <MenuItem
@@ -350,6 +361,7 @@ export default class SubmitDeal extends Component {
             onChange={this.handleDateChange}
             floatingLabelFixed={true}
             textFieldStyle={this.styles}
+            errorText={this.state.IndvInvestor_DealDateError}
           />
           <SelectField
             floatingLabelFixed={true}
@@ -359,6 +371,7 @@ export default class SubmitDeal extends Component {
             style={this.styles}
             hintText="-- Select --"
             labelStyle={this.styles}
+            errorText={this.state.IndvInvestor_NeworFollowOnError}
           >
             <MenuItem
               value={'New'}
@@ -379,6 +392,7 @@ export default class SubmitDeal extends Component {
             onChange={this.handleChange}
             floatingLabelFixed={true}
             style={this.styles}
+            errorText={this.state.IndvInvestor_DollarsInvestedError}
           />
           <br />
           <br />
@@ -387,6 +401,7 @@ export default class SubmitDeal extends Component {
             name="Angel_Group_Involvement"
             onToggle={this.handleToggle}
             style={this.styles}
+            errorText={this.state.Angel_Group_InvolvementError}
           />
           <SelectField
             floatingLabelFixed={true}
@@ -397,6 +412,7 @@ export default class SubmitDeal extends Component {
             multiple={true}
             hintText="-- Select all that apply --"
             labelStyle={this.styles}
+            errorText={this.state.Angel_Group_NamesError}
           >
             {this.menuItems(
               this.state.Angel_Group_Names,
@@ -412,6 +428,7 @@ export default class SubmitDeal extends Component {
             onChange={this.handleChange}
             floatingLabelFixed={true}
             style={this.styles}
+            errorText={this.state.Angel_Group_OtherError}
           />
 
           <h2>Company Sector Details</h2>
@@ -425,6 +442,7 @@ export default class SubmitDeal extends Component {
             style={this.styles}
             hintText="-- Select --"
             labelStyle={this.styles}
+            errorText={this.state.IndvInvestor_CompanyMajorSectorError}
           >
             <MenuItem
               value={'Life Sciences'}
@@ -474,6 +492,7 @@ export default class SubmitDeal extends Component {
             multiple={true}
             hintText="-- Select all that apply --"
             labelStyle={this.styles}
+            errorText={this.state.IndvInvestor_CompanySectorError}
           >
             {this.menuItems(
               this.state.IndvInvestor_CompanySector,
@@ -490,6 +509,7 @@ export default class SubmitDeal extends Component {
             floatingLabelFixed={true}
             style={this.styles}
             onChange={this.handleChange}
+            errorText={this.state.IndvInvestor_OtherSectorError}
           />
 
           <h2>Syndicate Partner Details</h2>
@@ -511,6 +531,7 @@ export default class SubmitDeal extends Component {
             multiple={true}
             hintText="-- Select all that apply --"
             labelStyle={this.styles}
+            errorText={this.state.IndvInvestor_SyndicatePartnersError}
           >
             {this.menuItems(
               this.state.IndvInvestor_SyndicatePartners,
@@ -526,6 +547,7 @@ export default class SubmitDeal extends Component {
             floatingLabelFixed={true}
             style={this.styles}
             onChange={this.handleChange}
+            errorText={this.state.IndvInvestor_OtherPartnersError}
           />
           <br />
           <br />
