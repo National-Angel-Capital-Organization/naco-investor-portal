@@ -3204,16 +3204,20 @@ function handler(event, context, callback) {
   }
 
   let path = event.queryStringParameters.path;
-  if (event.queryStringParameters.userSpecific) {
-    path += `?q.where=IndvInvestor_email%3D'${userEmail}'`;
-  }
 
-  // if (event.queryStringParameters.params) {
-  //   let params = JSON.parse(event.queryStringParameters.params)  
-  // for (let param in params) {
-  //   path += `?q.${param}=${params[param]}`
-  // }
-  // }
+  if (event.queryStringParameters) {
+    path += "?q.where=";
+    if (event.queryStringParameters.userSpecific) {
+      path += `IndvInvestor_email%3D'${userEmail}'`;
+      // add & to the end
+    }
+    for (let param in event.queryStringParameters) {
+      if (param !== 'path' && param !== 'userSpecific')
+        // add the params to the path with an & at the end of each
+        console.log(event.queryStringParameters[param]);
+    }
+    // trim the last & from the end
+  }
 
   _axios2.default.get(`https://${process.env.API_INTEGRATION_URL}.caspio.com/${path}`, {
     headers: {
