@@ -53,6 +53,14 @@ const submissionFunctions = {
     }
     return sendableListNumbers
   },
+
+  toggleSubmit(boolean) {
+    let value = 'No'
+    if (boolean) {
+      value = 'Yes'
+    }
+    return value;
+  },
 }
 
 export default submissionFunctions
