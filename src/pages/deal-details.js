@@ -16,7 +16,6 @@ const provinceOptions = ['AB', 'BC', 'MB', 'NB', 'NL', 'NT', 'NS', 'NU', 'ON', '
 export default class DealDetails extends Component {
 
   state = {
-    deal: [{}],
     IndvInvestor_FullName: '',
     IndvInvestor_Email: '',
     IndvInvestor_CompanyName: '',
@@ -99,17 +98,36 @@ export default class DealDetails extends Component {
           } else {
             newState.Angel_Group_Involvement = false
           }
-          // newState.Angel_Group_Names = resDeal.Angel_Group_Names
+
+          if (resDeal.Angel_Group_Names) {
+            let angelGroupNames = []
+            for (let angelGroup in resDeal.Angel_Group_Names) {
+              angelGroupNames.push(resDeal.Angel_Group_Names[angelGroup])
+            }
+            newState.Angel_Group_Names = angelGroupNames
+          }
           newState.Angel_Group_Other = resDeal.Angel_Group_Other
           newState.IndvInvestor_CompanyMajorSector = resDeal.IndvInvestor_CompanyMajorSector
-          // newState.IndvInvestor_CompanySector = resDeal.IndvInvestor_CompanySector
+          if (resDeal.IndvInvestor_CompanySector) {
+            let companySectors = []
+            for (let sector in resDeal.IndvInvestor_CompanySector) {
+              companySectors.push(resDeal.IndvInvestor_CompanySector[sector])
+            }
+            newState.IndvInvestor_CompanySector = companySectors
+          }
           newState.IndvInvestor_OtherSector = resDeal.IndvInvestor_OtherSector
           if (resDeal.IndvInvestor_Syndicated === "Yes") {
             newState.IndvInvestor_Syndicated = true
           } else {
             newState.IndvInvestor_Syndicated = false
           }
-          // newState.IndvInvestor_SyndicatePartners = resDeal.IndvInvestor_SyndicatePartners
+          if (resDeal.IndvInvestor_SyndicatePartners) {
+            let syndicatePartners = []
+            for (let partner in resDeal.IndvInvestor_SyndicatePartners) {
+              syndicatePartners.push(resDeal.IndvInvestor_SyndicatePartners[partner])
+            }
+            newState.IndvInvestor_SyndicatePartners = syndicatePartners
+          }
           newState.IndvInvestor_OtherPartners = resDeal.IndvInvestor_OtherPartners
           this.setState(newState)
         })
