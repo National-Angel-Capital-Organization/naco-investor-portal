@@ -33,16 +33,19 @@ export function handler(event, context, callback) {
 
   if (event.queryStringParameters) {
     path += "?q.where="
+    // if user specific, add user email
     if (event.queryStringParameters.userSpecific) {
-      path += `IndvInvestor_email%3D'${userEmail}'`
-      // add & to the end
+      path += `IndvInvestor_email%3D'${userEmail}'%20AND%20`
     }
     for (let param in event.queryStringParameters) {
-      if (param !== 'path' && param !== 'userSpecific')
       // add the params to the path with an & at the end of each
-      console.log(event.queryStringParameters[param])
+      if (param !== 'path' && param !== 'userSpecific')
+        path += `${param}%3D'${event.queryStringParameters[param]}'%20AND%20`
     }
     // trim the last & from the end
+    if (path.substr(path.length - 9) === '%20AND%20') {
+      path = path.substr(0, path.length - 9)
+    }
   }
 
 

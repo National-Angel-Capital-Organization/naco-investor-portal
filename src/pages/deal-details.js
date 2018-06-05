@@ -34,7 +34,7 @@ state = {
       }
       )
         .then(res => {
-          this.setState({ IndvInvestor_GUID: res.data.Result })
+          this.setState({ deal: res.data.Result })
           console.log(this.state)
         })
         .catch(error => {

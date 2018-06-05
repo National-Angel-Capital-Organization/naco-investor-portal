@@ -66,6 +66,7 @@ export default class MyDeals extends Component {
               <TableHeaderColumn tooltip="The Deal date">Deal Date</TableHeaderColumn>
               <TableHeaderColumn tooltip="Was it a new or follow-on investment?">New/Follow-On</TableHeaderColumn>
               <TableHeaderColumn tooltip="Was the deal syndicated?">Syndicated</TableHeaderColumn>
+              <TableHeaderColumn tooltip="View/edit details of your investment">Details</TableHeaderColumn>
             </TableRow>
           </TableHeader>
           <TableBody
@@ -81,6 +82,7 @@ export default class MyDeals extends Component {
                 <TableRowColumn>{(row.IndvInvestor_DealDate).slice(0, 10)}</TableRowColumn>
                 <TableRowColumn>{row.IndvInvestor_NeworFollowOn}</TableRowColumn>
                 <TableRowColumn>{row.IndvInvestor_Syndicated}</TableRowColumn>
+                <TableRowColumn><Link to={`/deal-details?IndvInvestor_GUID=${row.IndvInvestor_GUID}`}>View Details</Link></TableRowColumn>
               </TableRow>
             ))}
           </TableBody>
