@@ -34,6 +34,7 @@ export default class DealDetails extends Component {
     IndvInvestor_Syndicated: false,
     IndvInvestor_SyndicatePartners: [],
     IndvInvestor_OtherPartners: '',
+    parameters: {},
     importedLists: {
       angelGroupNames: ['Loading...'],
       angelGroupNumbers: [],
@@ -69,6 +70,7 @@ export default class DealDetails extends Component {
         let paramList = param.split("=")
         params[paramList[0]] = paramList[1]
       }
+      this.setState({parameters: params})
     }
 
     // GET DEAL DETAILS
@@ -325,26 +327,24 @@ export default class DealDetails extends Component {
       Angel_Group_Other,
     }
 
-    console.log(dealSubmission)
-
-    // axiosHeaders.generateHeaders().then((headers) => {
-    //   axios('/.netlify/functions/post', {
-    //     method: 'POST',
-    //     headers,
-    //     data: dealSubmission,
-    //     params: { path: "rest/v2/tables/IndvInvestorDeals/records" }
-    //   }
-    //   )
-    //     .catch(error => {
-    //       throw error
-    //     })
-    // })
-    //   .then(() => {
-    //     navigateTo('/personal-dashboard')
-    //   })
-    //   .catch(error => {
-    //     console.log(error)
-    //   })
+    axiosHeaders.generateHeaders().then((headers) => {
+      axios('/.netlify/functions/put', {
+        method: 'PUT',
+        headers,
+        data: dealSubmission,
+        params: { path: "rest/v2/tables/IndvInvestorDeals/records", userSpecific: true, IndvInvestor_GUID: this.state.parameters.IndvInvestor_GUID }
+      }
+      )
+        .catch(error => {
+          throw error
+        })
+    })
+      .then(() => {
+        navigateTo('/personal-dashboard')
+      })
+      .catch(error => {
+        console.log(error)
+      })
 
   }
 

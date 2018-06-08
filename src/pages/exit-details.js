@@ -38,6 +38,7 @@ export default class SubmitExit extends Component {
     IndvInvestor_ExitROI: '',
     IndvInvestor_ExitFTE: '',
     IndvInvestor_TotalInvestment: '',
+    parameters: {},
     importedLists: {
       angelGroupNames: ['Loading...'],
       angelGroupNumbers: [],
@@ -69,6 +70,7 @@ export default class SubmitExit extends Component {
         let paramList = param.split("=")
         params[paramList[0]] = paramList[1]
       }
+      this.setState({ parameters: params })
     }
 
     // GET EXIT DETAILS
@@ -221,24 +223,25 @@ export default class SubmitExit extends Component {
 
     console.log(exitSubmission)
 
-    // axiosHeaders.generateHeaders().then((headers) => {
-    //   axios('/.netlify/functions/post', {
-    //     method: 'POST',
-    //     headers,
-    //     data: exitSubmission,
-    //     params: { path: "rest/v2/tables/IndvInvestorExits/records" }
-    //   }
-    //   )
-    //     .catch(error => {
-    //       throw error
-    //     })
-    // })
-    //   .then(() => {
-    //     navigateTo('/personal-dashboard')
-    //   })
-    //   .catch(error => {
-    //     console.log(error)
-    //   })
+
+    axiosHeaders.generateHeaders().then((headers) => {
+      axios('/.netlify/functions/put', {
+        method: 'PUT',
+        headers,
+        data: exitSubmission,
+        params: { path: "rest/v2/tables/IndvInvestorExits/records", userSpecific: true, IndvInvestor_GUID: this.state.parameters.IndvInvestor_GUID }
+      }
+      )
+        .catch(error => {
+          throw error
+        })
+    })
+      .then(() => {
+        navigateTo('/personal-dashboard')
+      })
+      .catch(error => {
+        console.log(error)
+      })
 
   }
 

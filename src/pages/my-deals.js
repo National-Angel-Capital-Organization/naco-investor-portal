@@ -50,7 +50,8 @@ export default class MyDeals extends Component {
         <p>Search for your deals by year.</p>
 
         <Table
-          height='600px'
+          height='420px'
+          style={ {overflow: 'hidden'} }
           fixedHeader={true}
           selectable={true}
           multiSelectable={false}

@@ -49,7 +49,8 @@ export default class MyExits extends Component {
         <p>Search for your exits by year.</p>
 
         <Table
-          height='600px'
+          height='420px'
+          style={{ overflow: 'hidden' }}
           fixedHeader={true}
           selectable={true}
           multiSelectable={false}
