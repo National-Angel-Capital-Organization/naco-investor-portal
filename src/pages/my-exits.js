@@ -50,7 +50,7 @@ export default class MyExits extends Component {
 
         <Table
           height='420px'
-          style={{ overflow: 'hidden' }}
+          style={{width: '95%'}}
           fixedHeader={true}
           selectable={true}
           multiSelectable={false}
