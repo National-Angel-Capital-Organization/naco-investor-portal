@@ -5,17 +5,18 @@
   "author": "Kyle Mathews <mathews.kyle@gmail.com>",
   "dependencies": {
     "axios": "^0.18.0",
+    "chart.js": "^2.7.2",
     "dotenv": "^5.0.1",
     "gatsby": "^1.9.261",
     "gatsby-cli": "^1.1.51",
     "gatsby-link": "^1.6.40",
     "gatsby-plugin-react-helmet": "^2.0.10",
     "gatsby-plugin-sass": "^1.0.26",
+    "http-proxy-middleware": "^0.18.0",
     "js-cookie": "^2.2.0",
     "material-ui": "^0.20.0",
     "netlify-identity-widget": "^1.4.11",
     "netlify-lambda": "^0.4.0",
-    "http-proxy-middleware": "^0.18.0",
     "react-helmet": "^5.2.0"
   },
   "keywords": [

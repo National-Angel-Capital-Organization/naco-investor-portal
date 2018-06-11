@@ -79,7 +79,7 @@ export default class SubmitExit extends Component {
       axios('/.netlify/functions/get', {
         method: 'GET',
         headers,
-        params: { path: `rest/v2/tables/IndvInvestorExits/records`, userSpecific: true, IndvInvestor_GUID: params.IndvInvestor_GUID }
+        params: { path: `rest/v2/tables/IndvInvestorExits/records`, where: { userSpecific: true, IndvInvestor_GUID: { query: params.IndvInvestor_GUID, type: '%3D' } } }
       }
       )
         .then(res => {

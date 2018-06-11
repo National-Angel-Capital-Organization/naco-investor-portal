@@ -25,7 +25,7 @@ export default class MyExits extends Component {
       axios('/.netlify/functions/get', {
         method: 'GET',
         headers,
-        params: { path: "rest/v2/tables/IndvInvestorExits/records", userSpecific: true }
+        params: { path: "rest/v2/tables/IndvInvestorExits/records", where: { userSpecific: true } }
       }
       )
         .then(res => {

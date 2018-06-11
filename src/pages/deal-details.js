@@ -79,10 +79,11 @@ export default class DealDetails extends Component {
       axios('/.netlify/functions/get', {
         method: 'GET',
         headers,
-        params: { path: `rest/v2/tables/IndvInvestorDeals/records`, userSpecific: true, IndvInvestor_GUID: params.IndvInvestor_GUID }
+        params: { path: `rest/v2/tables/IndvInvestorDeals/records`, where: { userSpecific: true, IndvInvestor_GUID: { query: params.IndvInvestor_GUID, type: '%3D' } } }
       }
       )
         .then(res => {
+          console.log(res)
           const resDeal = res.data.Result[0];
           const oldState = this.state;
           const newState = oldState;
