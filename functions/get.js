@@ -3233,7 +3233,11 @@ function handler(event, context, callback) {
     }
     for (let param in where) {
       // add the params to the path with an & at the end of each
-      if (param !== 'userSpecific') path += `${param}${where[param].type}'${where[param].query}'%20AND%20`;
+      if (param !== 'userSpecific') if (where[param].query !== 'NULL') {
+        path += `${param}${where[param].type}'${where[param].query}'%20AND%20`;
+      } else {
+        path += `${param}${where[param].type}${where[param].query}%20AND%20`;
+      }
     }
     // trim the last & from the end
     if (path.substr(path.length - 9) === '%20AND%20') {
