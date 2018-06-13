@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "author": "Kyle Mathews <mathews.kyle@gmail.com>",
   "dependencies": {
+    "ajv": "^6.5.1",
     "axios": "^0.18.0",
     "chart.js": "^2.7.2",
     "dotenv": "^5.0.1",
@@ -17,6 +18,7 @@
     "material-ui": "^0.20.0",
     "netlify-identity-widget": "^1.4.11",
     "netlify-lambda": "^0.4.0",
+    "react-chartjs-2": "^2.7.2",
     "react-helmet": "^5.2.0"
   },
   "keywords": [

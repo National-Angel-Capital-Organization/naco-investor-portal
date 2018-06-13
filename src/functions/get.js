@@ -63,7 +63,6 @@ export function handler(event, context, callback) {
       // add the params to the path with an & at the end of each
       if (param !== 'userSpecific')
         path += `${param}${where[param].type}'${where[param].query}'%20AND%20`
-      console.log("PATH", path)
     }
     // trim the last & from the end
     if (path.substr(path.length - 9) === '%20AND%20') {

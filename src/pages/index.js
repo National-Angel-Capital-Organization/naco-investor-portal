@@ -1,27 +1,41 @@
 import React, { Component } from 'react'
-import Link from 'gatsby-link'
 import axios from 'axios'
-import Cookies from 'js-cookie'
 import axiosHeaders from '../axios-headers'
-import Chart from 'chart.js';
+import { Bar } from 'react-chartjs-2';
+
 
 
 
 export default class IndexPage extends Component {
 
   state = {
-    data: [12, 19, 3, 5, 2, 7],
-    premoneyValue: {
-      sum: {
-        "Services": 0,
-        "Manufacturing": 0,
-        "Life Sciences": 0,
-        "Energy": 0,
-        "ICT": 0,
-        "Clean Technologies": 0
-      },
+    data: {
+      labels: [],
+      datasets: [{
+        label: 'Valuation ($)',
+        data: [0, 0, 3, 0, 0, 0],
+        backgroundColor: [
+          'rgba(255, 99, 132, 0.2)',
+          'rgba(54, 162, 235, 0.2)',
+          'rgba(255, 206, 86, 0.2)',
+          'rgba(75, 192, 192, 0.2)',
+          'rgba(153, 102, 255, 0.2)',
+          'rgba(255, 159, 64, 0.2)'
+        ],
+        borderColor: [
+          'rgba(255,99,132,1)',
+          'rgba(54, 162, 235, 1)',
+          'rgba(255, 206, 86, 1)',
+          'rgba(75, 192, 192, 1)',
+          'rgba(153, 102, 255, 1)',
+          'rgba(255, 159, 64, 1)'
+        ],
+        borderWidth: 1
+      }]
     }
   }
+
+
 
   componentDidMount() {
 
@@ -35,16 +49,19 @@ export default class IndexPage extends Component {
       }
       )
         .then(res => {
-          console.log(res.data.Result)
-          const sum = {}
-          for (let sector of res.data.Result) {
-            if (sector.Deal_MajorSector !== '' && sector.Deal_MajorSector !== 'Other') {
-              sum[sector.Deal_MajorSector] = sector.PremoneyValueSum;
+          let labels = [];
+          let sums = [];
+          res.data.Result.forEach(sum => {
+
+            if (sum.Deal_MajorSector !== '' && sum.Deal_MajorSector !== 'Other') {
+              labels.push(sum.Deal_MajorSector)
+              sums.push(sum.PremoneyValueSum)   
             }
-          }
+          });
           const oldState = this.state;
           let newState = oldState;
-          newState.premoneyValue.sum = sum;
+          newState.data.labels = labels;
+          newState.data.datasets[0].data = sums;
           this.setState(newState)
         })
         .catch(error => {
@@ -55,40 +72,6 @@ export default class IndexPage extends Component {
         console.log(error)
       })
 
-
-
-
-    Chart.defaults.scale.ticks.beginAtZero = true;
-    const premoneyValue = document.getElementById("premoneyValue");
-
-    var premoneyValueChart = new Chart(premoneyValue, {
-      type: 'bar',
-      data: {
-        labels: Object.keys(this.state.premoneyValue.sum),
-        datasets: [{
-          label: 'Valuation ($)',
-          data: this.state.data,
-          backgroundColor: [
-            'rgba(255, 99, 132, 0.2)',
-            'rgba(54, 162, 235, 0.2)',
-            'rgba(255, 206, 86, 0.2)',
-            'rgba(75, 192, 192, 0.2)',
-            'rgba(153, 102, 255, 0.2)',
-            'rgba(255, 159, 64, 0.2)'
-          ],
-          borderColor: [
-            'rgba(255,99,132,1)',
-            'rgba(54, 162, 235, 1)',
-            'rgba(255, 206, 86, 1)',
-            'rgba(75, 192, 192, 1)',
-            'rgba(153, 102, 255, 1)',
-            'rgba(255, 159, 64, 1)'
-          ],
-          borderWidth: 1
-        }]
-      }
-    });
-
   }
 
   render() {
@@ -96,7 +79,11 @@ export default class IndexPage extends Component {
       <div>
         <h1>General Dashboard</h1>
         <p>Here you can find general investment information.</p>
-        <canvas id="premoneyValue" width="400" height="400"></canvas>
+        <Bar 
+          data={this.state.data}
+          width={100}
+          height={50} 
+        />
 
       </div>
     )
