@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import Helmet from 'react-helmet'
 import axios from 'axios'
-import { navigateTo } from "gatsby-link"
 import Header from '../components/header'
 import './scss/index.scss'
 import Cookies from 'js-cookie'

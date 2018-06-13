@@ -1,38 +1,13 @@
 import React, { Component } from 'react'
 import axios from 'axios'
 import axiosHeaders from '../axios-headers'
-import { Bar } from 'react-chartjs-2';
-
-
-
+import PremoneyValueChart from '../components/premoney-value-chart'
 
 export default class IndexPage extends Component {
 
   state = {
-    data: {
-      labels: [],
-      datasets: [{
-        label: 'Valuation ($)',
-        data: [0, 0, 3, 0, 0, 0],
-        backgroundColor: [
-          'rgba(255, 99, 132, 0.2)',
-          'rgba(54, 162, 235, 0.2)',
-          'rgba(255, 206, 86, 0.2)',
-          'rgba(75, 192, 192, 0.2)',
-          'rgba(153, 102, 255, 0.2)',
-          'rgba(255, 159, 64, 0.2)'
-        ],
-        borderColor: [
-          'rgba(255,99,132,1)',
-          'rgba(54, 162, 235, 1)',
-          'rgba(255, 206, 86, 1)',
-          'rgba(75, 192, 192, 1)',
-          'rgba(153, 102, 255, 1)',
-          'rgba(255, 159, 64, 1)'
-        ],
-        borderWidth: 1
-      }]
-    }
+    premoneyValueLabels: [],
+    premoneyValueData: []
   }
 
 
@@ -58,11 +33,8 @@ export default class IndexPage extends Component {
               sums.push(sum.PremoneyValueSum)   
             }
           });
-          const oldState = this.state;
-          let newState = oldState;
-          newState.data.labels = labels;
-          newState.data.datasets[0].data = sums;
-          this.setState(newState)
+          this.setState({premoneyValueLabels: labels})
+          this.setState({premoneyValueData: sums})
         })
         .catch(error => {
           throw error
@@ -79,12 +51,7 @@ export default class IndexPage extends Component {
       <div>
         <h1>General Dashboard</h1>
         <p>Here you can find general investment information.</p>
-        <Bar 
-          data={this.state.data}
-          width={100}
-          height={50} 
-        />
-
+        <PremoneyValueChart labels={this.state.premoneyValueLabels} data={this.state.premoneyValueData} />
       </div>
     )
   }
