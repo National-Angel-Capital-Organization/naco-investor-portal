@@ -3,31 +3,31 @@ import { Doughnut } from 'react-chartjs-2';
 import axios from 'axios'
 import axiosHeaders from '../axios-headers'
 
-export default class TotalInvestmentNumberChart extends Component {
+export default class TotalInvestmentDollarChart extends Component {
 
   state = {
-    TotalInvestmentNumberLabels: [],
-    TotalInvestmentNumberData: []
+    TotalInvestmentDollarLabels: [],
+    TotalInvestmentDollarData: []
   }
 
 
 
   componentDidMount() {
 
-    // GET COUNT OF DEALS FROM ANGEL GROUPS
+    // GET SUM OF INVESTMENT FROM ANGEL GROUPS
 
     axiosHeaders.generateHeaders().then((headers) => {
       axios('/.netlify/functions/get', {
         method: 'GET',
         headers,
-        params: { path: "rest/v2/tables/Deals/records", select: { 0: 'Deal_NewOrFollowon', 1: 'COUNT(Deal_DealRef)%20AS%20DealInvestmentNumber' }, where: { Group_NameAndSubmissionYear: { query: '%252017%25', type: '%20LIKE%20' } }, groupBy: 'Deal_NewOrFollowon' }
+        params: { path: "rest/v2/tables/Deals/records", select: { 0: 'Deal_NewOrFollowon', 1: 'SUM(Deal_DollarInvested)%20AS%20DealDollarInvested' }, where: { Group_NameAndSubmissionYear: { query: '%252017%25', type: '%20LIKE%20' } }, groupBy: 'Deal_NewOrFollowon' }
       }
       )
         .then(res => {
           let newFollowOn = [];
           res.data.Result.forEach(type => {
             if (type.Deal_NewOrFollowon !== '') {
-              newFollowOn.push({ label: type.Deal_NewOrFollowon, dealNumber: type.DealInvestmentNumber })
+              newFollowOn.push({ label: type.Deal_NewOrFollowon, DealDollarInvested: type.DealDollarInvested })
             }
           });
 
@@ -35,27 +35,27 @@ export default class TotalInvestmentNumberChart extends Component {
           axios('/.netlify/functions/get', {
             method: 'GET',
             headers,
-            params: { path: "rest/v2/tables/IndvInvestorDeals/records", select: { 0: 'IndvInvestor_NeworFollowOn', 1: 'COUNT(IndvInvestor_DealRef)%20AS%20IndvInvestorDealInvestmentNumber' }, where: { IndvInvestor_Email_Year: { query: '%252017%25', type: '%20LIKE%20' } }, groupBy: 'IndvInvestor_NeworFollowOn' }
+            params: { path: "rest/v2/tables/IndvInvestorDeals/records", select: { 0: 'IndvInvestor_NeworFollowOn', 1: 'SUM(IndvInvestor_DollarsInvested)%20AS%20IndvInvestorDealDollarInvested' }, where: { IndvInvestor_Email_Year: { query: '%252017%25', type: '%20LIKE%20' } }, groupBy: 'IndvInvestor_NeworFollowOn' }
           }
           )
             .then(res => {
               res.data.Result.forEach(indvInvestorType => {
                 newFollowOn.forEach(type => {
                   if (indvInvestorType.IndvInvestor_NeworFollowOn.toLowerCase() === type.label.toLowerCase()) {
-                    type.indvInvestorDealNumber = indvInvestorType.IndvInvestorDealInvestmentNumber
+                    type.IndvInvestorDealDollarInvested = indvInvestorType.IndvInvestorDealDollarInvested
                   }
                 })
               });
-              let totalInvestmentNumberLabels = []
-              let totalInvestmentNumberData = []
+              let totalInvestmentDollarLabels = []
+              let totalInvestmentDollarData = []
               newFollowOn.forEach(type => {
                 //SET STATE WITH LIST OF LABELS
-                totalInvestmentNumberLabels.push(type.label)
+                totalInvestmentDollarLabels.push(type.label)
                 //SET STATE WITH SUM OF DEAL NUMBERS
-                totalInvestmentNumberData.push(type.indvInvestorDealNumber + type.dealNumber)
+                totalInvestmentDollarData.push(Math.round(type.IndvInvestorDealDollarInvested + type.DealDollarInvested))
               })
-              this.setState({ TotalInvestmentNumberLabels: totalInvestmentNumberLabels })
-              this.setState({ TotalInvestmentNumberData: totalInvestmentNumberData })
+              this.setState({ TotalInvestmentDollarLabels: totalInvestmentDollarLabels })
+              this.setState({ TotalInvestmentDollarData: totalInvestmentDollarData })
             })
             .catch(error => {
               throw error;
@@ -73,10 +73,10 @@ export default class TotalInvestmentNumberChart extends Component {
 
   render() {
     const data = {
-      labels: this.state.TotalInvestmentNumberLabels,
+      labels: this.state.TotalInvestmentDollarLabels,
       datasets: [{
         label: 'Total Investment (#)',
-        data: this.state.TotalInvestmentNumberData,
+        data: this.state.TotalInvestmentDollarData,
         backgroundColor: [
           'rgba(255, 99, 132, 0.2)',
           'rgba(54, 162, 235, 0.2)'
