@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import PremoneyValueChart from '../components/premoney-value-chart'
+import TotalInvestmentNumberChart from '../components/total-investment-number-chart'
 import { defaults } from 'react-chartjs-2';
 
 //Set all charts to begin at Zero
@@ -15,6 +16,7 @@ export default class IndexPage extends Component {
         <h1>General Dashboard</h1>
         <p>Here you can find general investment information.</p>
         <PremoneyValueChart />
+        <TotalInvestmentNumberChart />
       </div>
     )
   }
