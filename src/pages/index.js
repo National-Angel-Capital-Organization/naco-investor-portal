@@ -3,6 +3,7 @@ import PremoneyValueChart from '../components/premoney-value-chart'
 import TotalInvestmentNumberChart from '../components/total-investment-number-chart'
 import TotalInvestmentDollarChart from '../components/total-investment-dollar-chart'
 import TotalSectorNumberChart from '../components/total-sector-number-chart'
+import TotalSectorDollarChart from '../components/total-sector-dollar-chart'
 import { defaults } from 'react-chartjs-2';
 
 //Set all charts to begin at Zero
@@ -17,10 +18,17 @@ export default class IndexPage extends Component {
       <div>
         <h1>General Dashboard</h1>
         <p>Here you can find general investment information.</p>
-        <PremoneyValueChart />
-        <TotalInvestmentNumberChart />
-        <TotalInvestmentDollarChart />
-        <TotalSectorNumberChart />
+        <div id='general-dashboard-chart-wrapper'>
+          <div id='general-doughnut' className='chart-container'>
+            <TotalInvestmentNumberChart />
+            <TotalInvestmentDollarChart />
+          </div>
+          <div id='general-bar' className='chart-container'>
+            <PremoneyValueChart />
+            <TotalSectorNumberChart />
+            <TotalSectorDollarChart />
+          </div>
+        </div>
       </div>
     )
   }

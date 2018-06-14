@@ -1,0 +1,26 @@
+// DASHBOARDS
+
+#general-dashboard-chart-wrapper {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  justify-content: center;
+}
+
+#general-doughnut {
+  width: 45%;
+
+}
+
+#general-bar {
+  width: 55%;
+}
+
+.chart-container {
+  display: flex;
+  flex-direction: column;
+
+  canvas {
+    margin: 50px;
+  }
+}
