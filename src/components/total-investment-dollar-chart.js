@@ -31,7 +31,7 @@ export default class TotalInvestmentDollarChart extends Component {
             }
           });
 
-          // GET COUNT OF DEALS FROM INDIVIDUAL INVESTORS
+          // GET SUM OF INVESTMENT FROM INDIVIDUAL INVESTORS
           axios('/.netlify/functions/get', {
             method: 'GET',
             headers,
@@ -51,7 +51,7 @@ export default class TotalInvestmentDollarChart extends Component {
               newFollowOn.forEach(type => {
                 //SET STATE WITH LIST OF LABELS
                 totalInvestmentDollarLabels.push(type.label)
-                //SET STATE WITH SUM OF DEAL NUMBERS
+                //SET STATE WITH SUM OF INVESTMENT VALUE
                 totalInvestmentDollarData.push(Math.round(type.IndvInvestorDealDollarInvested + type.DealDollarInvested))
               })
               this.setState({ TotalInvestmentDollarLabels: totalInvestmentDollarLabels })
@@ -75,7 +75,7 @@ export default class TotalInvestmentDollarChart extends Component {
     const data = {
       labels: this.state.TotalInvestmentDollarLabels,
       datasets: [{
-        label: 'Total Investment (#)',
+        label: 'Total Investment ($)',
         data: this.state.TotalInvestmentDollarData,
         backgroundColor: [
           'rgba(255, 99, 132, 0.2)',
