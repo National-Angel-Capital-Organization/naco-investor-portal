@@ -59,7 +59,7 @@ export function handler(event, context, callback) {
     if (where.userSpecific) {
       path += `IndvInvestor_email%3D'${userEmail}'%20AND%20`
     } else if (where.notUser) { // if results should not include user
-      path += `IndvInvestor_email%3C%3E'${userEmail}'%20AND%20`
+      path += `IndvInvestor_email%3C%3E'${userEmail}'%20AND%20IndvInvestor_email%3C%3E''%20AND%20`
     }
     for (let param in where) {
       // add the params to the path with an & at the end of each

@@ -4,10 +4,10 @@ import axios from 'axios'
 import axiosHeaders from '../../axios-headers'
 
 export default class AverageInvestmentDollarChart extends Component {
-state = {
-  averageInvestmentDollarLabels: [],
-  averageInvestmentDollarData: []
-}
+  state = {
+    averageInvestmentDollarLabels: [],
+    averageInvestmentDollarData: []
+  }
 
 
   componentDidMount() {
@@ -20,7 +20,7 @@ state = {
         headers,
         params: {
           path: "rest/v2/tables/IndvInvestorDeals/records", select: { 0: 'AVG(IndvInvestor_DollarsInvested)%20AS%20personalAverageInvestmentDollar' }, where: { userSpecific: true }
-      }
+        }
       })
         .then(res => {
           const personalAverage = res.data.Result[0]
@@ -36,7 +36,7 @@ state = {
           )
             .then(res => {
               const angelGroupSum = res.data.Result[0].totalDealSum
-            
+
 
               // GET TOTAL NUMBER OF INVESTORS FROM ANGEL GROUPS
               axios('/.netlify/functions/get', {
@@ -48,7 +48,6 @@ state = {
                 .then(res => {
                   const angelMembersInvested = res.data.Result[0].totalMemberInvestorsNumber
                   const investmentPerAngel = angelGroupSum / angelMembersInvested
-                  console.log(investmentPerAngel)
 
                   // GET AVERAGE INVESTMENT FROM INDIVIDUAL ANGELS THAT ARE NOT THE USER
                   axios('/.netlify/functions/get', {
@@ -60,18 +59,18 @@ state = {
                     .then(res => {
                       const indvInvestorAverageInvestmentDollar = res.data.Result[0].indvInvestorAverageInvestmentDollar
 
-                      averages.push({ label: 'Average Investment ($)', averageInvestmentDollar: (indvInvestorAverageInvestmentDollar + investmentPerAngel) / 2, })
+                      averages.push({ label: 'Average Investment by Other Angels ($)', averageInvestmentDollar: (indvInvestorAverageInvestmentDollar + investmentPerAngel) / 2, })
 
-                          let averageInvestmentDollarLabels = []
-              let averageInvestmentDollarData = []
-              averages.forEach(average => {
-                //SET STATE WITH LIST OF LABELS
-                averageInvestmentDollarLabels.push(average.label)
-                //SET STATE WITH AVERAGES
-                averageInvestmentDollarData.push(Math.round(average.averageInvestmentDollar))
-              })
-              this.setState({ averageInvestmentDollarLabels: averageInvestmentDollarLabels })
-              this.setState({ averageInvestmentDollarData: averageInvestmentDollarData })
+                      let averageInvestmentDollarLabels = []
+                      let averageInvestmentDollarData = []
+                      averages.forEach(average => {
+                        //SET STATE WITH LIST OF LABELS
+                        averageInvestmentDollarLabels.push(average.label)
+                        //SET STATE WITH AVERAGES
+                        averageInvestmentDollarData.push(Math.round(average.averageInvestmentDollar))
+                      })
+                      this.setState({ averageInvestmentDollarLabels: averageInvestmentDollarLabels })
+                      this.setState({ averageInvestmentDollarData: averageInvestmentDollarData })
                     })
                     .catch(error => {
                       throw error;
@@ -81,7 +80,7 @@ state = {
                 .catch(error => {
                   throw error;
                 })
-          
+
             })
             .catch(error => {
               throw error;
@@ -105,7 +104,7 @@ state = {
     const data = {
       labels: this.state.averageInvestmentDollarLabels,
       datasets: [{
-        label: 'Total Sector ($)',
+        label: 'Average Investment Amount ($)',
         data: this.state.averageInvestmentDollarData,
         backgroundColor: [
           'rgba(255, 99, 132, 0.2)',
