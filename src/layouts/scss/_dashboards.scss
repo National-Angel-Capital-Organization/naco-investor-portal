@@ -1,18 +1,18 @@
 // DASHBOARDS
 
-#general-dashboard-chart-wrapper {
+.chart-wrapper {
   display: flex;
   flex-direction: row-reverse;
   align-items: center;
   justify-content: center;
 }
 
-#general-doughnut {
+.doughnut {
   width: 45%;
 
 }
 
-#general-bar {
+.bar {
   width: 55%;
 }
 

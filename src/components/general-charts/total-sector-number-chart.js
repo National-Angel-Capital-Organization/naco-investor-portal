@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { Bar } from 'react-chartjs-2';
 import axios from 'axios'
-import axiosHeaders from '../axios-headers'
+import axiosHeaders from '../../axios-headers'
 
 export default class TotalSectorNumberChart extends Component {
 

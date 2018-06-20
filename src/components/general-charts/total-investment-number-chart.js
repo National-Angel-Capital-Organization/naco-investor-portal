@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { Doughnut } from 'react-chartjs-2';
 import axios from 'axios'
-import axiosHeaders from '../axios-headers'
+import axiosHeaders from '../../axios-headers'
 
 export default class TotalInvestmentNumberChart extends Component {
 

@@ -1,9 +1,9 @@
 import React, { Component } from 'react'
-import PremoneyValueChart from '../components/premoney-value-chart'
-import TotalInvestmentNumberChart from '../components/total-investment-number-chart'
-import TotalInvestmentDollarChart from '../components/total-investment-dollar-chart'
-import TotalSectorNumberChart from '../components/total-sector-number-chart'
-import TotalSectorDollarChart from '../components/total-sector-dollar-chart'
+import PremoneyValueChart from '../components/general-charts/premoney-value-chart'
+import TotalInvestmentNumberChart from '../components/general-charts/total-investment-number-chart'
+import TotalInvestmentDollarChart from '../components/general-charts/total-investment-dollar-chart'
+import TotalSectorNumberChart from '../components/general-charts/total-sector-number-chart'
+import TotalSectorDollarChart from '../components/general-charts/total-sector-dollar-chart'
 import { defaults } from 'react-chartjs-2';
 
 //Set all charts to begin at Zero
@@ -18,12 +18,12 @@ export default class IndexPage extends Component {
       <div>
         <h1>General Dashboard</h1>
         <p>Here you can find general investment information.</p>
-        <div id='general-dashboard-chart-wrapper'>
-          <div id='general-doughnut' className='chart-container'>
+        <div className='chart-wrapper'>
+          <div className='chart-container doughnut'>
             <TotalInvestmentNumberChart />
             <TotalInvestmentDollarChart />
           </div>
-          <div id='general-bar' className='chart-container'>
+          <div className='chart-container bar'>
             <PremoneyValueChart />
             <TotalSectorNumberChart />
             <TotalSectorDollarChart />

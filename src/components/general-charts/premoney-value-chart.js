@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { Bar } from 'react-chartjs-2';
 import axios from 'axios'
-import axiosHeaders from '../axios-headers'
+import axiosHeaders from '../../axios-headers'
 
 export default class PremoneyValueChart extends Component {
 
@@ -96,11 +96,31 @@ export default class PremoneyValueChart extends Component {
         borderWidth: 1
       }]
     }
+
+    const options = {
+      scales: {
+        yAxes: [
+          {
+            ticks: {
+              callback: function (label, index, labels) {
+                return label / 1000000 + 'm';
+              }
+            },
+            scaleLabel: {
+              display: true,
+              labelString: '1m = $1,000,000'
+            }
+          }
+        ]
+      }
+    }
+
     return (
       <Bar
         data={data}
         width={100}
         height={50}
+        options={options}
       />
     )
   }
