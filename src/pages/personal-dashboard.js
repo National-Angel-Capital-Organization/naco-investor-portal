@@ -1,5 +1,10 @@
 import React, { Component } from 'react'
-import Link from 'gatsby-link'
+import { defaults } from 'react-chartjs-2';
+import AverageInvestmentDollarChart from '../components/personal-charts/average-investment-dollar-chart'
+
+//Set all charts to begin at Zero
+defaults.scale.ticks.beginAtZero = true;
+
 
 export default class PersonalDashboard extends Component {
   state = {}
@@ -8,6 +13,11 @@ export default class PersonalDashboard extends Component {
       <div>
         <h1>Personal Dashboard</h1>
         <p>Here you can find personal investment information.</p>
+        <div className='chart-wrapper'>
+          <div className='chart-container bar'>
+            <AverageInvestmentDollarChart />
+          </div>
+        </div>
       </div>
     )
   }

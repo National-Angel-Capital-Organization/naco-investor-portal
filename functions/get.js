@@ -3230,10 +3230,13 @@ function handler(event, context, callback) {
     // if user specific, add user email
     if (where.userSpecific) {
       path += `IndvInvestor_email%3D'${userEmail}'%20AND%20`;
+    } else if (where.notUser) {
+      // if results should not include user
+      path += `IndvInvestor_email%3C%3E'${userEmail}'%20AND%20`;
     }
     for (let param in where) {
       // add the params to the path with an & at the end of each
-      if (param !== 'userSpecific') if (where[param].query !== 'NULL') {
+      if (param !== 'userSpecific' && param !== 'notUser') if (where[param].query !== 'NULL') {
         path += `${param}${where[param].type}'${where[param].query}'%20AND%20`;
       } else {
         path += `${param}${where[param].type}${where[param].query}%20AND%20`;
