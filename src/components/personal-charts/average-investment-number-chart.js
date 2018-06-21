@@ -36,7 +36,6 @@ export default class AverageInvestmentNumberChart extends Component {
           )
             .then(res => {
               const indvInvestorDealsNumber = res.data.Result[0].indvInvestorDealsNumber
-              console.log(indvInvestorDealsNumber)
 
               // GET NUMBER OF INDIVIDUAL INVESTORS
               axios('/.netlify/functions/get', {
@@ -46,36 +45,22 @@ export default class AverageInvestmentNumberChart extends Component {
               }
               )
                 .then(res => {
-                  console.log(res)
-          //         const angelMembersInvested = res.data.Result[0].totalMemberInvestorsNumber
-          //         const investmentPerAngel = angelGroupSum / angelMembersInvested
+                  const indvInvestorsNumber = res.data.Result[0].indvInvestorsNumber
+                  const dealsPerIndvInvestor = indvInvestorDealsNumber / indvInvestorsNumber
 
-          //         // GET AVERAGE INVESTMENT FROM INDIVIDUAL ANGELS THAT ARE NOT THE USER
-          //         axios('/.netlify/functions/get', {
-          //           method: 'GET',
-          //           headers,
-          //           params: { path: "rest/v2/tables/IndvInvestorDeals/records", select: { 0: 'AVG(IndvInvestor_DollarsInvested)%20AS%20indvInvestorAverageInvestmentNumber' }, where: { notUser: true } }
-          //         }
-          //         )
-          //           .then(res => {
-          //             const indvInvestorAverageInvestmentNumber = res.data.Result[0].indvInvestorAverageInvestmentNumber
+                  averages.push({ label: ["Other Angels' Average", "Number of Investments (#)"], investmentNumber: dealsPerIndvInvestor })
 
-          //             averages.push({ label: 'Average Investment ($)', averageInvestmentNumber: (indvInvestorAverageInvestmentNumber + investmentPerAngel) / 2, })
+                  let averageInvestmentNumberLabels = []
+                  let averageInvestmentNumberData = []
+                  averages.forEach(average => {
+                    //SET STATE WITH LIST OF LABELS
+                    averageInvestmentNumberLabels.push(average.label)
+                    //SET STATE WITH AVERAGES
+                    averageInvestmentNumberData.push((Math.round(average.investmentNumber * 100) / 100))
+                  })
+                  this.setState({ averageInvestmentNumberLabels: averageInvestmentNumberLabels })
+                  this.setState({ averageInvestmentNumberData: averageInvestmentNumberData })
 
-          //             let averageInvestmentNumberLabels = []
-          //             let averageInvestmentNumberData = []
-          //             averages.forEach(average => {
-          //               //SET STATE WITH LIST OF LABELS
-          //               averageInvestmentNumberLabels.push(average.label)
-          //               //SET STATE WITH AVERAGES
-          //               averageInvestmentNumberData.push(Math.round(average.averageInvestmentNumber))
-          //             })
-          //             this.setState({ averageInvestmentNumberLabels: averageInvestmentNumberLabels })
-          //             this.setState({ averageInvestmentNumberData: averageInvestmentNumberData })
-          //           })
-          //           .catch(error => {
-          //             throw error;
-          //           })
 
                 })
                 .catch(error => {
@@ -105,7 +90,7 @@ export default class AverageInvestmentNumberChart extends Component {
     const data = {
       labels: this.state.averageInvestmentNumberLabels,
       datasets: [{
-        label: 'Average Investment Number (#)',
+        label: 'Investment Number (#)',
         data: this.state.averageInvestmentNumberData,
         backgroundColor: [
           'rgba(255, 99, 132, 0.2)',
@@ -127,11 +112,22 @@ export default class AverageInvestmentNumberChart extends Component {
       }]
     }
 
+    const options = {
+      title: {
+        display: true,
+        text: 'Average Investment Number (#)'
+      },
+      legend: {
+        display: false
+      }
+    }
+
     return (
       <Bar
         data={data}
         width={100}
         height={50}
+        options={options}
       />
     )
   }

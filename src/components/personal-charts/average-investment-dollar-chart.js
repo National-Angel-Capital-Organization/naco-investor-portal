@@ -59,7 +59,7 @@ export default class AverageInvestmentDollarChart extends Component {
                     .then(res => {
                       const indvInvestorAverageInvestmentDollar = res.data.Result[0].indvInvestorAverageInvestmentDollar
 
-                      averages.push({ label: 'Average Investment by Other Angels ($)', averageInvestmentDollar: (indvInvestorAverageInvestmentDollar + investmentPerAngel) / 2, })
+                      averages.push({ label: ['Average Investment', 'by Other Angels ($)'], averageInvestmentDollar: (indvInvestorAverageInvestmentDollar + investmentPerAngel) / 2, })
 
                       let averageInvestmentDollarLabels = []
                       let averageInvestmentDollarData = []
@@ -104,7 +104,7 @@ export default class AverageInvestmentDollarChart extends Component {
     const data = {
       labels: this.state.averageInvestmentDollarLabels,
       datasets: [{
-        label: 'Average Investment Amount ($)',
+        label: 'Investment Amount ($)',
         data: this.state.averageInvestmentDollarData,
         backgroundColor: [
           'rgba(255, 99, 132, 0.2)',
@@ -126,11 +126,22 @@ export default class AverageInvestmentDollarChart extends Component {
       }]
     }
 
+    const options = {
+      legend: {
+        display: false
+      },
+      title: {
+        display: true,
+        text: 'Average Investment Amount ($)'
+      },
+    }
+
     return (
       <Bar
         data={data}
         width={100}
         height={50}
+        options={options}
       />
     )
   }
