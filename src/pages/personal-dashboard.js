@@ -4,6 +4,8 @@ import AverageInvestmentDollarChart from '../components/personal-charts/average-
 import AverageInvestmentNumberChart from '../components/personal-charts/average-investment-number-chart'
 import InvestmentDollarChart from '../components/personal-charts/investment-dollar-chart'
 import InvestmentNumberChart from '../components/personal-charts/investment-number-chart'
+import SectorDollarChart from '../components/personal-charts/sector-dollar-chart'
+import SectorNumberChart from '../components/personal-charts/sector-number-chart'
 
 //Set all charts to begin at Zero
 defaults.scale.ticks.beginAtZero = true;
@@ -24,6 +26,8 @@ export default class PersonalDashboard extends Component {
           <div className='chart-container bar'>
             <AverageInvestmentDollarChart />
             <AverageInvestmentNumberChart />
+            <SectorDollarChart />
+            <SectorNumberChart />
           </div>
         </div>
       </div>
