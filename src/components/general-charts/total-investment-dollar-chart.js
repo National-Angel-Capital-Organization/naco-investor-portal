@@ -10,9 +10,7 @@ export default class TotalInvestmentDollarChart extends Component {
     TotalInvestmentDollarData: []
   }
 
-
-
-  componentDidMount() {
+  fetchData = (year) => {
 
     // GET SUM OF INVESTMENT FROM ANGEL GROUPS
 
@@ -20,7 +18,7 @@ export default class TotalInvestmentDollarChart extends Component {
       axios('/.netlify/functions/get', {
         method: 'GET',
         headers,
-        params: { path: "rest/v2/tables/Deals/records", select: { 0: 'Deal_NewOrFollowon', 1: 'SUM(Deal_DollarInvested)%20AS%20DealDollarInvested' }, where: { Group_NameAndSubmissionYear: { query: '%252017%25', type: '%20LIKE%20' } }, groupBy: 'Deal_NewOrFollowon' }
+        params: { path: "rest/v2/tables/Deals/records", select: { 0: 'Deal_NewOrFollowon', 1: 'SUM(Deal_DollarInvested)%20AS%20DealDollarInvested' }, where: { Group_NameAndSubmissionYear: { query: year, type: '%20LIKE%20' } }, groupBy: 'Deal_NewOrFollowon' }
       }
       )
         .then(res => {
@@ -35,7 +33,7 @@ export default class TotalInvestmentDollarChart extends Component {
           axios('/.netlify/functions/get', {
             method: 'GET',
             headers,
-            params: { path: "rest/v2/tables/IndvInvestorDeals/records", select: { 0: 'IndvInvestor_NeworFollowOn', 1: 'SUM(IndvInvestor_DollarsInvested)%20AS%20IndvInvestorDealDollarInvested' }, where: { IndvInvestor_Email_Year: { query: '%252017%25', type: '%20LIKE%20' } }, groupBy: 'IndvInvestor_NeworFollowOn' }
+            params: { path: "rest/v2/tables/IndvInvestorDeals/records", select: { 0: 'IndvInvestor_NeworFollowOn', 1: 'SUM(IndvInvestor_DollarsInvested)%20AS%20IndvInvestorDealDollarInvested' }, where: { IndvInvestor_Email_Year: { query: year, type: '%20LIKE%20' } }, groupBy: 'IndvInvestor_NeworFollowOn' }
           }
           )
             .then(res => {
@@ -69,6 +67,16 @@ export default class TotalInvestmentDollarChart extends Component {
         console.log(error)
       })
 
+  }
+
+  componentDidMount() {
+    this.fetchData('%25')
+
+  }
+
+
+  componentWillReceiveProps(newProps) {
+    this.fetchData(newProps.year)
   }
 
   render() {

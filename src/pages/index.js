@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import { navigateTo } from "gatsby-link"
 import SelectField from 'material-ui/SelectField'
 import MenuItem from 'material-ui/MenuItem'
 import PremoneyValueChart from '../components/general-charts/premoney-value-chart'
@@ -17,13 +16,25 @@ export default class IndexPage extends Component {
   state = {
     currentYear: 'all years.',
     error: '',
-    yearList: ['all years.', '2018.', '2017.', '2016.']
+    yearList: ['all years.', '2018.', '2017.', '2016.', '2015.', '2014.', '2013.', '2012.', '2011.', '2010.'],
+    refreshYear: false
   }
 
   handleDropdownChange = (event, index, value) => {
     this.setState({ currentYear: value })
   }
 
+  handleYear = (yearString) => {
+    let currentYear = yearString;
+
+    if (yearString === 'all years.') {
+      currentYear = '%25'
+    } else {
+      currentYear = yearString.slice(0, -1)
+      currentYear = `%25${currentYear}%25`
+    }
+    return currentYear;
+  }
 
   render() {
     return (
@@ -54,13 +65,13 @@ export default class IndexPage extends Component {
         </p>
         <div className='chart-wrapper'>
           <div className='chart-container doughnut'>
-            <TotalInvestmentNumberChart />
-            <TotalInvestmentDollarChart />
+            <TotalInvestmentNumberChart year={this.handleYear(this.state.currentYear)} />
+            <TotalInvestmentDollarChart year={this.handleYear(this.state.currentYear)} />
           </div>
           <div className='chart-container bar'>
-            <PremoneyValueChart />
-            <TotalSectorNumberChart />
-            <TotalSectorDollarChart />
+            <PremoneyValueChart year={this.handleYear(this.state.currentYear)} />
+            <TotalSectorNumberChart year={this.handleYear(this.state.currentYear)} />
+            <TotalSectorDollarChart year={this.handleYear(this.state.currentYear)} />
           </div>
         </div>
       </div>

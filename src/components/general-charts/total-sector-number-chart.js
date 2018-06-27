@@ -10,17 +10,14 @@ export default class TotalSectorNumberChart extends Component {
     totalSectorNumberData: []
   }
 
-
-
-  componentDidMount() {
-
+  fetchData = (year) => {
     // GET COUNT OF DEAL NUMBERS
 
     axiosHeaders.generateHeaders().then((headers) => {
       axios('/.netlify/functions/get', {
         method: 'GET',
         headers,
-        params: { path: "rest/v2/tables/Deals/records", select: { 0: 'Deal_MajorSector', 1: 'COUNT(Deal_DealRef)%20AS%20totalSectorNumber' }, where: { Group_NameAndSubmissionYear: { query: '%252017%25', type: '%20LIKE%20' } }, groupBy: 'Deal_MajorSector' }
+        params: { path: "rest/v2/tables/Deals/records", select: { 0: 'Deal_MajorSector', 1: 'COUNT(Deal_DealRef)%20AS%20totalSectorNumber' }, where: { Group_NameAndSubmissionYear: { query: year, type: '%20LIKE%20' } }, groupBy: 'Deal_MajorSector' }
       }
       )
         .then(res => {
@@ -35,7 +32,7 @@ export default class TotalSectorNumberChart extends Component {
           axios('/.netlify/functions/get', {
             method: 'GET',
             headers,
-            params: { path: "rest/v2/tables/IndvInvestorDeals/records", select: { 0: 'IndvInvestor_CompanyMajorSector', 1: 'COUNT(IndvInvestor_DealRef)%20AS%20indvInvestorTotalSectorNumber' }, where: { IndvInvestor_Email_Year: { query: '%252017%25', type: '%20LIKE%20' } }, groupBy: 'IndvInvestor_CompanyMajorSector' }
+            params: { path: "rest/v2/tables/IndvInvestorDeals/records", select: { 0: 'IndvInvestor_CompanyMajorSector', 1: 'COUNT(IndvInvestor_DealRef)%20AS%20indvInvestorTotalSectorNumber' }, where: { IndvInvestor_Email_Year: { query: year, type: '%20LIKE%20' } }, groupBy: 'IndvInvestor_CompanyMajorSector' }
           }
           )
             .then(res => {
@@ -70,6 +67,16 @@ export default class TotalSectorNumberChart extends Component {
         console.log(error)
       })
 
+  }
+
+  componentDidMount() {
+    this.fetchData('%25')
+
+  }
+
+
+  componentWillReceiveProps(newProps) {
+    this.fetchData(newProps.year)
   }
 
   render() {

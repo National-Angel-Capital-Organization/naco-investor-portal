@@ -10,17 +10,14 @@ export default class TotalSectorDollarChart extends Component {
     totalSectorDollarData: []
   }
 
-
-
-  componentDidMount() {
-
+  fetchData = (year) => {
     // GET INVESTMENT DOLLAR AMOUNTS
 
     axiosHeaders.generateHeaders().then((headers) => {
       axios('/.netlify/functions/get', {
         method: 'GET',
         headers,
-        params: { path: "rest/v2/tables/Deals/records", select: { 0: 'Deal_MajorSector', 1: 'SUM(Deal_DollarInvested)%20AS%20totalSectorDollar' }, where: { Group_NameAndSubmissionYear: { query: '%252017%25', type: '%20LIKE%20' } }, groupBy: 'Deal_MajorSector' }
+        params: { path: "rest/v2/tables/Deals/records", select: { 0: 'Deal_MajorSector', 1: 'SUM(Deal_DollarInvested)%20AS%20totalSectorDollar' }, where: { Group_NameAndSubmissionYear: { query: year, type: '%20LIKE%20' } }, groupBy: 'Deal_MajorSector' }
       }
       )
         .then(res => {
@@ -35,7 +32,7 @@ export default class TotalSectorDollarChart extends Component {
           axios('/.netlify/functions/get', {
             method: 'GET',
             headers,
-            params: { path: "rest/v2/tables/IndvInvestorDeals/records", select: { 0: 'IndvInvestor_CompanyMajorSector', 1: 'SUM(IndvInvestor_DollarsInvested)%20AS%20indvInvestorTotalSectorDollar' }, where: { IndvInvestor_Email_Year: { query: '%252017%25', type: '%20LIKE%20' } }, groupBy: 'IndvInvestor_CompanyMajorSector' }
+            params: { path: "rest/v2/tables/IndvInvestorDeals/records", select: { 0: 'IndvInvestor_CompanyMajorSector', 1: 'SUM(IndvInvestor_DollarsInvested)%20AS%20indvInvestorTotalSectorDollar' }, where: { IndvInvestor_Email_Year: { query: year, type: '%20LIKE%20' } }, groupBy: 'IndvInvestor_CompanyMajorSector' }
           }
           )
             .then(res => {
@@ -69,7 +66,16 @@ export default class TotalSectorDollarChart extends Component {
       .catch(error => {
         console.log(error)
       })
+  }
 
+  componentDidMount() {
+    this.fetchData('%25')
+
+  }
+
+
+  componentWillReceiveProps(newProps) {
+    this.fetchData(newProps.year)
   }
 
   render() {

@@ -10,9 +10,9 @@ export default class PremoneyValueChart extends Component {
     premoneyValueData: []
   }
 
+  fetchData = (year) => {
 
-
-  componentDidMount() {
+    
 
     // GET SUM OF PREMONEY VALUE
 
@@ -20,7 +20,7 @@ export default class PremoneyValueChart extends Component {
       axios('/.netlify/functions/get', {
         method: 'GET',
         headers,
-        params: { path: "rest/v2/tables/Deals/records", select: { 0: 'Deal_MajorSector', 1: 'SUM(Deal_PremoneyValue)%20AS%20PremoneyValueSum' }, where: { Group_NameAndSubmissionYear: { query: '%252017%25', type: '%20LIKE%20' } }, groupBy: 'Deal_MajorSector' }
+        params: { path: "rest/v2/tables/Deals/records", select: { 0: 'Deal_MajorSector', 1: 'SUM(Deal_PremoneyValue)%20AS%20PremoneyValueSum' }, where: { Group_NameAndSubmissionYear: { query: year, type: '%20LIKE%20' } }, groupBy: 'Deal_MajorSector' }
       }
       )
         .then(res => {
@@ -35,7 +35,7 @@ export default class PremoneyValueChart extends Component {
           axios('/.netlify/functions/get', {
             method: 'GET',
             headers,
-            params: { path: "rest/v2/tables/Deals/records", select: { 0: 'Deal_MajorSector', 1: 'COUNT(Deal_DealRef)%20AS%20PremoneyValueCount' }, where: { Group_NameAndSubmissionYear: { query: '%252017%25', type: '%20LIKE%20' }, Deal_PremoneyValue: { query: 'NULL', type: '%20IS%20NOT%20' } }, groupBy: 'Deal_MajorSector' }
+            params: { path: "rest/v2/tables/Deals/records", select: { 0: 'Deal_MajorSector', 1: 'COUNT(Deal_DealRef)%20AS%20PremoneyValueCount' }, where: { Group_NameAndSubmissionYear: { query: year, type: '%20LIKE%20' }, Deal_PremoneyValue: { query: 'NULL', type: '%20IS%20NOT%20' } }, groupBy: 'Deal_MajorSector' }
           }
           )
             .then(res => {
@@ -68,8 +68,18 @@ export default class PremoneyValueChart extends Component {
       .catch(error => {
         console.log(error)
       })
+  }
+
+  componentDidMount() {
+    this.fetchData('%25')
 
   }
+
+
+  componentWillReceiveProps(newProps) {
+    this.fetchData(newProps.year)
+  }
+
 
   render() {
     const data = {

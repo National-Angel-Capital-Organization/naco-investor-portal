@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import { defaults } from 'react-chartjs-2';
-import { navigateTo } from "gatsby-link"
 import SelectField from 'material-ui/SelectField'
 import MenuItem from 'material-ui/MenuItem'
 import AverageInvestmentDollarChart from '../components/personal-charts/average-investment-dollar-chart'
@@ -18,12 +17,12 @@ export default class PersonalDashboard extends Component {
   state = {
     currentYear: 'all years.',
     error: '',
-    yearList: ['all years.', '2018.', '2017.', '2016.']
+    yearList: ['all years.', '2018.', '2017.', '2016.', '2015.', '2014.', '2013.', '2012.', '2011.', '2010.']
   }
 
   handleDropdownChange = (event, index, value) => {
     this.setState({ currentYear: value })
-  }
+  } 
 
   render() {
     return (
@@ -54,14 +53,14 @@ export default class PersonalDashboard extends Component {
           </p>
         <div className='chart-wrapper'>
           <div className='chart-container doughnut'>
-            <InvestmentDollarChart />
-            <InvestmentNumberChart />
+            <InvestmentDollarChart year={this.state.currentYear} />
+            <InvestmentNumberChart year={this.state.currentYear} />
           </div>
           <div className='chart-container bar'>
-            <AverageInvestmentDollarChart />
-            <AverageInvestmentNumberChart />
-            <SectorDollarChart />
-            <SectorNumberChart />
+            <AverageInvestmentDollarChart year={this.state.currentYear} />
+            <AverageInvestmentNumberChart year={this.state.currentYear} />
+            <SectorDollarChart year={this.state.currentYear} />
+            <SectorNumberChart year={this.state.currentYear} />
           </div>
         </div>
       </div>
