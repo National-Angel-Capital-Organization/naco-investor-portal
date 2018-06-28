@@ -24,6 +24,18 @@ export default class PersonalDashboard extends Component {
     this.setState({ currentYear: value })
   } 
 
+  handleYear = (yearString) => {
+    let currentYear = yearString;
+
+    if (yearString === 'all years.') {
+      currentYear = '%25'
+    } else {
+      currentYear = yearString.slice(0, -1)
+      currentYear = `%25${currentYear}%25`
+    }
+    return currentYear;
+  }
+
   render() {
     return (
       <div>
@@ -53,14 +65,14 @@ export default class PersonalDashboard extends Component {
           </p>
         <div className='chart-wrapper'>
           <div className='chart-container doughnut'>
-            <InvestmentDollarChart year={this.state.currentYear} />
-            <InvestmentNumberChart year={this.state.currentYear} />
+            <InvestmentDollarChart year={this.handleYear(this.state.currentYear)} />
+            <InvestmentNumberChart year={this.handleYear(this.state.currentYear)} />
           </div>
           <div className='chart-container bar'>
-            <AverageInvestmentDollarChart year={this.state.currentYear} />
-            <AverageInvestmentNumberChart year={this.state.currentYear} />
-            <SectorDollarChart year={this.state.currentYear} />
-            <SectorNumberChart year={this.state.currentYear} />
+            <AverageInvestmentDollarChart year={this.handleYear(this.state.currentYear)} />
+            <AverageInvestmentNumberChart year={this.handleYear(this.state.currentYear)} />
+            <SectorDollarChart year={this.handleYear(this.state.currentYear)} />
+            <SectorNumberChart year={this.handleYear(this.state.currentYear)} />
           </div>
         </div>
       </div>

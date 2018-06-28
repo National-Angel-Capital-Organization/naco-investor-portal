@@ -10,40 +10,48 @@ export default class InvestmentDollarChart extends Component {
     investmentDollarData: []
   }
 
-
-  componentDidMount() {
-
+  fetchData = (year) => {
     axiosHeaders.generateHeaders().then((headers) => {
-      
-          // GET SUM OF INVESTMENT FROM INVESTOR
-          axios('/.netlify/functions/get', {
-            method: 'GET',
-            headers,
-            params: { path: "rest/v2/tables/IndvInvestorDeals/records", select: { 0: 'IndvInvestor_NeworFollowOn', 1: 'SUM(IndvInvestor_DollarsInvested)%20AS%20dollarInvested' }, where: { userSpecific: true }, groupBy: 'IndvInvestor_NeworFollowOn' }
-          }
-          )
-            .then(res => {
-              let newFollowOn = res.data.Result
-              let investmentDollarLabels = []
-              let investmentDollarData = []
-              newFollowOn.forEach(type => {
-                //SET STATE WITH LIST OF LABELS
-                investmentDollarLabels.push(type.IndvInvestor_NeworFollowOn)
-                //SET STATE WITH SUM OF INVESTMENT VALUE
-                investmentDollarData.push(Math.round(type.dollarInvested))
-              })
-              this.setState({ investmentDollarLabels: investmentDollarLabels })
-              this.setState({ investmentDollarData: investmentDollarData })
-            })
-            .catch(error => {
-              throw error;
-            })
+
+      // GET SUM OF INVESTMENT FROM INVESTOR
+      axios('/.netlify/functions/get', {
+        method: 'GET',
+        headers,
+        params: { path: "rest/v2/tables/IndvInvestorDeals/records", select: { 0: 'IndvInvestor_NeworFollowOn', 1: 'SUM(IndvInvestor_DollarsInvested)%20AS%20dollarInvested' }, where: { userSpecific: true, IndvInvestor_Email_Year: { query: year, type: '%20LIKE%20' } }, groupBy: 'IndvInvestor_NeworFollowOn' }
+      }
+      )
+        .then(res => {
+          let newFollowOn = res.data.Result
+          let investmentDollarLabels = []
+          let investmentDollarData = []
+          newFollowOn.forEach(type => {
+            //SET STATE WITH LIST OF LABELS
+            investmentDollarLabels.push(type.IndvInvestor_NeworFollowOn)
+            //SET STATE WITH SUM OF INVESTMENT VALUE
+            investmentDollarData.push(Math.round(type.dollarInvested))
+          })
+          this.setState({ investmentDollarLabels: investmentDollarLabels })
+          this.setState({ investmentDollarData: investmentDollarData })
+        })
+        .catch(error => {
+          throw error;
+        })
     })
       .catch(error => {
         console.log(error)
       })
+  }
+
+  componentDidMount() {
+    this.fetchData('%25')
 
   }
+
+
+  componentWillReceiveProps(newProps) {
+    this.fetchData(newProps.year)
+  }
+
 
   render() {
     const data = {

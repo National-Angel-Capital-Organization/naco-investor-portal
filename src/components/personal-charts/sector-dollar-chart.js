@@ -10,10 +10,7 @@ export default class SectorDollarChart extends Component {
     sectorDollarData: []
   }
 
-
-
-  componentDidMount() {
-
+  fetchData = (year) => {
     // GET INVESTMENT DOLLAR AMOUNTS
 
     axiosHeaders.generateHeaders().then((headers) => {
@@ -21,9 +18,10 @@ export default class SectorDollarChart extends Component {
         method: 'GET',
         headers,
         params: {
-          path: "rest/v2/tables/IndvInvestorDeals/records", select: { 0: 'IndvInvestor_CompanyMajorSector', 1: 'SUM(IndvInvestor_DollarsInvested)%20AS%20sectorDollar' }, where: { userSpecific: true  }, groupBy: 'IndvInvestor_CompanyMajorSector' }
+          path: "rest/v2/tables/IndvInvestorDeals/records", select: { 0: 'IndvInvestor_CompanyMajorSector', 1: 'SUM(IndvInvestor_DollarsInvested)%20AS%20sectorDollar' }, where: { userSpecific: true, IndvInvestor_Email_Year: { query: year, type: '%20LIKE%20' } }, groupBy: 'IndvInvestor_CompanyMajorSector'
         }
-          )
+      }
+      )
         .then(res => {
           let sectors = [];
           res.data.Result.forEach(sector => {
@@ -31,17 +29,17 @@ export default class SectorDollarChart extends Component {
               sectors.push({ label: sector.IndvInvestor_CompanyMajorSector, sectorDollar: sector.sectorDollar })
             }
           });
-          
-              let sectorDollarLabels = []
-              let sectorDollarData = []
-              sectors.forEach(sector => {
-                //SET STATE WITH LIST OF LABELS
-                sectorDollarLabels.push(sector.label)
-                //SET STATE WITH SUM OF DEAL DOLLARS
-                sectorDollarData.push(Math.round(sector.sectorDollar))
-              })
-              this.setState({ sectorDollarLabels: sectorDollarLabels })
-              this.setState({ sectorDollarData: sectorDollarData })
+
+          let sectorDollarLabels = []
+          let sectorDollarData = []
+          sectors.forEach(sector => {
+            //SET STATE WITH LIST OF LABELS
+            sectorDollarLabels.push(sector.label)
+            //SET STATE WITH SUM OF DEAL DOLLARS
+            sectorDollarData.push(Math.round(sector.sectorDollar))
+          })
+          this.setState({ sectorDollarLabels: sectorDollarLabels })
+          this.setState({ sectorDollarData: sectorDollarData })
         })
         .catch(error => {
           throw error
@@ -50,7 +48,17 @@ export default class SectorDollarChart extends Component {
       .catch(error => {
         console.log(error)
       })
+  }
 
+
+  componentDidMount() {
+    this.fetchData('%25')
+
+  }
+
+
+  componentWillReceiveProps(newProps) {
+    this.fetchData(newProps.year)
   }
 
   render() {

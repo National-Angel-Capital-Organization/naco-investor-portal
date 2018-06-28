@@ -16,8 +16,7 @@ export default class IndexPage extends Component {
   state = {
     currentYear: 'all years.',
     error: '',
-    yearList: ['all years.', '2018.', '2017.', '2016.', '2015.', '2014.', '2013.', '2012.', '2011.', '2010.'],
-    refreshYear: false
+    yearList: ['all years.', '2018.', '2017.', '2016.', '2015.', '2014.', '2013.', '2012.', '2011.', '2010.']
   }
 
   handleDropdownChange = (event, index, value) => {

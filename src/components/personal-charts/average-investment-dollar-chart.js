@@ -9,9 +9,7 @@ export default class AverageInvestmentDollarChart extends Component {
     averageInvestmentDollarData: []
   }
 
-
-  componentDidMount() {
-
+  fetchData = (year) => {
     // GET AVERAGE INVESTMENT DOLLAR AMOUNTS
 
     axiosHeaders.generateHeaders().then((headers) => {
@@ -19,7 +17,7 @@ export default class AverageInvestmentDollarChart extends Component {
         method: 'GET',
         headers,
         params: {
-          path: "rest/v2/tables/IndvInvestorDeals/records", select: { 0: 'AVG(IndvInvestor_DollarsInvested)%20AS%20personalAverageInvestmentDollar' }, where: { userSpecific: true }
+          path: "rest/v2/tables/IndvInvestorDeals/records", select: { 0: 'AVG(IndvInvestor_DollarsInvested)%20AS%20personalAverageInvestmentDollar' }, where: { userSpecific: true, IndvInvestor_Email_Year: { query: year, type: '%20LIKE%20' } }
         }
       })
         .then(res => {
@@ -31,7 +29,7 @@ export default class AverageInvestmentDollarChart extends Component {
           axios('/.netlify/functions/get', {
             method: 'GET',
             headers,
-            params: { path: "rest/v2/tables/Deals/records", select: { 0: 'SUM(Deal_DollarInvested)%20AS%20totalDealSum' }, where: { Deal_MemberInvestors_Num: { query: '0', type: '%20>%20' } } }
+            params: { path: "rest/v2/tables/Deals/records", select: { 0: 'SUM(Deal_DollarInvested)%20AS%20totalDealSum' }, where: { Deal_MemberInvestors_Num: { query: '0', type: '%20>%20' }, Group_NameAndSubmissionYear: { query: year, type: '%20LIKE%20' } } }
           }
           )
             .then(res => {
@@ -42,7 +40,7 @@ export default class AverageInvestmentDollarChart extends Component {
               axios('/.netlify/functions/get', {
                 method: 'GET',
                 headers,
-                params: { path: "rest/v2/tables/Deals/records", select: { 0: 'SUM(Deal_MemberInvestors_Num)%20AS%20totalMemberInvestorsNumber' }, where: { Deal_DollarInvested: { query: '0', type: '%20>%20' } } }
+                params: { path: "rest/v2/tables/Deals/records", select: { 0: 'SUM(Deal_MemberInvestors_Num)%20AS%20totalMemberInvestorsNumber' }, where: { Deal_DollarInvested: { query: '0', type: '%20>%20' }, Group_NameAndSubmissionYear: { query: year, type: '%20LIKE%20' } } }
               }
               )
                 .then(res => {
@@ -53,7 +51,7 @@ export default class AverageInvestmentDollarChart extends Component {
                   axios('/.netlify/functions/get', {
                     method: 'GET',
                     headers,
-                    params: { path: "rest/v2/tables/IndvInvestorDeals/records", select: { 0: 'AVG(IndvInvestor_DollarsInvested)%20AS%20indvInvestorAverageInvestmentDollar' }, where: { notUser: true } }
+                    params: { path: "rest/v2/tables/IndvInvestorDeals/records", select: { 0: 'AVG(IndvInvestor_DollarsInvested)%20AS%20indvInvestorAverageInvestmentDollar' }, where: { notUser: true, IndvInvestor_Email_Year: { query: year, type: '%20LIKE%20' }} }
                   }
                   )
                     .then(res => {
@@ -93,11 +91,17 @@ export default class AverageInvestmentDollarChart extends Component {
       .catch(error => {
         console.log(error)
       })
+  }
+
+  componentDidMount() {
+    this.fetchData('%25')
 
   }
 
 
-
+  componentWillReceiveProps(newProps) {
+    this.fetchData(newProps.year)
+  }
 
 
   render() {

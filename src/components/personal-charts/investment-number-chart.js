@@ -10,9 +10,7 @@ export default class InvestmentNumberChart extends Component {
     investmentNumberData: []
   }
 
-
-  componentDidMount() {
-
+  fetchData = (year) => {
 
     axiosHeaders.generateHeaders().then((headers) => {
 
@@ -20,7 +18,7 @@ export default class InvestmentNumberChart extends Component {
       axios('/.netlify/functions/get', {
         method: 'GET',
         headers,
-        params: { path: "rest/v2/tables/IndvInvestorDeals/records", select: { 0: 'IndvInvestor_NeworFollowOn', 1: 'COUNT(IndvInvestor_GUID)%20AS%20numberOfInvestments' }, where: { userSpecific: true }, groupBy: 'IndvInvestor_NeworFollowOn' }
+        params: { path: "rest/v2/tables/IndvInvestorDeals/records", select: { 0: 'IndvInvestor_NeworFollowOn', 1: 'COUNT(IndvInvestor_GUID)%20AS%20numberOfInvestments' }, where: { userSpecific: true, IndvInvestor_Email_Year: { query: year, type: '%20LIKE%20' } }, groupBy: 'IndvInvestor_NeworFollowOn' }
       }
       )
         .then(res => {
@@ -44,6 +42,16 @@ export default class InvestmentNumberChart extends Component {
         console.log(error)
       })
 
+  }
+
+  componentDidMount() {
+    this.fetchData('%25')
+
+  }
+
+
+  componentWillReceiveProps(newProps) {
+    this.fetchData(newProps.year)
   }
 
   render() {

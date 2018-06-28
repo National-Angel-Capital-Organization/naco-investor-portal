@@ -10,9 +10,7 @@ export default class SectorNumberChart extends Component {
     sectorNumberData: []
   }
 
-
-
-  componentDidMount() {
+  fetchData = (year) => {
 
     // GET INVESTMENT NUMBER AMOUNTS
 
@@ -21,7 +19,7 @@ export default class SectorNumberChart extends Component {
         method: 'GET',
         headers,
         params: {
-          path: "rest/v2/tables/IndvInvestorDeals/records", select: { 0: 'IndvInvestor_CompanyMajorSector', 1: 'COUNT(IndvInvestor_GUID)%20AS%20sectorNumber' }, where: { userSpecific: true }, groupBy: 'IndvInvestor_CompanyMajorSector'
+          path: "rest/v2/tables/IndvInvestorDeals/records", select: { 0: 'IndvInvestor_CompanyMajorSector', 1: 'COUNT(IndvInvestor_GUID)%20AS%20sectorNumber' }, where: { userSpecific: true, IndvInvestor_Email_Year: { query: year, type: '%20LIKE%20' } }, groupBy: 'IndvInvestor_CompanyMajorSector'
         }
       }
       )
@@ -52,6 +50,16 @@ export default class SectorNumberChart extends Component {
         console.log(error)
       })
 
+  }
+
+  componentDidMount() {
+    this.fetchData('%25')
+
+  }
+
+
+  componentWillReceiveProps(newProps) {
+    this.fetchData(newProps.year)
   }
 
   render() {

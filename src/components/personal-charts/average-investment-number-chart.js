@@ -9,9 +9,7 @@ export default class AverageInvestmentNumberChart extends Component {
     averageInvestmentNumberData: []
   }
 
-
-  componentDidMount() {
-
+  fetchData = (year) => {
     // GET USER INVESTMENT NUMBER
 
     axiosHeaders.generateHeaders().then((headers) => {
@@ -19,7 +17,7 @@ export default class AverageInvestmentNumberChart extends Component {
         method: 'GET',
         headers,
         params: {
-          path: "rest/v2/tables/IndvInvestorDeals/records", select: { 0: 'COUNT(IndvInvestor_GUID)%20AS%20userInvestmentNumber' }, where: { userSpecific: true }
+          path: "rest/v2/tables/IndvInvestorDeals/records", select: { 0: 'COUNT(IndvInvestor_GUID)%20AS%20userInvestmentNumber' }, where: { userSpecific: true, IndvInvestor_Email_Year: { query: year, type: '%20LIKE%20' } }
         }
       })
         .then(res => {
@@ -31,7 +29,7 @@ export default class AverageInvestmentNumberChart extends Component {
           axios('/.netlify/functions/get', {
             method: 'GET',
             headers,
-            params: { path: "rest/v2/tables/IndvInvestorDeals/records", select: { 0: 'COUNT(IndvInvestor_GUID)%20AS%20indvInvestorDealsNumber' }, where: { notUser: true } }
+            params: { path: "rest/v2/tables/IndvInvestorDeals/records", select: { 0: 'COUNT(IndvInvestor_GUID)%20AS%20indvInvestorDealsNumber' }, where: { notUser: true, IndvInvestor_Email_Year: { query: year, type: '%20LIKE%20' } } }
           }
           )
             .then(res => {
@@ -41,7 +39,7 @@ export default class AverageInvestmentNumberChart extends Component {
               axios('/.netlify/functions/get', {
                 method: 'GET',
                 headers,
-                params: { path: "rest/v2/tables/IndvInvestorDeals/records", select: { 0: 'COUNT(DISTINCT%20IndvInvestor_Email)%20AS%20indvInvestorsNumber' }, where: { notUser: true } }
+                params: { path: "rest/v2/tables/IndvInvestorDeals/records", select: { 0: 'COUNT(DISTINCT%20IndvInvestor_Email)%20AS%20indvInvestorsNumber' }, where: { notUser: true, IndvInvestor_Email_Year: { query: year, type: '%20LIKE%20' } } }
               }
               )
                 .then(res => {
@@ -79,12 +77,17 @@ export default class AverageInvestmentNumberChart extends Component {
       .catch(error => {
         console.log(error)
       })
+  }
+
+  componentDidMount() {
+    this.fetchData('%25')
 
   }
 
 
-
-
+  componentWillReceiveProps(newProps) {
+    this.fetchData(newProps.year)
+  }
 
   render() {
     const data = {
