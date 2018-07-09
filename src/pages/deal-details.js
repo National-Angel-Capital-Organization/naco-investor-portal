@@ -83,7 +83,6 @@ export default class DealDetails extends Component {
       }
       )
         .then(res => {
-          console.log(res)
           const resDeal = res.data.Result[0];
           const oldState = this.state;
           const newState = oldState;

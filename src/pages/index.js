@@ -39,7 +39,7 @@ export default class IndexPage extends Component {
     return (
       <div>
         <h1>General Dashboard</h1>
-        <p>Here you can find general investment information from
+        <div className="selection-text">Here you can find general investment information from
           <SelectField
             value={this.state.currentYear}
             style={{ bottom: -26, width: '140px', paddingLeft: '5px', font: '18px "Roboto", sans-serif', fontWeight: '500' }}
@@ -61,7 +61,7 @@ export default class IndexPage extends Component {
               />
             ))}
           </SelectField>
-        </p>
+        </div>
         <div className='chart-wrapper'>
           <div className='chart-container doughnut'>
             <TotalInvestmentNumberChart year={this.handleYear(this.state.currentYear)} />

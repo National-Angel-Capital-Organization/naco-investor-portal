@@ -21,11 +21,29 @@ export default class TotalSectorNumberChart extends Component {
       }
       )
         .then(res => {
-          let sectors = [];
+          let sectors = [{ label: 'Clean Technologies', totalSectorNumber: 0, indvInvestorTotalSectorNumber: 0 }, { label: 'Energy', totalSectorNumber: 0, indvInvestorTotalSectorNumber: 0 }, { label: 'ICT', totalSectorNumber: 0, indvInvestorTotalSectorNumber: 0 }, { label: 'Life Sciences', totalSectorNumber: 0, indvInvestorTotalSectorNumber: 0 }, { label: 'Manufacturing', totalSectorNumber: 0, indvInvestorTotalSectorNumber: 0 }, { label: 'Services', totalSectorNumber: 0, indvInvestorTotalSectorNumber: 0 }];
           res.data.Result.forEach(sector => {
-            if (sector.Deal_MajorSector !== '' && sector.Deal_MajorSector !== 'Other') {
-              sectors.push({ label: sector.Deal_MajorSector, totalSectorNumber: sector.totalSectorNumber, indvInvestorTotalSectorNumber: 0 })
+            switch (sector.Deal_MajorSector.toLowerCase()) {
+              case sectors[0].label.toLowerCase():
+                sectors[0].totalSectorNumber = sector.totalSectorNumber
+                break
+              case sectors[1].label.toLowerCase():
+                sectors[1].totalSectorNumber = sector.totalSectorNumber
+                break
+              case sectors[2].label.toLowerCase():
+                sectors[2].totalSectorNumber = sector.totalSectorNumber
+                break
+              case sectors[3].label.toLowerCase():
+                sectors[3].totalSectorNumber = sector.totalSectorNumber
+                break
+              case sectors[4].label.toLowerCase():
+                sectors[4].totalSectorNumber = sector.totalSectorNumber
+                break
+              case sectors[5].label.toLowerCase():
+                sectors[5].totalSectorNumber = sector.totalSectorNumber
+                break
             }
+
           });
 
           // GET COUNT OF DEALS FROM INDIVIDUAL INVESTORS
@@ -36,13 +54,27 @@ export default class TotalSectorNumberChart extends Component {
           }
           )
             .then(res => {
-              console.log(res)
               res.data.Result.forEach(indvInvestorSector => {
-                sectors.forEach(sector => {
-                  if (indvInvestorSector.IndvInvestor_CompanyMajorSector.toLowerCase() === sector.label.toLowerCase()) {
-                    sector.indvInvestorTotalSectorNumber = indvInvestorSector.indvInvestorTotalSectorNumber
-                  }
-                })
+                switch (indvInvestorSector.IndvInvestor_CompanyMajorSector.toLowerCase()) {
+                  case sectors[0].label.toLowerCase():
+                    sectors[0].indvInvestorTotalSectorNumber = indvInvestorSector.indvInvestorTotalSectorNumber
+                    break
+                  case sectors[1].label.toLowerCase():
+                    sectors[1].indvInvestorTotalSectorNumber = indvInvestorSector.indvInvestorTotalSectorNumber
+                    break
+                  case sectors[2].label.toLowerCase():
+                    sectors[2].indvInvestorTotalSectorNumber = indvInvestorSector.indvInvestorTotalSectorNumber
+                    break
+                  case sectors[3].label.toLowerCase():
+                    sectors[3].indvInvestorTotalSectorNumber = indvInvestorSector.indvInvestorTotalSectorNumber
+                    break
+                  case sectors[4].label.toLowerCase():
+                    sectors[4].indvInvestorTotalSectorNumber = indvInvestorSector.indvInvestorTotalSectorNumber
+                    break
+                  case sectors[5].label.toLowerCase():
+                    sectors[5].indvInvestorTotalSectorNumber = indvInvestorSector.indvInvestorTotalSectorNumber
+                    break
+                }
               });
               let totalSectorNumberLabels = []
               let totalSectorNumberData = []

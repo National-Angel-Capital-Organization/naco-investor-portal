@@ -36,7 +36,6 @@ export default class TotalSectorDollarChart extends Component {
           }
           )
             .then(res => {
-              console.log(res)
               res.data.Result.forEach(indvInvestorSector => {
                 sectors.forEach(sector => {
                   if (indvInvestorSector.IndvInvestor_CompanyMajorSector.toLowerCase() === sector.label.toLowerCase()) {

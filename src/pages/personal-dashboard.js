@@ -40,7 +40,7 @@ export default class PersonalDashboard extends Component {
     return (
       <div>
         <h1>Personal Dashboard</h1>
-        <p>Here you can find personal investment information from
+        <div className="selection-text">Here you can find personal investment information from
           <SelectField
             value={this.state.currentYear}
             style={{ bottom: -26, width: '140px', paddingLeft: '5px', font: '18px "Roboto", sans-serif', fontWeight: '500' } }
@@ -62,7 +62,7 @@ export default class PersonalDashboard extends Component {
               />
             ))}
           </SelectField>
-          </p>
+          </div>
         <div className='chart-wrapper'>
           <div className='chart-container doughnut'>
             <InvestmentDollarChart year={this.handleYear(this.state.currentYear)} />

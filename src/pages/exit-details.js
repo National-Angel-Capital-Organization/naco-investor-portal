@@ -84,7 +84,6 @@ export default class SubmitExit extends Component {
       )
         .then(res => {
           const resExit = res.data.Result[0];
-          console.log(resExit)
           const oldState = this.state;
           const newState = oldState;
           newState.IndvInvestor_FullName = resExit.IndvInvestor_FullName
@@ -220,8 +219,6 @@ export default class SubmitExit extends Component {
       IndvInvestor_ExitFTE,
       IndvInvestor_TotalInvestment,
     }
-
-    console.log(exitSubmission)
 
 
     axiosHeaders.generateHeaders().then((headers) => {

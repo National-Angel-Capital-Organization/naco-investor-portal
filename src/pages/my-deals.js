@@ -31,7 +31,6 @@ export default class MyDeals extends Component {
       )
         .then(res => {
           this.setState({ deals: res.data.Result})
-          console.log(this.state)
         })
         .catch(error => {
           throw error

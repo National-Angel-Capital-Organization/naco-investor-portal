@@ -30,7 +30,6 @@ export default class MyExits extends Component {
       )
         .then(res => {
           this.setState({ exits: res.data.Result })
-          console.log(this.state)
         })
         .catch(error => {
           throw error
