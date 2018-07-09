@@ -22,13 +22,18 @@ export default class TotalInvestmentDollarChart extends Component {
       }
       )
         .then(res => {
-          let newFollowOn = [];
+          let newFollowOn = [{ label: 'New', DealDollarInvested: 0, IndvInvestorDealDollarInvested: 0 }, { label: 'Follow-On', DealDollarInvested: 0, IndvInvestorDealDollarInvested: 0 }];
           res.data.Result.forEach(type => {
-            if (type.Deal_NewOrFollowon !== '') {
-              newFollowOn.push({ label: type.Deal_NewOrFollowon, DealDollarInvested: type.DealDollarInvested })
+
+            switch (type.Deal_NewOrFollowon.toLowerCase()) {
+              case newFollowOn[0].label.toLowerCase():
+                newFollowOn[0].DealDollarInvested = type.DealDollarInvested
+                break
+              case newFollowOn[1].label.toLowerCase():
+                newFollowOn[1].DealDollarInvested = type.DealDollarInvested
+                break
             }
           });
-
           // GET SUM OF INVESTMENT FROM INDIVIDUAL INVESTORS
           axios('/.netlify/functions/get', {
             method: 'GET',
@@ -38,12 +43,17 @@ export default class TotalInvestmentDollarChart extends Component {
           )
             .then(res => {
               res.data.Result.forEach(indvInvestorType => {
-                newFollowOn.forEach(type => {
-                  if (indvInvestorType.IndvInvestor_NeworFollowOn.toLowerCase() === type.label.toLowerCase()) {
-                    type.IndvInvestorDealDollarInvested = indvInvestorType.IndvInvestorDealDollarInvested
-                  }
-                })
+
+                switch (indvInvestorType.IndvInvestor_NeworFollowOn.toLowerCase()) {
+                  case newFollowOn[0].label.toLowerCase():
+                    newFollowOn[0].IndvInvestorDealDollarInvested = indvInvestorType.IndvInvestorDealDollarInvested
+                    break
+                  case newFollowOn[1].label.toLowerCase():
+                    newFollowOn[1].IndvInvestorDealDollarInvested = indvInvestorType.IndvInvestorDealDollarInvested
+                    break
+                }
               });
+
               let totalInvestmentDollarLabels = []
               let totalInvestmentDollarData = []
               newFollowOn.forEach(type => {
