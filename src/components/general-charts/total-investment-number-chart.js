@@ -21,10 +21,15 @@ export default class TotalInvestmentNumberChart extends Component {
       }
       )
         .then(res => {
-          let newFollowOn = [];
+          let newFollowOn = [{ label: 'New', dealNumber: 0, indvInvestorDealNumber: 0 }, { label: 'Follow-On', dealNumber: 0, indvInvestorDealNumber: 0 }];
           res.data.Result.forEach(type => {
-            if (type.Deal_NewOrFollowon !== '') {
-              newFollowOn.push({ label: type.Deal_NewOrFollowon, dealNumber: type.DealInvestmentNumber })
+            switch (type.Deal_NewOrFollowon.toLowerCase()) {
+              case newFollowOn[0].label.toLowerCase():
+                newFollowOn[0].dealNumber = type.DealInvestmentNumber
+                break
+              case newFollowOn[1].label.toLowerCase():
+                newFollowOn[1].dealNumber = type.DealInvestmentNumber
+                break
             }
           });
 
@@ -37,11 +42,15 @@ export default class TotalInvestmentNumberChart extends Component {
           )
             .then(res => {
               res.data.Result.forEach(indvInvestorType => {
-                newFollowOn.forEach(type => {
-                  if (indvInvestorType.IndvInvestor_NeworFollowOn.toLowerCase() === type.label.toLowerCase()) {
-                    type.indvInvestorDealNumber = indvInvestorType.IndvInvestorDealInvestmentNumber
-                  }
-                })
+                switch (indvInvestorType.IndvInvestor_NeworFollowOn.toLowerCase()) {
+                  case newFollowOn[0].label.toLowerCase():
+                    newFollowOn[0].indvInvestorDealNumber = indvInvestorType.IndvInvestorDealInvestmentNumber
+                    break
+                  case newFollowOn[1].label.toLowerCase():
+                    newFollowOn[1].indvInvestorDealNumber = indvInvestorType.IndvInvestorDealInvestmentNumber
+                    break
+                }
+
               });
               let totalInvestmentNumberLabels = []
               let totalInvestmentNumberData = []
