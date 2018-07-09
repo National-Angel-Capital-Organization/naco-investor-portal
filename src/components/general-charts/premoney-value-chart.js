@@ -12,7 +12,7 @@ export default class PremoneyValueChart extends Component {
 
   fetchData = (year) => {
 
-    
+
 
     // GET SUM OF PREMONEY VALUE
 
@@ -24,10 +24,27 @@ export default class PremoneyValueChart extends Component {
       }
       )
         .then(res => {
-          let sectors = [];
+          let sectors = [{ label: 'Clean Technologies', sum: 0, count: 0 }, { label: 'Energy', sum: 0, count: 0 }, { label: 'ICT', sum: 0, count: 0 }, { label: 'Life Sciences', sum: 0, count: 0 }, { label: 'Manufacturing', sum: 0, count: 0 }, { label: 'Services', sum: 0, count: 0 }];
           res.data.Result.forEach(sector => {
-            if (sector.Deal_MajorSector !== '' && sector.Deal_MajorSector !== 'Other') {
-              sectors.push({ label: sector.Deal_MajorSector, sum: sector.PremoneyValueSum })
+            switch (sector.Deal_MajorSector.toLowerCase()) {
+              case sectors[0].label.toLowerCase():
+                sectors[0].sum = sector.PremoneyValueSum
+                break
+              case sectors[1].label.toLowerCase():
+                sectors[1].sum = sector.PremoneyValueSum
+                break
+              case sectors[2].label.toLowerCase():
+                sectors[2].sum = sector.PremoneyValueSum
+                break
+              case sectors[3].label.toLowerCase():
+                sectors[3].sum = sector.PremoneyValueSum
+                break
+              case sectors[4].label.toLowerCase():
+                sectors[4].sum = sector.PremoneyValueSum
+                break
+              case sectors[5].label.toLowerCase():
+                sectors[5].sum = sector.PremoneyValueSum
+                break
             }
           });
 
@@ -40,11 +57,26 @@ export default class PremoneyValueChart extends Component {
           )
             .then(res => {
               res.data.Result.forEach(count => {
-                sectors.forEach(sector => {
-                  if (count.Deal_MajorSector === sector.label) {
-                    sector.count = count.PremoneyValueCount
-                  }
-                })
+                switch (count.Deal_MajorSector.toLowerCase()) {
+                  case sectors[0].label.toLowerCase():
+                    sectors[0].count = count.PremoneyValueCount
+                    break
+                  case sectors[1].label.toLowerCase():
+                    sectors[1].count = count.PremoneyValueCount
+                    break
+                  case sectors[2].label.toLowerCase():
+                    sectors[2].count = count.PremoneyValueCount
+                    break
+                  case sectors[3].label.toLowerCase():
+                    sectors[3].count = count.PremoneyValueCount
+                    break
+                  case sectors[4].label.toLowerCase():
+                    sectors[4].count = count.PremoneyValueCount
+                    break
+                  case sectors[5].label.toLowerCase():
+                    sectors[5].count = count.PremoneyValueCount
+                    break
+                }
               });
               let premoneyValueLabels = []
               let premoneyValueAverage = []
