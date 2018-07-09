@@ -21,11 +21,29 @@ export default class TotalSectorDollarChart extends Component {
       }
       )
         .then(res => {
-          let sectors = [];
+          let sectors = [{ label: 'Clean Technologies', totalSectorDollar: 0, indvInvestorTotalSectorDollar: 0 }, { label: 'Energy', totalSectorDollar: 0, indvInvestorTotalSectorDollar: 0 }, { label: 'ICT', totalSectorDollar: 0, indvInvestorTotalSectorDollar: 0 }, { label: 'Life Sciences', totalSectorDollar: 0, indvInvestorTotalSectorDollar: 0 }, { label: 'Manufacturing', totalSectorDollar: 0, indvInvestorTotalSectorDollar: 0 }, { label: 'Services', totalSectorDollar: 0, indvInvestorTotalSectorDollar: 0 },];
           res.data.Result.forEach(sector => {
-            if (sector.Deal_MajorSector !== '' && sector.Deal_MajorSector !== 'Other') {
-              sectors.push({ label: sector.Deal_MajorSector, totalSectorDollar: sector.totalSectorDollar, indvInvestorTotalSectorDollar: 0 })
+            switch (sector.Deal_MajorSector.toLowerCase()) {
+              case sectors[0].label.toLowerCase():
+                sectors[0].totalSectorDollar = sector.totalSectorDollar
+                break
+              case sectors[1].label.toLowerCase():
+                sectors[1].totalSectorDollar = sector.totalSectorDollar
+                break
+              case sectors[2].label.toLowerCase():
+                sectors[2].totalSectorDollar = sector.totalSectorDollar
+                break
+              case sectors[3].label.toLowerCase():
+                sectors[3].totalSectorDollar = sector.totalSectorDollar
+                break
+              case sectors[4].label.toLowerCase():
+                sectors[4].totalSectorDollar = sector.totalSectorDollar
+                break
+              case sectors[5].label.toLowerCase():
+                sectors[5].totalSectorDollar = sector.totalSectorDollar
+                break
             }
+
           });
 
           // GET DOLLAR AMOUNT OF DEALS FROM INDIVIDUAL INVESTORS
@@ -37,12 +55,28 @@ export default class TotalSectorDollarChart extends Component {
           )
             .then(res => {
               res.data.Result.forEach(indvInvestorSector => {
-                sectors.forEach(sector => {
-                  if (indvInvestorSector.IndvInvestor_CompanyMajorSector.toLowerCase() === sector.label.toLowerCase()) {
-                    sector.indvInvestorTotalSectorDollar = indvInvestorSector.indvInvestorTotalSectorDollar
-                  }
-                })
+                switch (indvInvestorSector.IndvInvestor_CompanyMajorSector.toLowerCase()) {
+                  case sectors[0].label.toLowerCase():
+                    sectors[0].indvInvestorTotalSectorDollar = indvInvestorSector.indvInvestorTotalSectorDollar
+                    break
+                  case sectors[1].label.toLowerCase():
+                    sectors[1].indvInvestorTotalSectorDollar = indvInvestorSector.indvInvestorTotalSectorDollar
+                    break
+                  case sectors[2].label.toLowerCase():
+                    sectors[2].indvInvestorTotalSectorDollar = indvInvestorSector.indvInvestorTotalSectorDollar
+                    break
+                  case sectors[3].label.toLowerCase():
+                    sectors[3].indvInvestorTotalSectorDollar = indvInvestorSector.indvInvestorTotalSectorDollar
+                    break
+                  case sectors[4].label.toLowerCase():
+                    sectors[4].indvInvestorTotalSectorDollar = indvInvestorSector.indvInvestorTotalSectorDollar
+                    break
+                  case sectors[5].label.toLowerCase():
+                    sectors[5].indvInvestorTotalSectorDollar = indvInvestorSector.indvInvestorTotalSectorDollar
+                    break
+                }
               });
+
               let totalSectorDollarLabels = []
               let totalSectorDollarData = []
               sectors.forEach(sector => {
