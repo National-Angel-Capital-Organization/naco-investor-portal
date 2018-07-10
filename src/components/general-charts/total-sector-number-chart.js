@@ -136,11 +136,23 @@ export default class TotalSectorNumberChart extends Component {
         borderWidth: 1
       }]
     }
+
+    const options = {
+      legend: {
+        display: false
+      },
+      title: {
+        display: true,
+        text: 'Total Sector (#)'
+      },
+    }
+
     return (
       <Bar
         data={data}
         width={100}
         height={50}
+        options={options}
       />
     )
   }

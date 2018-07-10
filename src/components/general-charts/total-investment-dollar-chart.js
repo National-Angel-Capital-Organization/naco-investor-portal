@@ -106,11 +106,24 @@ export default class TotalInvestmentDollarChart extends Component {
         borderWidth: 1
       }]
     }
+
+    const options = {
+      title: {
+        display: true,
+        text: 'Total Investment ($)'
+      },
+      legend: {
+        position: 'bottom',
+        reverse: true
+      }
+    }
+
     return (
       <Doughnut
         data={data}
         width={100}
         height={50}
+        options={options}
       />
     )
   }

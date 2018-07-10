@@ -138,6 +138,13 @@ export default class TotalSectorDollarChart extends Component {
     }
 
     const options = {
+      legend: {
+        display: false
+      },
+      title: {
+        display: true,
+        text: 'Total Sector ($)'
+      },
       scales: {
         yAxes: [
           {
