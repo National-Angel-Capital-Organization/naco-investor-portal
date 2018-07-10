@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { Bar } from 'react-chartjs-2';
 import axios from 'axios'
 import axiosHeaders from '../../axios-headers'
+import dashboardFunctions from '../../dashboard-functions'
 
 export default class AverageInvestmentDollarChart extends Component {
   state = {
@@ -21,7 +22,7 @@ export default class AverageInvestmentDollarChart extends Component {
         }
       })
         .then(res => {
-          const personalAverage = res.data.Result[0]
+          const personalAverage = dashboardFunctions.emptyToZero(res.data.Result[0])
           let averages = [];
           averages.push({ label: 'Your Average Investment ($)', averageInvestmentDollar: personalAverage.personalAverageInvestmentDollar, })
 
@@ -33,7 +34,7 @@ export default class AverageInvestmentDollarChart extends Component {
           }
           )
             .then(res => {
-              const angelGroupSum = res.data.Result[0].totalDealSum
+              const angelGroupSum = dashboardFunctions.emptyToZero(res.data.Result[0].totalDealSum)
 
 
               // GET TOTAL NUMBER OF INVESTORS FROM ANGEL GROUPS
@@ -44,21 +45,24 @@ export default class AverageInvestmentDollarChart extends Component {
               }
               )
                 .then(res => {
-                  const angelMembersInvested = res.data.Result[0].totalMemberInvestorsNumber
-                  const investmentPerAngel = angelGroupSum / angelMembersInvested
+                  const angelMembersInvested = dashboardFunctions.emptyToZero(res.data.Result[0].totalMemberInvestorsNumber)
+                  let investmentPerAngel = 0
+                  if (angelGroupSum !== 0 && angelMembersInvested !== 0) {
+                    investmentPerAngel = angelGroupSum / angelMembersInvested
+                  }
 
                   // GET AVERAGE INVESTMENT FROM INDIVIDUAL ANGELS THAT ARE NOT THE USER
                   axios('/.netlify/functions/get', {
                     method: 'GET',
                     headers,
-                    params: { path: "rest/v2/tables/IndvInvestorDeals/records", select: { 0: 'AVG(IndvInvestor_DollarsInvested)%20AS%20indvInvestorAverageInvestmentDollar' }, where: { notUser: true, IndvInvestor_Email_Year: { query: year, type: '%20LIKE%20' }} }
+                    params: { path: "rest/v2/tables/IndvInvestorDeals/records", select: { 0: 'AVG(IndvInvestor_DollarsInvested)%20AS%20indvInvestorAverageInvestmentDollar' }, where: { notUser: true, IndvInvestor_Email_Year: { query: year, type: '%20LIKE%20' } } }
                   }
                   )
                     .then(res => {
-                      const indvInvestorAverageInvestmentDollar = res.data.Result[0].indvInvestorAverageInvestmentDollar
+                      const indvInvestorAverageInvestmentDollar = dashboardFunctions.emptyToZero(res.data.Result[0].indvInvestorAverageInvestmentDollar)
 
                       averages.push({ label: ['Average Investment', 'by Other Angels ($)'], averageInvestmentDollar: (indvInvestorAverageInvestmentDollar + investmentPerAngel) / 2, })
-
+                      console.log(angelGroupSum)
                       let averageInvestmentDollarLabels = []
                       let averageInvestmentDollarData = []
                       averages.forEach(average => {
