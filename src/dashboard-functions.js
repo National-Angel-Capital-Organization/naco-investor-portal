@@ -7,6 +7,16 @@ const dashboardFunctions = {
       return value;
     }
   },
+
+  checkForData(array) {
+    let data = false;
+    for (let item of array) {
+      if (!isNaN(item)) {
+        data = true
+      }
+    }
+    return data;
+  },
 }
 
 export default dashboardFunctions;
