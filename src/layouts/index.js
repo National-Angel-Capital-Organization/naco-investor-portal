@@ -10,6 +10,11 @@ import getMuiTheme from 'material-ui/styles/getMuiTheme'
 import netlifyIdentity from 'netlify-identity-widget'
 import axiosHeaders from '../axios-headers'
 import { Link } from 'react-router-dom';
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faChartBar, faChartPie } from '@fortawesome/free-solid-svg-icons'
+
+library.add(faChartBar, faChartPie)
 
 
 

@@ -3,6 +3,7 @@ import { Doughnut } from 'react-chartjs-2';
 import axios from 'axios'
 import axiosHeaders from '../../axios-headers'
 import dashboardFunctions from '../../dashboard-functions'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 export default class TotalInvestmentNumberChart extends Component {
 
@@ -147,7 +148,10 @@ export default class TotalInvestmentNumberChart extends Component {
           options={options}
         />)
       } else {
-        return (<p>No Data</p>)
+        return (<div className="no-data">
+          <FontAwesomeIcon icon="chart-pie" size="8x" />
+          <p style={{ marginTop: '15px' }}>No Data Available</p>
+        </div>)
       }
     }
 

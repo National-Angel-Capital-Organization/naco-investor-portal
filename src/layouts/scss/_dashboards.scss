@@ -21,7 +21,7 @@
   flex-direction: column;
 }
 
-.selection-text { 
+.selection-text, .no-data { 
 font: 18px 'Roboto', sans-serif;
  }
  
@@ -79,4 +79,10 @@ font: 18px 'Roboto', sans-serif;
     transform: scaleY(1.0);
     -webkit-transform: scaleY(1.0);
   }
+}
+
+.no-data {
+  color: #c8c8c8;
+  margin: 30px auto;
+  text-align: center;
 }

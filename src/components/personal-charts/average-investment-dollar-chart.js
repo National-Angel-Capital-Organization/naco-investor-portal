@@ -3,6 +3,7 @@ import { Bar } from 'react-chartjs-2';
 import axios from 'axios'
 import axiosHeaders from '../../axios-headers'
 import dashboardFunctions from '../../dashboard-functions'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 export default class AverageInvestmentDollarChart extends Component {
   state = {
@@ -173,7 +174,10 @@ export default class AverageInvestmentDollarChart extends Component {
           options={options}
         />)
       } else {
-        return (<p>No Data</p>)
+        return (<div className="no-data">
+          <FontAwesomeIcon icon="chart-bar" size="10x" />
+          <p>No Data Available</p>
+        </div>)
       }
     }
 
