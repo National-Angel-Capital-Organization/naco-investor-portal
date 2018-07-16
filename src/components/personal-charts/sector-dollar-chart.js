@@ -10,6 +10,7 @@ export default class SectorDollarChart extends Component {
     sectorDollarLabels: [],
     sectorDollarData: [],
     isData: false,
+    isLoading: true,
   }
 
   fetchData = (year) => {
@@ -43,6 +44,7 @@ export default class SectorDollarChart extends Component {
           this.setState({ isData: dashboardFunctions.checkForData(sectorDollarData) })
           this.setState({ sectorDollarLabels: sectorDollarLabels })
           this.setState({ sectorDollarData: sectorDollarData })
+          this.setState({ isLoading: false })
         })
         .catch(error => {
           throw error
@@ -91,6 +93,14 @@ export default class SectorDollarChart extends Component {
     }
 
     const options = {
+      layout: {
+        padding: {
+          left: 30,
+          right: 30,
+          top: 30,
+          bottom: 30
+        }
+      },
       title: {
         display: true,
         text: 'Deal Sector Dollar Comparison ($)'
@@ -115,8 +125,16 @@ export default class SectorDollarChart extends Component {
       }
     }
 
-    const graphOrPlaceholder = (dataPresent) => {
-      if (dataPresent) {
+    const graphOrPlaceholder = (dataPresent, loading) => {
+      if (loading) {
+        return (<div className="graph-loader">
+          <div className="rect1"></div>
+          <div className="rect2"></div>
+          <div className="rect3"></div>
+          <div className="rect4"></div>
+          <div className="rect5"></div>
+        </div>)
+      } else if (dataPresent) {
         return (<Bar
           data={data}
           width={100}
@@ -129,7 +147,7 @@ export default class SectorDollarChart extends Component {
     }
 
     return (
-      graphOrPlaceholder(this.state.isData)
+      graphOrPlaceholder(this.state.isData, this.state.isLoading)
     )
   }
 

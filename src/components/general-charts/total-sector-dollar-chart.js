@@ -10,9 +10,11 @@ export default class TotalSectorDollarChart extends Component {
     totalSectorDollarLabels: [],
     totalSectorDollarData: [],
     isData: false,
+    isLoading: true,
   }
 
   fetchData = (year) => {
+
     // GET INVESTMENT DOLLAR AMOUNTS
 
     axiosHeaders.generateHeaders().then((headers) => {
@@ -90,6 +92,7 @@ export default class TotalSectorDollarChart extends Component {
               this.setState({ isData: dashboardFunctions.checkForData(totalSectorDollarData) })
               this.setState({ totalSectorDollarLabels: totalSectorDollarLabels })
               this.setState({ totalSectorDollarData: totalSectorDollarData })
+              this.setState({ isLoading: false })
             })
             .catch(error => {
               throw error;
@@ -141,6 +144,14 @@ export default class TotalSectorDollarChart extends Component {
     }
 
     const options = {
+      layout: {
+        padding: {
+          left: 30,
+          right: 30,
+          top: 30,
+          bottom: 30
+        }
+      },
       legend: {
         display: false
       },
@@ -165,8 +176,16 @@ export default class TotalSectorDollarChart extends Component {
       }
     }
 
-    const graphOrPlaceholder = (dataPresent) => {
-      if (dataPresent) {
+    const graphOrPlaceholder = (dataPresent, loading) => {
+      if (loading) {
+        return (<div className="graph-loader">
+          <div className="rect1"></div>
+          <div className="rect2"></div>
+          <div className="rect3"></div>
+          <div className="rect4"></div>
+          <div className="rect5"></div>
+        </div>)
+      } else if (dataPresent) {
         return (<Bar
           data={data}
           width={100}
@@ -179,7 +198,7 @@ export default class TotalSectorDollarChart extends Component {
     }
 
     return (
-      graphOrPlaceholder(this.state.isData)
+      graphOrPlaceholder(this.state.isData, this.state.isLoading)
     )
   }
 

@@ -10,6 +10,7 @@ export default class InvestmentNumberChart extends Component {
     investmentNumberLabels: [],
     investmentNumberData: [],
     isData: false,
+    isLoading: true,
   }
 
   fetchData = (year) => {
@@ -36,6 +37,7 @@ export default class InvestmentNumberChart extends Component {
           this.setState({ isData: dashboardFunctions.checkForData(investmentNumberData) })
           this.setState({ investmentNumberLabels: investmentNumberLabels })
           this.setState({ investmentNumberData: investmentNumberData })
+          this.setState({ isLoading: false })
         })
         .catch(error => {
           throw error;
@@ -76,6 +78,14 @@ export default class InvestmentNumberChart extends Component {
     }
 
     const options = {
+      layout: {
+        padding: {
+          left: 30,
+          right: 30,
+          top: 30,
+          bottom: 30
+        }
+      },
       title: {
         display: true,
         text: 'Your Total Number of Investments (#)'
@@ -86,8 +96,16 @@ export default class InvestmentNumberChart extends Component {
     }
 
 
-    const graphOrPlaceholder = (dataPresent) => {
-      if (dataPresent) {
+    const graphOrPlaceholder = (dataPresent, loading) => {
+      if (loading) {
+        return (<div className="graph-loader">
+          <div className="rect1"></div>
+          <div className="rect2"></div>
+          <div className="rect3"></div>
+          <div className="rect4"></div>
+          <div className="rect5"></div>
+        </div>)
+      } else if (dataPresent) {
         return (<Doughnut
           data={data}
           width={100}
@@ -100,7 +118,7 @@ export default class InvestmentNumberChart extends Component {
     }
 
     return (
-      graphOrPlaceholder(this.state.isData)
+      graphOrPlaceholder(this.state.isData, this.state.isLoading)
     )
   }
 
