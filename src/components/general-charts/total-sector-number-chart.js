@@ -2,12 +2,14 @@ import React, { Component } from 'react'
 import { Bar } from 'react-chartjs-2';
 import axios from 'axios'
 import axiosHeaders from '../../axios-headers'
+import dashboardFunctions from '../../dashboard-functions'
 
 export default class TotalSectorNumberChart extends Component {
 
   state = {
     totalSectorNumberLabels: [],
-    totalSectorNumberData: []
+    totalSectorNumberData: [],
+    isData: false,
   }
 
   fetchData = (year) => {
@@ -84,6 +86,7 @@ export default class TotalSectorNumberChart extends Component {
                 //SET STATE WITH SUM OF DEAL NUMBERS
                 totalSectorNumberData.push(sector.indvInvestorTotalSectorNumber + sector.totalSectorNumber)
               })
+              this.setState({ isData: dashboardFunctions.checkForData(totalSectorNumberData) })
               this.setState({ totalSectorNumberLabels: totalSectorNumberLabels })
               this.setState({ totalSectorNumberData: totalSectorNumberData })
             })
@@ -147,13 +150,21 @@ export default class TotalSectorNumberChart extends Component {
       },
     }
 
+    const graphOrPlaceholder = (dataPresent) => {
+      if (dataPresent) {
+        return (<Bar
+          data={data}
+          width={100}
+          height={50}
+          options={options}
+        />)
+      } else {
+        return (<p>No Data</p>)
+      }
+    }
+
     return (
-      <Bar
-        data={data}
-        width={100}
-        height={50}
-        options={options}
-      />
+      graphOrPlaceholder(this.state.isData)
     )
   }
 

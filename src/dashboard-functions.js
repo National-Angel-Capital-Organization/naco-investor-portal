@@ -11,7 +11,7 @@ const dashboardFunctions = {
   checkForData(array) {
     let data = false;
     for (let item of array) {
-      if (!isNaN(item)) {
+      if (!isNaN(item) && item !== 0) {
         data = true
       }
     }

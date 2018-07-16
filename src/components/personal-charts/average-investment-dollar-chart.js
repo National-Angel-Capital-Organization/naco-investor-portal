@@ -7,7 +7,8 @@ import dashboardFunctions from '../../dashboard-functions'
 export default class AverageInvestmentDollarChart extends Component {
   state = {
     averageInvestmentDollarLabels: [],
-    averageInvestmentDollarData: []
+    averageInvestmentDollarData: [],
+    isData: false,
   }
 
   fetchData = (year) => {
@@ -71,6 +72,7 @@ export default class AverageInvestmentDollarChart extends Component {
                         //SET STATE WITH AVERAGES
                         averageInvestmentDollarData.push(Math.round(average.averageInvestmentDollar))
                       })
+                      this.setState({ isData: dashboardFunctions.checkForData(averageInvestmentDollarData) })
                       this.setState({ averageInvestmentDollarLabels: averageInvestmentDollarLabels })
                       this.setState({ averageInvestmentDollarData: averageInvestmentDollarData })
                     })
@@ -144,13 +146,21 @@ export default class AverageInvestmentDollarChart extends Component {
       },
     }
 
+    const graphOrPlaceholder = (dataPresent) => {
+      if (dataPresent) {
+        return (<Bar
+          data={data}
+          width={100}
+          height={50}
+          options={options}
+        />)
+      } else {
+        return (<p>No Data</p>)
+      }
+    }
+
     return (
-      <Bar
-        data={data}
-        width={100}
-        height={50}
-        options={options}
-      />
+      graphOrPlaceholder(this.state.isData)
     )
   }
 

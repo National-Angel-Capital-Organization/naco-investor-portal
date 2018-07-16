@@ -2,12 +2,14 @@ import React, { Component } from 'react'
 import { Doughnut } from 'react-chartjs-2';
 import axios from 'axios'
 import axiosHeaders from '../../axios-headers'
+import dashboardFunctions from '../../dashboard-functions'
 
 export default class TotalInvestmentDollarChart extends Component {
 
   state = {
     TotalInvestmentDollarLabels: [],
-    TotalInvestmentDollarData: []
+    TotalInvestmentDollarData: [],
+    isData: false,
   }
 
   fetchData = (year) => {
@@ -62,6 +64,7 @@ export default class TotalInvestmentDollarChart extends Component {
                 //SET STATE WITH SUM OF INVESTMENT VALUE
                 totalInvestmentDollarData.push(Math.round(type.IndvInvestorDealDollarInvested + type.DealDollarInvested))
               })
+              this.setState({ isData: dashboardFunctions.checkForData(totalInvestmentDollarData) })
               this.setState({ TotalInvestmentDollarLabels: totalInvestmentDollarLabels })
               this.setState({ TotalInvestmentDollarData: totalInvestmentDollarData })
             })
@@ -118,13 +121,21 @@ export default class TotalInvestmentDollarChart extends Component {
       }
     }
 
+    const graphOrPlaceholder = (dataPresent) => {
+      if (dataPresent) {
+        return (<Doughnut
+          data={data}
+          width={100}
+          height={50}
+          options={options}
+        />)
+      } else {
+        return (<p>No Data</p>)
+      }
+    }
+
     return (
-      <Doughnut
-        data={data}
-        width={100}
-        height={50}
-        options={options}
-      />
+      graphOrPlaceholder(this.state.isData)
     )
   }
 

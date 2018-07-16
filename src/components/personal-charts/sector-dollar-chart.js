@@ -2,12 +2,14 @@ import React, { Component } from 'react'
 import { Bar } from 'react-chartjs-2';
 import axios from 'axios'
 import axiosHeaders from '../../axios-headers'
+import dashboardFunctions from '../../dashboard-functions'
 
 export default class SectorDollarChart extends Component {
 
   state = {
     sectorDollarLabels: [],
-    sectorDollarData: []
+    sectorDollarData: [],
+    isData: false,
   }
 
   fetchData = (year) => {
@@ -38,6 +40,7 @@ export default class SectorDollarChart extends Component {
             //SET STATE WITH SUM OF DEAL DOLLARS
             sectorDollarData.push(Math.round(sector.sectorDollar))
           })
+          this.setState({ isData: dashboardFunctions.checkForData(sectorDollarData) })
           this.setState({ sectorDollarLabels: sectorDollarLabels })
           this.setState({ sectorDollarData: sectorDollarData })
         })
@@ -112,13 +115,21 @@ export default class SectorDollarChart extends Component {
       }
     }
 
+    const graphOrPlaceholder = (dataPresent) => {
+      if (dataPresent) {
+        return (<Bar
+          data={data}
+          width={100}
+          height={50}
+          options={options}
+        />)
+      } else {
+        return (<p>No Data</p>)
+      }
+    }
+
     return (
-      <Bar
-        data={data}
-        width={100}
-        height={50}
-        options={options}
-      />
+      graphOrPlaceholder(this.state.isData)
     )
   }
 

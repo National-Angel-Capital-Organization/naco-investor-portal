@@ -2,11 +2,13 @@ import React, { Component } from 'react'
 import { Bar } from 'react-chartjs-2';
 import axios from 'axios'
 import axiosHeaders from '../../axios-headers'
+import dashboardFunctions from '../../dashboard-functions'
 
 export default class AverageInvestmentNumberChart extends Component {
   state = {
     averageInvestmentNumberLabels: [],
-    averageInvestmentNumberData: []
+    averageInvestmentNumberData: [],
+    isData: false,
   }
 
   fetchData = (year) => {
@@ -56,6 +58,7 @@ export default class AverageInvestmentNumberChart extends Component {
                     //SET STATE WITH AVERAGES
                     averageInvestmentNumberData.push((Math.round(average.investmentNumber * 100) / 100))
                   })
+                  this.setState({ isData: dashboardFunctions.checkForData(averageInvestmentNumberData) })
                   this.setState({ averageInvestmentNumberLabels: averageInvestmentNumberLabels })
                   this.setState({ averageInvestmentNumberData: averageInvestmentNumberData })
 
@@ -125,13 +128,21 @@ export default class AverageInvestmentNumberChart extends Component {
       }
     }
 
+    const graphOrPlaceholder = (dataPresent) => {
+      if (dataPresent) {
+        return (<Bar
+          data={data}
+          width={100}
+          height={50}
+          options={options}
+        />)
+      } else {
+        return (<p>No Data</p>)
+      }
+    }
+
     return (
-      <Bar
-        data={data}
-        width={100}
-        height={50}
-        options={options}
-      />
+      graphOrPlaceholder(this.state.isData)
     )
   }
 
