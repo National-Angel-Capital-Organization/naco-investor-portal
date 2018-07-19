@@ -30,19 +30,14 @@ export function handler(event, context, callback) {
     });
   }
 
-  // PUT DEALS IN DIFFERENT ARRAYS
-
-  let deals = []
-  let indvInvestorDeals = []
-
-
   // GET ALL DEALS AND ADD TO ARRAYS
 
-  function addDeals(path, dealArray) {
+  function addDeals(path, pageNumber) {
     return new Promise((resolve, reject) => {
+      let dealArray = []
         axios
         .get(
-          `https://${process.env.API_INTEGRATION_URL}.caspio.com/rest/v2/tables/${path}&q.pageNumber=1`,
+          `https://${process.env.API_INTEGRATION_URL}.caspio.com/rest/v2/tables/${path}&q.pageNumber=${pageNumber}`,
           {
             headers: {
               accept: 'application/json',
@@ -55,76 +50,7 @@ export function handler(event, context, callback) {
           res.data.Result.forEach(element => {
             dealArray.push(element)
           });
-          if (res.data.Result.length === 1000) {
-            axios
-            .get(
-              `https://${process.env.API_INTEGRATION_URL}.caspio.com/rest/v2/tables/${path}&q.pageNumber=2`,
-              {
-                headers: {
-                  accept: 'application/json',
-                  Authorization: `bearer ${cookies.token}`,
-                },
-                
-              }
-            )
-            .then(res => {
-              res.data.Result.forEach(element => {
-                dealArray.push(element)
-              });
-              if (res.data.Result.length === 1000) {
-                axios
-                .get(
-                  `https://${process.env.API_INTEGRATION_URL}.caspio.com/rest/v2/tables/${path}&q.pageNumber=3`,
-                  {
-                    headers: {
-                      accept: 'application/json',
-                      Authorization: `bearer ${cookies.token}`,
-                    },
-                    
-                  }
-                )
-                .then(res => {
-                  res.data.Result.forEach(element => {
-                    dealArray.push(element)
-                  });
-                  if (res.data.Result.length === 1000) {
-                    axios
-                    .get(
-                      `https://${process.env.API_INTEGRATION_URL}.caspio.com/rest/v2/tables/${path}&q.pageNumber=4`,
-                      {
-                        headers: {
-                          accept: 'application/json',
-                          Authorization: `bearer ${cookies.token}`,
-                        },
-                        
-                      }
-                    )
-                    .then(res => {
-                      res.data.Result.forEach(element => {
-                        dealArray.push(element)
-                      });
-                      resolve (dealArray)
-                    })
-                    .catch(err => {
-                      reject(err)
-                    })
-                  } else {
-                    resolve (dealArray)
-                  }
-                })
-                .catch(err => {
-                  reject(err)
-                })
-              } else {
-                resolve (dealArray)
-              }
-            })
-            .catch(err => {
-              reject(err)
-            })
-          } else {
             resolve (dealArray)
-          }
         })
         .catch(err => {
           reject (err)
@@ -134,8 +60,32 @@ export function handler(event, context, callback) {
       
 
       async function getAllDeals() {
-        const groupDeals = await addDeals(`Deals/records?q.pageSize=1000`, deals)
-        const investorDeals = await addDeals(`IndvInvestorDeals/records?q.pageSize=1000`, indvInvestorDeals)
+        // GROUP DEAL VARIABLES
+        let groupDeals = []
+        let newGroupDeals = []
+        let groupPageNumber = 1
+        // INVESTOR DEAL VARIABLES
+        let investorDeals = []
+        let newinvestorDeals = []
+        let investorPageNumber = 1
+
+        // COLLECT GROUP DEALS
+        do {
+        newGroupDeals = await addDeals(`Deals/records?q.pageSize=1000`, groupPageNumber)
+        newGroupDeals.forEach(element => {
+          groupDeals.push(element)
+        }); 
+        groupPageNumber++
+        } while (groupDeals.length % 1000 === 0 && newGroupDeals.length !== 0)
+
+      // COLLECT INVESTOR DEALS
+        do {
+          newinvestorDeals = await addDeals(`IndvInvestorDeals/records?q.pageSize=1000`, investorPageNumber)
+          newinvestorDeals.forEach(element => {
+            investorDeals.push(element)
+          });
+          investorPageNumber++
+        } while (investorDeals.length % 1000 === 0 && newinvestorDeals.length !== 0)
         console.log(groupDeals.length)
         console.log(investorDeals.length)
       }

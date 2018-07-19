@@ -3182,8 +3182,32 @@ __webpack_require__(43).config();
 function handler(event, context, callback) {
   let getAllDeals = (() => {
     var _ref = _asyncToGenerator(function* () {
-      const groupDeals = yield addDeals(`Deals/records?q.pageSize=1000`, deals);
-      const investorDeals = yield addDeals(`IndvInvestorDeals/records?q.pageSize=1000`, indvInvestorDeals);
+      // GROUP DEAL VARIABLES
+      let groupDeals = [];
+      let newGroupDeals = [];
+      let groupPageNumber = 1;
+      // INVESTOR DEAL VARIABLES
+      let investorDeals = [];
+      let newinvestorDeals = [];
+      let investorPageNumber = 1;
+
+      // COLLECT GROUP DEALS
+      do {
+        newGroupDeals = yield addDeals(`Deals/records?q.pageSize=1000`, groupPageNumber);
+        newGroupDeals.forEach(function (element) {
+          groupDeals.push(element);
+        });
+        groupPageNumber++;
+      } while (groupDeals.length % 1000 === 0 && newGroupDeals.length !== 0);
+
+      // COLLECT INVESTOR DEALS
+      do {
+        newinvestorDeals = yield addDeals(`IndvInvestorDeals/records?q.pageSize=1000`, investorPageNumber);
+        newinvestorDeals.forEach(function (element) {
+          investorDeals.push(element);
+        });
+        investorPageNumber++;
+      } while (investorDeals.length % 1000 === 0 && newinvestorDeals.length !== 0);
       console.log(groupDeals.length);
       console.log(investorDeals.length);
     });
@@ -3218,16 +3242,12 @@ function handler(event, context, callback) {
     });
   }
 
-  // PUT DEALS IN DIFFERENT ARRAYS
-
-  let deals = [];
-  let indvInvestorDeals = [];
-
   // GET ALL DEALS AND ADD TO ARRAYS
 
-  function addDeals(path, dealArray) {
+  function addDeals(path, pageNumber) {
     return new Promise((resolve, reject) => {
-      _axios2.default.get(`https://${process.env.API_INTEGRATION_URL}.caspio.com/rest/v2/tables/${path}&q.pageNumber=1`, {
+      let dealArray = [];
+      _axios2.default.get(`https://${process.env.API_INTEGRATION_URL}.caspio.com/rest/v2/tables/${path}&q.pageNumber=${pageNumber}`, {
         headers: {
           accept: 'application/json',
           Authorization: `bearer ${cookies.token}`
@@ -3237,58 +3257,7 @@ function handler(event, context, callback) {
         res.data.Result.forEach(element => {
           dealArray.push(element);
         });
-        if (res.data.Result.length === 1000) {
-          _axios2.default.get(`https://${process.env.API_INTEGRATION_URL}.caspio.com/rest/v2/tables/${path}&q.pageNumber=2`, {
-            headers: {
-              accept: 'application/json',
-              Authorization: `bearer ${cookies.token}`
-            }
-
-          }).then(res => {
-            res.data.Result.forEach(element => {
-              dealArray.push(element);
-            });
-            if (res.data.Result.length === 1000) {
-              _axios2.default.get(`https://${process.env.API_INTEGRATION_URL}.caspio.com/rest/v2/tables/${path}&q.pageNumber=3`, {
-                headers: {
-                  accept: 'application/json',
-                  Authorization: `bearer ${cookies.token}`
-                }
-
-              }).then(res => {
-                res.data.Result.forEach(element => {
-                  dealArray.push(element);
-                });
-                if (res.data.Result.length === 1000) {
-                  _axios2.default.get(`https://${process.env.API_INTEGRATION_URL}.caspio.com/rest/v2/tables/${path}&q.pageNumber=4`, {
-                    headers: {
-                      accept: 'application/json',
-                      Authorization: `bearer ${cookies.token}`
-                    }
-
-                  }).then(res => {
-                    res.data.Result.forEach(element => {
-                      dealArray.push(element);
-                    });
-                    resolve(dealArray);
-                  }).catch(err => {
-                    reject(err);
-                  });
-                } else {
-                  resolve(dealArray);
-                }
-              }).catch(err => {
-                reject(err);
-              });
-            } else {
-              resolve(dealArray);
-            }
-          }).catch(err => {
-            reject(err);
-          });
-        } else {
-          resolve(dealArray);
-        }
+        resolve(dealArray);
       }).catch(err => {
         reject(err);
       });
