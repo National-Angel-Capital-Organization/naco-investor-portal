@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 49);
+/******/ 	return __webpack_require__(__webpack_require__.s = 47);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -3158,9 +3158,7 @@ module.exports = require("path");
 
 /***/ }),
 /* 46 */,
-/* 47 */,
-/* 48 */,
-/* 49 */
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3177,10 +3175,25 @@ var _axios2 = _interopRequireDefault(_axios);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+
 __webpack_require__(43).config();
 
 function handler(event, context, callback) {
+  let getAllDeals = (() => {
+    var _ref = _asyncToGenerator(function* () {
+      const groupDeals = yield addDeals(`Deals/records?q.pageSize=1000`, deals);
+      const investorDeals = yield addDeals(`IndvInvestorDeals/records?q.pageSize=1000`, indvInvestorDeals);
+      console.log(groupDeals.length);
+      console.log(investorDeals.length);
+    });
 
+    return function getAllDeals() {
+      return _ref.apply(this, arguments);
+    };
+  })();
+
+  // USER Email From Client Context
   let userEmail = '';
   if (event.headers.host === 'localhost:8000') {
     userEmail = 'bhunter@nacocanada.com';
@@ -3188,6 +3201,7 @@ function handler(event, context, callback) {
     userEmail = context.clientContext.user.email;
   }
 
+  // GET COOKIES
   let cookies = {};
 
   if (event.headers.cookie) {
@@ -3204,73 +3218,84 @@ function handler(event, context, callback) {
     });
   }
 
-  let path = event.queryStringParameters.path;
+  // PUT DEALS IN DIFFERENT ARRAYS
 
-  if (event.queryStringParameters.select) {
+  let deals = [];
+  let indvInvestorDeals = [];
 
-    const select = JSON.parse(event.queryStringParameters.select);
-    path += "?q.select=";
+  // GET ALL DEALS AND ADD TO ARRAYS
 
-    for (let param in select) {
-      path += `${select[param]}%2C%20`;
-    }
-    // trim the last comma from the end
-    if (path.substr(path.length - 6) === '%2C%20') {
-      path = path.substr(0, path.length - 6);
-    }
-  }
+  function addDeals(path, dealArray) {
+    return new Promise((resolve, reject) => {
+      _axios2.default.get(`https://${process.env.API_INTEGRATION_URL}.caspio.com/rest/v2/tables/${path}&q.pageNumber=1`, {
+        headers: {
+          accept: 'application/json',
+          Authorization: `bearer ${cookies.token}`
+        }
 
-  if (event.queryStringParameters.where) {
-    const where = JSON.parse(event.queryStringParameters.where);
+      }).then(res => {
+        res.data.Result.forEach(element => {
+          dealArray.push(element);
+        });
+        if (res.data.Result.length === 1000) {
+          _axios2.default.get(`https://${process.env.API_INTEGRATION_URL}.caspio.com/rest/v2/tables/${path}&q.pageNumber=2`, {
+            headers: {
+              accept: 'application/json',
+              Authorization: `bearer ${cookies.token}`
+            }
 
-    if (event.queryStringParameters.select) {
-      path += "&q.where=";
-    } else {
-      path += "?q.where=";
-    }
-    // if user specific, add user email
-    if (where.userSpecific) {
-      path += `IndvInvestor_email%3D'${userEmail}'%20AND%20`;
-    } else if (where.notUser) {
-      // if results should not include user
-      path += `IndvInvestor_email%3C%3E'${userEmail}'%20AND%20IndvInvestor_email%3C%3E''%20AND%20`;
-    }
-    for (let param in where) {
-      // add the params to the path with an & at the end of each
-      if (param !== 'userSpecific' && param !== 'notUser') if (where[param].query !== 'NULL') {
-        path += `${param}${where[param].type}'${where[param].query}'%20AND%20`;
-      } else {
-        path += `${param}${where[param].type}${where[param].query}%20AND%20`;
-      }
-    }
-    // trim the last & from the end
-    if (path.substr(path.length - 9) === '%20AND%20') {
-      path = path.substr(0, path.length - 9);
-    }
-  }
+          }).then(res => {
+            res.data.Result.forEach(element => {
+              dealArray.push(element);
+            });
+            if (res.data.Result.length === 1000) {
+              _axios2.default.get(`https://${process.env.API_INTEGRATION_URL}.caspio.com/rest/v2/tables/${path}&q.pageNumber=3`, {
+                headers: {
+                  accept: 'application/json',
+                  Authorization: `bearer ${cookies.token}`
+                }
 
-  if (event.queryStringParameters.groupBy) {
-    path += `&q.groupBy=${event.queryStringParameters.groupBy}`;
-  }
+              }).then(res => {
+                res.data.Result.forEach(element => {
+                  dealArray.push(element);
+                });
+                if (res.data.Result.length === 1000) {
+                  _axios2.default.get(`https://${process.env.API_INTEGRATION_URL}.caspio.com/rest/v2/tables/${path}&q.pageNumber=4`, {
+                    headers: {
+                      accept: 'application/json',
+                      Authorization: `bearer ${cookies.token}`
+                    }
 
-  _axios2.default.get(`https://${process.env.API_INTEGRATION_URL}.caspio.com/${path}`, {
-    headers: {
-      accept: 'application/json',
-      Authorization: `bearer ${cookies.token}`
-    }
-
-  }).then(res => {
-    callback(null, {
-      statusCode: 200,
-      body: `${JSON.stringify(res.data)}`
+                  }).then(res => {
+                    res.data.Result.forEach(element => {
+                      dealArray.push(element);
+                    });
+                    resolve(dealArray);
+                  }).catch(err => {
+                    reject(err);
+                  });
+                } else {
+                  resolve(dealArray);
+                }
+              }).catch(err => {
+                reject(err);
+              });
+            } else {
+              resolve(dealArray);
+            }
+          }).catch(err => {
+            reject(err);
+          });
+        } else {
+          resolve(dealArray);
+        }
+      }).catch(err => {
+        reject(err);
+      });
     });
-  }).catch(err => {
-    console.log('ERROR', err);
-    callback(null, {
-      statusCode: 500,
-      body: `${err}`
-    });
-  });
+  }
+
+  getAllDeals();
 }
 
 /***/ })
