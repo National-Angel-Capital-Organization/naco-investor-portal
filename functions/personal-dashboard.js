@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 47);
+/******/ 	return __webpack_require__(__webpack_require__.s = 50);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -3158,7 +3158,10 @@ module.exports = require("path");
 
 /***/ }),
 /* 46 */,
-/* 47 */
+/* 47 */,
+/* 48 */,
+/* 49 */,
+/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3208,9 +3211,8 @@ function handler(event, context, callback) {
         });
         investorPageNumber++;
       } while (investorDeals.length % 1000 === 0 && newinvestorDeals.length !== 0);
-      const dealsByYear = groupByYear(groupDeals, 'Group_NameAndSubmissionYear');
-      const investorDealsByYear = groupByYear(investorDeals, 'IndvInvestor_Email_Year');
-      console.log(investorDealsByYear);
+      console.log(groupDeals.length);
+      console.log(investorDeals.length);
     });
 
     return function getAllDeals() {
@@ -3241,27 +3243,6 @@ function handler(event, context, callback) {
       statusCode: 401,
       body: `No Cookies`
     });
-  }
-
-  // DEAL SORTING
-
-  // VARIABLES
-
-  const years = ['2010', '2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018'];
-
-  // GROUP DEALS BY YEAR
-
-  function groupByYear(dealArray, yearVariable) {
-    let sortedDeals = {};
-    years.forEach(year => {
-      let dealsFromYear = dealArray.filter(deal => {
-        let dealYear = deal[yearVariable];
-        dealYear = dealYear.substr(dealYear.length - 4);
-        return dealYear === year;
-      });
-      sortedDeals[year] = dealsFromYear;
-    });
-    return sortedDeals;
   }
 
   // GET ALL DEALS AND ADD TO ARRAYS
