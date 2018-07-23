@@ -3211,12 +3211,12 @@ function handler(event, context, callback) {
         });
         investorPageNumber++;
       } while (investorDeals.length % 1000 === 0 && newinvestorDeals.length !== 0);
-      const dealsByYear = groupByYear(groupDeals, 'Group_NameAndSubmissionYear');
-      const investorDealsByYear = groupByYear(investorDeals, 'IndvInvestor_Email_Year');
-      const dealsBySector = groupBySector(groupDeals, 'Deal_MajorSector');
-      const investorDealsBySector = groupBySector(investorDeals, 'IndvInvestor_CompanyMajorSector');
-      const dealsByNewFollowOn = groupByNewFollowOn(groupDeals, 'Deal_NewOrFollowon');
-      const investorDealsByNewFollowOn = groupByNewFollowOn(investorDeals, 'IndvInvestor_NeworFollowOn');
+      const dealsByYear = yield groupByYear(groupDeals, 'Group_NameAndSubmissionYear');
+      const investorDealsByYear = yield groupByYear(investorDeals, 'IndvInvestor_Email_Year');
+      const dealsBySector = yield groupBySector(groupDeals, 'Deal_MajorSector');
+      const investorDealsBySector = yield groupBySector(investorDeals, 'IndvInvestor_CompanyMajorSector');
+      const dealsByNewFollowOn = yield groupByNewFollowOn(groupDeals, 'Deal_NewOrFollowon');
+      const investorDealsByNewFollowOn = yield groupByNewFollowOn(investorDeals, 'IndvInvestor_NeworFollowOn');
     });
 
     return function getAllDeals() {
@@ -3259,46 +3259,61 @@ function handler(event, context, callback) {
   // GROUP DEALS BY YEAR
 
   function groupByYear(dealArray, yearVariable) {
-    let sortedDeals = {};
-    years.forEach(year => {
-      let dealsFromYear = dealArray.filter(deal => {
-        let dealYear = deal[yearVariable];
-        dealYear = dealYear.substr(dealYear.length - 4);
-        return dealYear === year;
+    return new Promise((resolve, reject) => {
+      if (dealArray.length === 0) {
+        reject(console.log('Error: No deals.'));
+      }
+      let sortedDeals = {};
+      years.forEach(year => {
+        let dealsFromYear = dealArray.filter(deal => {
+          let dealYear = deal[yearVariable];
+          dealYear = dealYear.substr(dealYear.length - 4);
+          return dealYear === year;
+        });
+        sortedDeals[year] = dealsFromYear;
       });
-      sortedDeals[year] = dealsFromYear;
+      resolve(sortedDeals);
     });
-    return sortedDeals;
   }
 
   // GROUP DEALS BY NEW/FOLLOW-ON
   function groupByNewFollowOn(dealArray, newFollowOnVariable) {
-    let sortedDeals = {};
-    let newDeals = dealArray.filter(deal => {
-      let dealNewOrFollowOn = deal[newFollowOnVariable];
-      return dealNewOrFollowOn.toLowerCase() === 'new';
+    return new Promise((resolve, reject) => {
+      if (dealArray.length === 0) {
+        reject(console.log('Error: No deals.'));
+      }
+      let sortedDeals = {};
+      let newDeals = dealArray.filter(deal => {
+        let dealNewOrFollowOn = deal[newFollowOnVariable];
+        return dealNewOrFollowOn.toLowerCase() === 'new';
+      });
+      let followOnDeals = dealArray.filter(deal => {
+        let dealNewOrFollowOn = deal[newFollowOnVariable];
+        return dealNewOrFollowOn.toLowerCase() === 'follow-on';
+      });
+      sortedDeals.new = newDeals;
+      sortedDeals.followOn = followOnDeals;
+      resolve(sortedDeals);
     });
-    let followOnDeals = dealArray.filter(deal => {
-      let dealNewOrFollowOn = deal[newFollowOnVariable];
-      return dealNewOrFollowOn.toLowerCase() === 'follow-on';
-    });
-    sortedDeals.new = newDeals;
-    sortedDeals.followOn = followOnDeals;
-    return sortedDeals;
   }
 
   // GROUP DEALS BY SECTOR
 
   function groupBySector(dealArray, sectorVariable) {
-    let sortedDeals = {};
-    sectors.forEach(sector => {
-      let dealsFromSector = dealArray.filter(deal => {
-        let dealSector = deal[sectorVariable];
-        return dealSector === sector;
+    return new Promise((resolve, reject) => {
+      if (dealArray.length === 0) {
+        reject(console.log('Error: No deals.'));
+      }
+      let sortedDeals = {};
+      sectors.forEach(sector => {
+        let dealsFromSector = dealArray.filter(deal => {
+          let dealSector = deal[sectorVariable];
+          return dealSector === sector;
+        });
+        sortedDeals[sector] = dealsFromSector;
       });
-      sortedDeals[sector] = dealsFromSector;
+      resolve(sortedDeals);
     });
-    return sortedDeals;
   }
 
   // GET ALL DEALS AND ADD TO ARRAYS

@@ -1,6 +1,7 @@
 
 
 import axios from 'axios'
+import { isNull } from 'util';
 require('dotenv').config()
 
 export function handler(event, context, callback) {
@@ -41,49 +42,84 @@ export function handler(event, context, callback) {
   // GROUP DEALS BY YEAR
 
   function groupByYear(dealArray, yearVariable) {
-    let sortedDeals = {}
-    years.forEach(year => {
-      let dealsFromYear = dealArray.filter(deal => {
-        let dealYear = deal[yearVariable]
-        dealYear = dealYear.substr(dealYear.length - 4)
-        return dealYear === year
+    return new Promise((resolve, reject) => {
+      if (dealArray.length === 0) {
+        reject(console.log('Error: No deals.'))
+      }
+      let sortedDeals = {'all years': dealArray}
+      years.forEach(year => {
+        let dealsFromYear = dealArray.filter(deal => {
+          let dealYear = deal[yearVariable]
+          dealYear = dealYear.substr(dealYear.length - 4)
+          return dealYear === year
+        })
+        sortedDeals[year] = dealsFromYear
       })
-      sortedDeals[year] = dealsFromYear
+      resolve(sortedDeals)
     })
-    return sortedDeals
   }
 
 
   // GROUP DEALS BY NEW/FOLLOW-ON
   function groupByNewFollowOn(dealArray, newFollowOnVariable) {
-    let sortedDeals = {}
-    let newDeals = dealArray.filter(deal => {
-      let dealNewOrFollowOn = deal[newFollowOnVariable]
-      return dealNewOrFollowOn.toLowerCase() === 'new'
+    return new Promise((resolve, reject) => {
+      if (dealArray.length === 0) {
+        reject(console.log('Error: No deals.'))
+      }
+      let sortedDeals = {}
+      let newDeals = dealArray.filter(deal => {
+        let dealNewOrFollowOn = deal[newFollowOnVariable]
+        return dealNewOrFollowOn.toLowerCase() === 'new'
+      })
+      let followOnDeals = dealArray.filter(deal => {
+        let dealNewOrFollowOn = deal[newFollowOnVariable]
+        return dealNewOrFollowOn.toLowerCase() === 'follow-on'
+      })
+      sortedDeals.new = newDeals
+      sortedDeals.followOn = followOnDeals
+      resolve(sortedDeals)
     })
-    let followOnDeals = dealArray.filter(deal => {
-      let dealNewOrFollowOn = deal[newFollowOnVariable]
-      return dealNewOrFollowOn.toLowerCase() === 'follow-on'
-    })
-    sortedDeals.new = newDeals
-    sortedDeals.followOn = followOnDeals
-    return sortedDeals
   }
 
   // GROUP DEALS BY SECTOR
 
   function groupBySector(dealArray, sectorVariable) {
-    let sortedDeals = {}
-    sectors.forEach(sector => {
-      let dealsFromSector = dealArray.filter(deal => {
-        let dealSector = deal[sectorVariable]
-        return dealSector === sector
+    return new Promise((resolve, reject) => {
+      if (dealArray.length === 0) {
+        reject(console.log('Error: No deals.'))
+      }
+      let sortedDeals = {}
+      sectors.forEach(sector => {
+        let dealsFromSector = dealArray.filter(deal => {
+          let dealSector = deal[sectorVariable]
+          return dealSector === sector
+        })
+        sortedDeals[sector] = dealsFromSector
       })
-      sortedDeals[sector] = dealsFromSector
+      resolve(sortedDeals)
     })
-    return sortedDeals
   }
 
+
+  // GENERAL DATA FUNCTIONS
+
+  // SUM DATA
+
+  function sumData(dealArray, sectorVariable) {
+    return new Promise((resolve, reject) => {
+      if (dealArray.length === 0) {
+        reject(console.log('Error: No deals.'))
+      }
+      let valueArray = []
+      dealArray.forEach(deal => {
+        if (deal[sectorVariable] !== null) {
+          valueArray.push(deal[sectorVariable])
+        }
+      })
+      const reducer = (accumulator, currentValue) => accumulator + currentValue
+      resolve({sum: valueArray.reduce(reducer), count: valueArray.length})
+    })
+  }
 
 
   // GET ALL DEALS AND ADD TO ARRAYS
@@ -142,12 +178,23 @@ export function handler(event, context, callback) {
       });
       investorPageNumber++
     } while (investorDeals.length % 1000 === 0 && newinvestorDeals.length !== 0)
-    const dealsByYear = groupByYear(groupDeals, 'Group_NameAndSubmissionYear')
-    const investorDealsByYear = groupByYear(investorDeals, 'IndvInvestor_Email_Year')
-    const dealsBySector = groupBySector(groupDeals, 'Deal_MajorSector')
-    const investorDealsBySector = groupBySector(investorDeals, 'IndvInvestor_CompanyMajorSector')
-    const dealsByNewFollowOn = groupByNewFollowOn(groupDeals, 'Deal_NewOrFollowon')
-    const investorDealsByNewFollowOn = groupByNewFollowOn(investorDeals, 'IndvInvestor_NeworFollowOn')
+const dealsByYear = await groupByYear(groupDeals, 'Group_NameAndSubmissionYear')
+  const investorDealsByYear = await groupByYear(investorDeals, 'IndvInvestor_Email_Year')
+  return ({groupDeals: dealsByYear, investorDeals: investorDealsByYear})
   }
+  
+  // const dealsBySector = await groupBySector(groupDeals, 'Deal_MajorSector')
+  // const investorDealsBySector = await groupBySector(investorDeals, 'IndvInvestor_CompanyMajorSector')
+  // const dealsByNewFollowOn = await groupByNewFollowOn(groupDeals, 'Deal_NewOrFollowon')
+  // const investorDealsByNewFollowOn = await groupByNewFollowOn(investorDeals, 'IndvInvestor_NeworFollowOn')
+  // const groupPreMoneyValuation = await sumData(groupDeals, 'Deal_PremoneyValue')
+  // console.log(groupPreMoneyValuation.sum / groupPreMoneyValuation.count)
+
   getAllDeals()
+  .then((res) => {
+console.log(res.groupDeals['all years'].length)
+  })
+  .catch((err) => {
+    throw err
+  }) 
 }
