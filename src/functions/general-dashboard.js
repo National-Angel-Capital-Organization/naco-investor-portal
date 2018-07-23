@@ -46,7 +46,7 @@ export function handler(event, context, callback) {
       if (dealArray.length === 0) {
         reject(console.log('Error: No deals.'))
       }
-      let sortedDeals = {'all years': dealArray}
+      let sortedDeals = { 'all years': dealArray }
       years.forEach(year => {
         let dealsFromYear = dealArray.filter(deal => {
           let dealYear = deal[yearVariable]
@@ -62,74 +62,97 @@ export function handler(event, context, callback) {
 
   // GROUP DEALS BY NEW/FOLLOW-ON
   function groupByNewFollowOn(dealArray, newFollowOnVariable) {
-      let sortedDeals = {}
-      let newDeals = dealArray.filter(deal => {
-        let dealNewOrFollowOn = deal[newFollowOnVariable]
-        return dealNewOrFollowOn.toLowerCase() === 'new'
-      })
-      let followOnDeals = dealArray.filter(deal => {
-        let dealNewOrFollowOn = deal[newFollowOnVariable]
-        return dealNewOrFollowOn.toLowerCase() === 'follow-on'
-      })
-      sortedDeals.new = newDeals
-      sortedDeals.followOn = followOnDeals
-      return sortedDeals
+    let sortedDeals = {}
+    let newDeals = dealArray.filter(deal => {
+      let dealNewOrFollowOn = deal[newFollowOnVariable]
+      return dealNewOrFollowOn.toLowerCase() === 'new'
+    })
+    let followOnDeals = dealArray.filter(deal => {
+      let dealNewOrFollowOn = deal[newFollowOnVariable]
+      return dealNewOrFollowOn.toLowerCase() === 'follow-on'
+    })
+    sortedDeals.new = newDeals
+    sortedDeals.followOn = followOnDeals
+    return sortedDeals
   }
 
   // GROUP DEALS BY SECTOR
 
   function groupBySector(dealArray, sectorVariable) {
-      let sortedDeals = {}
-      sectors.forEach(sector => {
-        let dealsFromSector = dealArray.filter(deal => {
-          let dealSector = deal[sectorVariable]
-          return dealSector === sector
-        })
-        sortedDeals[sector] = dealsFromSector
+    let sortedDeals = {}
+    sectors.forEach(sector => {
+      let dealsFromSector = dealArray.filter(deal => {
+        let dealSector = deal[sectorVariable]
+        return dealSector === sector
       })
-      return sortedDeals
+      sortedDeals[sector] = dealsFromSector
+    })
+    return sortedDeals
   }
 
   // SUM DATA
 
   function sumData(dealArray, sectorVariable) {
-      let valueArray = []
-      dealArray.forEach(deal => {
-        if (deal[sectorVariable] !== null) {
-          valueArray.push(deal[sectorVariable])
-        }
-      })
-      let sumOfValues = 0
-      const reducer = (accumulator, currentValue) => accumulator + currentValue
-      if (valueArray.length > 0) {
-        sumOfValues = valueArray.reduce(reducer)
+    let valueArray = []
+    dealArray.forEach(deal => {
+      if (deal[sectorVariable] !== null) {
+        valueArray.push(deal[sectorVariable])
       }
-    return ({ sum: sumOfValues, count: valueArray.length})
+    })
+    let sumOfValues = 0
+    const reducer = (accumulator, currentValue) => accumulator + currentValue
+    if (valueArray.length > 0) {
+      sumOfValues = valueArray.reduce(reducer)
+    }
+    return ({ sum: sumOfValues, count: valueArray.length })
   }
 
   // CHART SPECIFIC FUNCTIONS
 
   // PREMONEY VALUE
 
-function premoneyValue(deals) {
-  const groupAllDealsBySector = groupBySector(deals.groupDeals['all years'], "Deal_MajorSector")
-  let premoneyValueReturn = {'all years': {}}
-  sectors.forEach((sector) => {
-    const sectorSumCount = sumData(groupAllDealsBySector[sector], 'Deal_PremoneyValue')
-    premoneyValueReturn['all years'][sector] = sectorSumCount.sum / sectorSumCount.count
-  })
+  function premoneyValue(deals) {
+    const allGroupDealsBySector = groupBySector(deals.groupDeals['all years'], "Deal_MajorSector")
+    let premoneyValueReturn = { 'all years': {} }
+    sectors.forEach((sector) => {
+      const sectorSumCount = sumData(allGroupDealsBySector[sector], 'Deal_PremoneyValue')
+      premoneyValueReturn['all years'][sector] = sectorSumCount.sum / sectorSumCount.count
+    })
 
     years.forEach((year) => {
       premoneyValueReturn[year] = {}
-      const groupYearDealsBySector = groupBySector(deals.groupDeals[year], "Deal_MajorSector")
+      const yearGroupDealsBySector = groupBySector(deals.groupDeals[year], "Deal_MajorSector")
       sectors.forEach((sector) => {
-        const sectorSumCount = sumData(groupYearDealsBySector[sector], 'Deal_PremoneyValue')
+        const sectorSumCount = sumData(yearGroupDealsBySector[sector], 'Deal_PremoneyValue')
         premoneyValueReturn[year][sector] = sectorSumCount.sum / sectorSumCount.count
       })
     })
-  return premoneyValueReturn
+    return premoneyValueReturn
   }
 
+  // TOTAL INVESTMENT DOLLAR
+
+  function totalInvestmentDollar(deals) {
+    const allGroupDealsByNewFollowOn = groupByNewFollowOn(deals.groupDeals['all years'], "Deal_NewOrFollowon")
+    let totalInvestmentDollarReturn = { 'all years': {} }
+    const newSum = sumData(allGroupDealsByNewFollowOn.new, 'Deal_DollarInvested')
+    totalInvestmentDollarReturn['all years']['new'] = newSum.sum
+    const followOnSum = sumData(allGroupDealsByNewFollowOn.followOn, 'Deal_DollarInvested')
+    totalInvestmentDollarReturn['all years']['followOn'] = followOnSum.sum
+
+    years.forEach((year) => {
+      totalInvestmentDollarReturn[year] = {}
+      const yearGroupDealsByNewFollowOn = groupByNewFollowOn(deals.groupDeals[year], "Deal_NewOrFollowon")
+      const newSum = sumData(yearGroupDealsByNewFollowOn.new, 'Deal_DollarInvested')
+      totalInvestmentDollarReturn[year]['new'] = newSum.sum
+      const followOnSum = sumData(yearGroupDealsByNewFollowOn.followOn, 'Deal_DollarInvested')
+      totalInvestmentDollarReturn[year]['followOn'] = followOnSum.sum
+    })
+    return totalInvestmentDollarReturn
+  }
+
+
+// DEAL MANAGEMENT
 
   // GET ALL DEALS AND ADD TO ARRAYS
 
@@ -187,11 +210,11 @@ function premoneyValue(deals) {
       });
       investorPageNumber++
     } while (investorDeals.length % 1000 === 0 && newinvestorDeals.length !== 0)
-const dealsByYear = await groupByYear(groupDeals, 'Group_NameAndSubmissionYear')
-  const investorDealsByYear = await groupByYear(investorDeals, 'IndvInvestor_Email_Year')
-  return ({groupDeals: dealsByYear, investorDeals: investorDealsByYear})
+    const dealsByYear = await groupByYear(groupDeals, 'Group_NameAndSubmissionYear')
+    const investorDealsByYear = await groupByYear(investorDeals, 'IndvInvestor_Email_Year')
+    return ({ groupDeals: dealsByYear, investorDeals: investorDealsByYear })
   }
-  
+
   // const dealsBySector = await groupBySector(groupDeals, 'Deal_MajorSector')
   // const investorDealsBySector = await groupBySector(investorDeals, 'IndvInvestor_CompanyMajorSector')
   // const dealsByNewFollowOn = await groupByNewFollowOn(groupDeals, 'Deal_NewOrFollowon')
@@ -200,10 +223,11 @@ const dealsByYear = await groupByYear(groupDeals, 'Group_NameAndSubmissionYear')
   // console.log(groupPreMoneyValuation.sum / groupPreMoneyValuation.count)
 
   getAllDeals()
-  .then((res) => {
-    console.log(premoneyValue(res))
-  })
-  .catch((err) => {
-    throw err
-  }) 
+    .then((res) => {
+      console.log(premoneyValue(res))
+      console.log(totalInvestmentDollar(res))
+    })
+    .catch((err) => {
+      throw err
+    })
 }

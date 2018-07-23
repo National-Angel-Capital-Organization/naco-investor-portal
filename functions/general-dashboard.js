@@ -3331,23 +3331,46 @@ function handler(event, context, callback) {
   // PREMONEY VALUE
 
   function premoneyValue(deals) {
-    const groupAllDealsBySector = groupBySector(deals.groupDeals['all years'], "Deal_MajorSector");
+    const allGroupDealsBySector = groupBySector(deals.groupDeals['all years'], "Deal_MajorSector");
     let premoneyValueReturn = { 'all years': {} };
     sectors.forEach(sector => {
-      const sectorSumCount = sumData(groupAllDealsBySector[sector], 'Deal_PremoneyValue');
+      const sectorSumCount = sumData(allGroupDealsBySector[sector], 'Deal_PremoneyValue');
       premoneyValueReturn['all years'][sector] = sectorSumCount.sum / sectorSumCount.count;
     });
 
     years.forEach(year => {
       premoneyValueReturn[year] = {};
-      const groupYearDealsBySector = groupBySector(deals.groupDeals[year], "Deal_MajorSector");
+      const yearGroupDealsBySector = groupBySector(deals.groupDeals[year], "Deal_MajorSector");
       sectors.forEach(sector => {
-        const sectorSumCount = sumData(groupYearDealsBySector[sector], 'Deal_PremoneyValue');
+        const sectorSumCount = sumData(yearGroupDealsBySector[sector], 'Deal_PremoneyValue');
         premoneyValueReturn[year][sector] = sectorSumCount.sum / sectorSumCount.count;
       });
     });
     return premoneyValueReturn;
   }
+
+  // TOTAL INVESTMENT DOLLAR
+
+  function totalInvestmentDollar(deals) {
+    const allGroupDealsByNewFollowOn = groupByNewFollowOn(deals.groupDeals['all years'], "Deal_NewOrFollowon");
+    let totalInvestmentDollarReturn = { 'all years': {} };
+    const newSum = sumData(allGroupDealsByNewFollowOn.new, 'Deal_DollarInvested');
+    totalInvestmentDollarReturn['all years']['new'] = newSum.sum;
+    const followOnSum = sumData(allGroupDealsByNewFollowOn.followOn, 'Deal_DollarInvested');
+    totalInvestmentDollarReturn['all years']['followOn'] = followOnSum.sum;
+
+    years.forEach(year => {
+      totalInvestmentDollarReturn[year] = {};
+      const yearGroupDealsByNewFollowOn = groupByNewFollowOn(deals.groupDeals[year], "Deal_NewOrFollowon");
+      const newSum = sumData(yearGroupDealsByNewFollowOn.new, 'Deal_DollarInvested');
+      totalInvestmentDollarReturn[year]['new'] = newSum.sum;
+      const followOnSum = sumData(yearGroupDealsByNewFollowOn.followOn, 'Deal_DollarInvested');
+      totalInvestmentDollarReturn[year]['followOn'] = followOnSum.sum;
+    });
+    return totalInvestmentDollarReturn;
+  }
+
+  // DEAL MANAGEMENT
 
   // GET ALL DEALS AND ADD TO ARRAYS
 
@@ -3373,6 +3396,7 @@ function handler(event, context, callback) {
 
   getAllDeals().then(res => {
     console.log(premoneyValue(res));
+    console.log(totalInvestmentDollar(res));
   }).catch(err => {
     throw err;
   });
