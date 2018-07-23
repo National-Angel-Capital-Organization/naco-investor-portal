@@ -62,10 +62,6 @@ export function handler(event, context, callback) {
 
   // GROUP DEALS BY NEW/FOLLOW-ON
   function groupByNewFollowOn(dealArray, newFollowOnVariable) {
-    return new Promise((resolve, reject) => {
-      if (dealArray.length === 0) {
-        reject(console.log('Error: No deals.'))
-      }
       let sortedDeals = {}
       let newDeals = dealArray.filter(deal => {
         let dealNewOrFollowOn = deal[newFollowOnVariable]
@@ -77,17 +73,12 @@ export function handler(event, context, callback) {
       })
       sortedDeals.new = newDeals
       sortedDeals.followOn = followOnDeals
-      resolve(sortedDeals)
-    })
+      return sortedDeals
   }
 
   // GROUP DEALS BY SECTOR
 
   function groupBySector(dealArray, sectorVariable) {
-    return new Promise((resolve, reject) => {
-      if (dealArray.length === 0) {
-        reject(console.log('Error: No deals.'))
-      }
       let sortedDeals = {}
       sectors.forEach(sector => {
         let dealsFromSector = dealArray.filter(deal => {
@@ -96,29 +87,47 @@ export function handler(event, context, callback) {
         })
         sortedDeals[sector] = dealsFromSector
       })
-      resolve(sortedDeals)
-    })
+      return sortedDeals
   }
-
-
-  // GENERAL DATA FUNCTIONS
 
   // SUM DATA
 
   function sumData(dealArray, sectorVariable) {
-    return new Promise((resolve, reject) => {
-      if (dealArray.length === 0) {
-        reject(console.log('Error: No deals.'))
-      }
       let valueArray = []
       dealArray.forEach(deal => {
         if (deal[sectorVariable] !== null) {
           valueArray.push(deal[sectorVariable])
         }
       })
+      let sumOfValues = 0
       const reducer = (accumulator, currentValue) => accumulator + currentValue
-      resolve({sum: valueArray.reduce(reducer), count: valueArray.length})
+      if (valueArray.length > 0) {
+        sumOfValues = valueArray.reduce(reducer)
+      }
+    return ({ sum: sumOfValues, count: valueArray.length})
+  }
+
+  // CHART SPECIFIC FUNCTIONS
+
+  // PREMONEY VALUE
+
+function premoneyValue(deals) {
+  const groupAllDealsBySector = groupBySector(deals.groupDeals['all years'], "Deal_MajorSector")
+  let premoneyValueReturn = {'all years': {}}
+  sectors.forEach((sector) => {
+    const sectorSumCount = sumData(groupAllDealsBySector[sector], 'Deal_PremoneyValue')
+    premoneyValueReturn['all years'][sector] = sectorSumCount.sum / sectorSumCount.count
+  })
+
+    years.forEach((year) => {
+      premoneyValueReturn[year] = {}
+      const groupYearDealsBySector = groupBySector(deals.groupDeals[year], "Deal_MajorSector")
+      sectors.forEach((sector) => {
+        const sectorSumCount = sumData(groupYearDealsBySector[sector], 'Deal_PremoneyValue')
+        premoneyValueReturn[year][sector] = sectorSumCount.sum / sectorSumCount.count
+      })
     })
+  return premoneyValueReturn
   }
 
 
@@ -192,7 +201,7 @@ const dealsByYear = await groupByYear(groupDeals, 'Group_NameAndSubmissionYear')
 
   getAllDeals()
   .then((res) => {
-console.log(res.groupDeals['all years'].length)
+    console.log(premoneyValue(res))
   })
   .catch((err) => {
     throw err
