@@ -46,7 +46,7 @@ export function handler(event, context, callback) {
       if (dealArray.length === 0) {
         reject(console.log('Error: No deals.'))
       }
-      let sortedDeals = { 'all years': dealArray }
+      let sortedDeals = { 'unfiltered': dealArray }
       years.forEach(year => {
         let dealsFromYear = dealArray.filter(deal => {
           let dealYear = deal[yearVariable]
@@ -109,23 +109,29 @@ export function handler(event, context, callback) {
 
   // CHART SPECIFIC FUNCTIONS
 
+  function chart(sortArray, calculation, groupedDeals) {
+    let returnObject = { }
+    sortArray.forEach((type) => {
+      const calculatedValues = calculation(groupedDeals[type])
+      returnObject[type] = calculatedValues
+    })
+    return returnObject
+  }
+
   // PREMONEY VALUE
 
-  function premoneyValue(deals) {
-    const allGroupDealsBySector = groupBySector(deals.groupDeals['all years'], "Deal_MajorSector")
-    let premoneyValueReturn = { 'all years': {} }
-    sectors.forEach((sector) => {
-      const sectorSumCount = sumData(allGroupDealsBySector[sector], 'Deal_PremoneyValue')
-      premoneyValueReturn['all years'][sector] = sectorSumCount.sum / sectorSumCount.count
-    })
+  function premoneyValueCalculations(deals) {
+    const sectorSumCount = sumData(deals, 'Deal_PremoneyValue')
+    return sectorSumCount.sum / sectorSumCount.count
+  }
 
+  function premoneyValue(deals) {
+    // Not Filtered
+    let premoneyValueReturn = {}
+    premoneyValueReturn['unfiltered'] = chart(sectors, premoneyValueCalculations, groupBySector(deals.groupDeals['unfiltered'], "Deal_MajorSector"))
+    //Filtered By Year
     years.forEach((year) => {
-      premoneyValueReturn[year] = {}
-      const yearGroupDealsBySector = groupBySector(deals.groupDeals[year], "Deal_MajorSector")
-      sectors.forEach((sector) => {
-        const sectorSumCount = sumData(yearGroupDealsBySector[sector], 'Deal_PremoneyValue')
-        premoneyValueReturn[year][sector] = sectorSumCount.sum / sectorSumCount.count
-      })
+      premoneyValueReturn[year] = chart(sectors, premoneyValueCalculations, groupBySector(deals.groupDeals[year], "Deal_MajorSector"))
     })
     return premoneyValueReturn
   }
@@ -133,13 +139,14 @@ export function handler(event, context, callback) {
   // TOTAL INVESTMENT DOLLAR
 
   function totalInvestmentDollar(deals) {
-    const allGroupDealsByNewFollowOn = groupByNewFollowOn(deals.groupDeals['all years'], "Deal_NewOrFollowon")
-    let totalInvestmentDollarReturn = { 'all years': {} }
+    // Not Filtered
+    const allGroupDealsByNewFollowOn = groupByNewFollowOn(deals.groupDeals['unfiltered'], "Deal_NewOrFollowon")
+    let totalInvestmentDollarReturn = { 'unfiltered': {} }
     const newSum = sumData(allGroupDealsByNewFollowOn.new, 'Deal_DollarInvested')
-    totalInvestmentDollarReturn['all years']['new'] = newSum.sum
+    totalInvestmentDollarReturn['unfiltered']['new'] = newSum.sum
     const followOnSum = sumData(allGroupDealsByNewFollowOn.followOn, 'Deal_DollarInvested')
-    totalInvestmentDollarReturn['all years']['followOn'] = followOnSum.sum
-
+    totalInvestmentDollarReturn['unfiltered']['followOn'] = followOnSum.sum
+    // Filtered by Year
     years.forEach((year) => {
       totalInvestmentDollarReturn[year] = {}
       const yearGroupDealsByNewFollowOn = groupByNewFollowOn(deals.groupDeals[year], "Deal_NewOrFollowon")
@@ -231,3 +238,63 @@ export function handler(event, context, callback) {
       throw err
     })
 }
+
+
+
+
+
+
+
+// RUN ALL FUNCTION COMBOS
+
+
+// function func1() {
+//   return "Number 1"
+// }
+
+// function func2() {
+//   return "Number 2"
+// }
+
+// function func3() {
+//   return "Number 3"
+// }
+
+
+// testArr = [func1, func2, func3]
+
+// function runAllFunctions(funcArr) {
+//   let newArr = []
+//   funcArr.forEach((func) => {
+//     newArr.push(func())
+//   })
+//   return newArr
+// }
+
+
+// var combine = function (a) {
+//   var fn = function (n, src, got, all) {
+//     if (n == 0) {
+//       if (got.length > 0) {
+//         all[all.length] = got;
+//       }
+//       return;
+//     }
+//     for (var j = 0; j < src.length; j++) {
+//       fn(n - 1, src.slice(j + 1), got.concat([src[j]]), all);
+//     }
+//     return;
+//   }
+//   var all = [];
+//   for (var i = 0; i < a.length; i++) {
+//     fn(i, a, [], all);
+//   }
+//   all.push(a);
+//   return all;
+// }
+
+// let allFuncs = combine(testArr)
+
+// allFuncs.forEach((arr) => {
+//   console.log(runAllFunctions(arr))
+// })
