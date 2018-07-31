@@ -118,6 +118,17 @@ export function handler(event, context, callback) {
     return returnObject
   }
 
+  // FILTERING
+
+  // UNFILTERED
+  
+  function unfiltered(finalObject, dealSorter) {
+    return finalObject['unfiltered'] = dealSorter
+  }
+
+  // FILTERED BY YEAR
+
+
   // PREMONEY VALUE
 
   function premoneyValueCalculations(deals) {
@@ -125,14 +136,23 @@ export function handler(event, context, callback) {
     return sectorSumCount.sum / sectorSumCount.count
   }
 
+
+  function yearFilteredPremoneyValue(finalObject, allDeals) {
+    finalObject['years'] = {}
+    years.forEach((year) => {
+      finalObject['years'][year] = chart(sectors, premoneyValueCalculations, groupBySector(allDeals.groupDeals[year], "Deal_MajorSector"))
+    })
+    return finalObject
+  }
+
   function premoneyValue(deals) {
     // Not Filtered
     let premoneyValueReturn = {}
-    premoneyValueReturn['unfiltered'] = chart(sectors, premoneyValueCalculations, groupBySector(deals.groupDeals['unfiltered'], "Deal_MajorSector"))
+    unfiltered(premoneyValueReturn, chart(sectors, premoneyValueCalculations, groupBySector(deals.groupDeals['unfiltered'], "Deal_MajorSector")))
+
     //Filtered By Year
-    years.forEach((year) => {
-      premoneyValueReturn[year] = chart(sectors, premoneyValueCalculations, groupBySector(deals.groupDeals[year], "Deal_MajorSector"))
-    })
+    yearFilteredPremoneyValue(premoneyValueReturn, deals)
+    
     return premoneyValueReturn
   }
 
