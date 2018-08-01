@@ -110,7 +110,7 @@ export function handler(event, context, callback) {
   // CHART SPECIFIC FUNCTIONS
 
   function chart(sortArray, calculation, groupedDeals) {
-    let returnObject = { }
+    let returnObject = {}
     sortArray.forEach((type) => {
       const calculatedValues = calculation(groupedDeals[type])
       returnObject[type] = calculatedValues
@@ -121,12 +121,23 @@ export function handler(event, context, callback) {
   // FILTERING
 
   // UNFILTERED
-  
+
   function unfiltered(finalObject, dealSorter) {
     return finalObject['unfiltered'] = dealSorter
   }
 
   // FILTERED BY YEAR
+
+  function yearFiltered(finalObject, chartFunctionArray, groupFunctionArray) {
+    finalObject['years'] = {}
+    let sortFunction = groupFunctionArray[0]
+    let dealsToSort = groupFunctionArray[1]
+    years.forEach((year) => {
+      finalObject['years'][year] = chart(chartFunctionArray[0], chartFunctionArray[1], sortFunction(dealsToSort[year], groupFunctionArray))
+    })
+    return finalObject
+  }
+
 
 
   // PREMONEY VALUE
@@ -136,23 +147,14 @@ export function handler(event, context, callback) {
     return sectorSumCount.sum / sectorSumCount.count
   }
 
-
-  function yearFilteredPremoneyValue(finalObject, allDeals) {
-    finalObject['years'] = {}
-    years.forEach((year) => {
-      finalObject['years'][year] = chart(sectors, premoneyValueCalculations, groupBySector(allDeals.groupDeals[year], "Deal_MajorSector"))
-    })
-    return finalObject
-  }
-
   function premoneyValue(deals) {
     // Not Filtered
     let premoneyValueReturn = {}
     unfiltered(premoneyValueReturn, chart(sectors, premoneyValueCalculations, groupBySector(deals.groupDeals['unfiltered'], "Deal_MajorSector")))
 
     //Filtered By Year
-    yearFilteredPremoneyValue(premoneyValueReturn, deals)
-    
+    yearFiltered(premoneyValueReturn, [sectors, premoneyValueCalculations], [groupBySector, deals.groupDeals, "Deal_MajorSector"])
+
     return premoneyValueReturn
   }
 
@@ -179,7 +181,7 @@ export function handler(event, context, callback) {
   }
 
 
-// DEAL MANAGEMENT
+  // DEAL MANAGEMENT
 
   // GET ALL DEALS AND ADD TO ARRAYS
 

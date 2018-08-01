@@ -3347,6 +3347,15 @@ function handler(event, context, callback) {
 
   // FILTERED BY YEAR
 
+  function yearFiltered(finalObject, chartFunctionArray, groupFunctionArray) {
+    finalObject['years'] = {};
+    let sortFunction = groupFunctionArray[0];
+    let dealsToSort = groupFunctionArray[1];
+    years.forEach(year => {
+      finalObject['years'][year] = chart(chartFunctionArray[0], chartFunctionArray[1], sortFunction(dealsToSort[year], groupFunctionArray));
+    });
+    return finalObject;
+  }
 
   // PREMONEY VALUE
 
@@ -3355,21 +3364,13 @@ function handler(event, context, callback) {
     return sectorSumCount.sum / sectorSumCount.count;
   }
 
-  function yearFilteredPremoneyValue(finalObject, allDeals) {
-    finalObject['years'] = {};
-    years.forEach(year => {
-      finalObject['years'][year] = chart(sectors, premoneyValueCalculations, groupBySector(allDeals.groupDeals[year], "Deal_MajorSector"));
-    });
-    return finalObject;
-  }
-
   function premoneyValue(deals) {
     // Not Filtered
     let premoneyValueReturn = {};
     unfiltered(premoneyValueReturn, chart(sectors, premoneyValueCalculations, groupBySector(deals.groupDeals['unfiltered'], "Deal_MajorSector")));
 
     //Filtered By Year
-    yearFilteredPremoneyValue(premoneyValueReturn, deals);
+    yearFiltered(premoneyValueReturn, [sectors, premoneyValueCalculations], [groupBySector, deals.groupDeals, "Deal_MajorSector"]);
 
     return premoneyValueReturn;
   }
