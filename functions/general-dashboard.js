@@ -3258,6 +3258,7 @@ function handler(event, context, callback) {
 
   const years = ['2010', '2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018'];
   const sectors = ['Clean Technologies', 'Energy', 'ICT', 'Life Sciences', 'Manufacturing', 'Services'];
+  const provinces = ['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT'];
 
   // GROUP DEALS BY YEAR
 
@@ -3305,6 +3306,20 @@ function handler(event, context, callback) {
         return dealSector === sector;
       });
       sortedDeals[sector] = dealsFromSector;
+    });
+    return sortedDeals;
+  }
+
+  // GROUP DEALS BY PROVINCE
+
+  function groupByProvince(dealArray, provinceVariable) {
+    let sortedDeals = {};
+    provinces.forEach(province => {
+      let dealsFromProvince = dealArray.filter(deal => {
+        let dealProvince = deal[provinceVariable];
+        return dealProvince === province;
+      });
+      sortedDeals[province] = dealsFromProvince;
     });
     return sortedDeals;
   }
