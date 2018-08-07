@@ -3195,7 +3195,7 @@ function handler(event, context, callback) {
 
       // COLLECT GROUP DEALS
       do {
-        newGroupDeals = yield addDeals(`Deals/records?q.pageSize=1000`, groupPageNumber);
+        newGroupDeals = yield addDeals(`views/IndvInvestor_DealsCharacteristic/records?q.pageSize=1000`, groupPageNumber);
         newGroupDeals.forEach(function (element) {
           groupDeals.push(element);
         });
@@ -3204,7 +3204,7 @@ function handler(event, context, callback) {
 
       // COLLECT INVESTOR DEALS
       do {
-        newinvestorDeals = yield addDeals(`IndvInvestorDeals/records?q.pageSize=1000`, investorPageNumber);
+        newinvestorDeals = yield addDeals(`tables/IndvInvestorDeals/records?q.pageSize=1000`, investorPageNumber);
         newinvestorDeals.forEach(function (element) {
           investorDeals.push(element);
         });
@@ -3212,20 +3212,18 @@ function handler(event, context, callback) {
       } while (investorDeals.length % 1000 === 0 && newinvestorDeals.length !== 0);
       const dealsByYear = yield groupByYear(groupDeals, 'Group_NameAndSubmissionYear');
       const investorDealsByYear = yield groupByYear(investorDeals, 'IndvInvestor_Email_Year');
-      return { groupDeals: dealsByYear, investorDeals: investorDealsByYear };
+      const dealsByProvince = yield groupByProvince(groupDeals, 'Group_Province');
+      // const investorDealsByProvince = await groupByProvince(investorDeals, 'IndvInvestor_Email_Year')
+      return {
+        years: { groupDeals: dealsByYear, investorDeals: investorDealsByYear },
+        provinces: { groupDeals: dealsByProvince, investorDeals: {} }
+      };
     });
 
     return function getAllDeals() {
       return _ref.apply(this, arguments);
     };
   })();
-
-  // const dealsBySector = await groupBySector(groupDeals, 'Deal_MajorSector')
-  // const investorDealsBySector = await groupBySector(investorDeals, 'IndvInvestor_CompanyMajorSector')
-  // const dealsByNewFollowOn = await groupByNewFollowOn(groupDeals, 'Deal_NewOrFollowon')
-  // const investorDealsByNewFollowOn = await groupByNewFollowOn(investorDeals, 'IndvInvestor_NeworFollowOn')
-  // const groupPreMoneyValuation = await sumData(groupDeals, 'Deal_PremoneyValue')
-  // console.log(groupPreMoneyValuation.sum / groupPreMoneyValuation.count)
 
   // USER Email From Client Context
   let userEmail = '';
@@ -3367,7 +3365,19 @@ function handler(event, context, callback) {
     let sortFunction = groupFunctionArray[0];
     let dealsToSort = groupFunctionArray[1];
     years.forEach(year => {
-      finalObject['years'][year] = chart(chartFunctionArray[0], chartFunctionArray[1], sortFunction(dealsToSort[year], groupFunctionArray));
+      finalObject['years'][year] = chart(chartFunctionArray[0], chartFunctionArray[1], sortFunction(dealsToSort[year], groupFunctionArray[2]));
+    });
+    return finalObject;
+  }
+
+  // FILTERED BY PROVINCE
+
+  function provinceFiltered(finalObject, chartFunctionArray, groupFunctionArray) {
+    finalObject['provinces'] = {};
+    let sortFunction = groupFunctionArray[0];
+    let dealsToSort = groupFunctionArray[1];
+    provinces.forEach(province => {
+      finalObject['provinces'][province] = chart(chartFunctionArray[0], chartFunctionArray[1], sortFunction(dealsToSort[province], groupFunctionArray[2]));
     });
     return finalObject;
   }
@@ -3382,10 +3392,13 @@ function handler(event, context, callback) {
   function premoneyValue(deals) {
     // Not Filtered
     let premoneyValueReturn = {};
-    unfiltered(premoneyValueReturn, chart(sectors, premoneyValueCalculations, groupBySector(deals.groupDeals['unfiltered'], "Deal_MajorSector")));
+    unfiltered(premoneyValueReturn, chart(sectors, premoneyValueCalculations, groupBySector(deals.years.groupDeals['unfiltered'], "Deal_MajorSector")));
 
     //Filtered By Year
-    yearFiltered(premoneyValueReturn, [sectors, premoneyValueCalculations], [groupBySector, deals.groupDeals, "Deal_MajorSector"]);
+    yearFiltered(premoneyValueReturn, [sectors, premoneyValueCalculations], [groupBySector, deals.years.groupDeals, "Deal_MajorSector"]);
+
+    // Filtered By Province 
+    provinceFiltered(premoneyValueReturn, [sectors, premoneyValueCalculations], [groupBySector, deals.provinces.groupDeals, "Deal_MajorSector"]);
 
     return premoneyValueReturn;
   }
@@ -3394,7 +3407,7 @@ function handler(event, context, callback) {
 
   function totalInvestmentDollar(deals) {
     // Not Filtered
-    const allGroupDealsByNewFollowOn = groupByNewFollowOn(deals.groupDeals['unfiltered'], "Deal_NewOrFollowon");
+    const allGroupDealsByNewFollowOn = groupByNewFollowOn(deals.years.groupDeals['unfiltered'], "Deal_NewOrFollowon");
     let totalInvestmentDollarReturn = { 'unfiltered': {} };
     const newSum = sumData(allGroupDealsByNewFollowOn.new, 'Deal_DollarInvested');
     totalInvestmentDollarReturn['unfiltered']['new'] = newSum.sum;
@@ -3403,7 +3416,7 @@ function handler(event, context, callback) {
     // Filtered by Year
     years.forEach(year => {
       totalInvestmentDollarReturn[year] = {};
-      const yearGroupDealsByNewFollowOn = groupByNewFollowOn(deals.groupDeals[year], "Deal_NewOrFollowon");
+      const yearGroupDealsByNewFollowOn = groupByNewFollowOn(deals.years.groupDeals[year], "Deal_NewOrFollowon");
       const newSum = sumData(yearGroupDealsByNewFollowOn.new, 'Deal_DollarInvested');
       totalInvestmentDollarReturn[year]['new'] = newSum.sum;
       const followOnSum = sumData(yearGroupDealsByNewFollowOn.followOn, 'Deal_DollarInvested');
@@ -3419,7 +3432,7 @@ function handler(event, context, callback) {
   function addDeals(path, pageNumber) {
     return new Promise((resolve, reject) => {
       let dealArray = [];
-      _axios2.default.get(`https://${process.env.API_INTEGRATION_URL}.caspio.com/rest/v2/tables/${path}&q.pageNumber=${pageNumber}`, {
+      _axios2.default.get(`https://${process.env.API_INTEGRATION_URL}.caspio.com/rest/v2/${path}&q.pageNumber=${pageNumber}`, {
         headers: {
           accept: 'application/json',
           Authorization: `bearer ${cookies.token}`
@@ -3443,60 +3456,6 @@ function handler(event, context, callback) {
     throw err;
   });
 }
-
-// RUN ALL FUNCTION COMBOS
-
-
-// function func1() {
-//   return "Number 1"
-// }
-
-// function func2() {
-//   return "Number 2"
-// }
-
-// function func3() {
-//   return "Number 3"
-// }
-
-
-// testArr = [func1, func2, func3]
-
-// function runAllFunctions(funcArr) {
-//   let newArr = []
-//   funcArr.forEach((func) => {
-//     newArr.push(func())
-//   })
-//   return newArr
-// }
-
-
-// var combine = function (a) {
-//   var fn = function (n, src, got, all) {
-//     if (n == 0) {
-//       if (got.length > 0) {
-//         all[all.length] = got;
-//       }
-//       return;
-//     }
-//     for (var j = 0; j < src.length; j++) {
-//       fn(n - 1, src.slice(j + 1), got.concat([src[j]]), all);
-//     }
-//     return;
-//   }
-//   var all = [];
-//   for (var i = 0; i < a.length; i++) {
-//     fn(i, a, [], all);
-//   }
-//   all.push(a);
-//   return all;
-// }
-
-// let allFuncs = combine(testArr)
-
-// allFuncs.forEach((arr) => {
-//   console.log(runAllFunctions(arr))
-// })
 
 /***/ })
 /******/ ])));
