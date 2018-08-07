@@ -154,7 +154,7 @@ export function handler(event, context, callback) {
     return finalObject
   }
 
-// FILTERED BY PROVINCE
+  // FILTERED BY PROVINCE
 
   function provinceFiltered(finalObject, chartFunctionArray, groupFunctionArray) {
     finalObject['provinces'] = {}
@@ -184,7 +184,6 @@ export function handler(event, context, callback) {
 
     // Filtered By Province 
     provinceFiltered(premoneyValueReturn, [sectors, premoneyValueCalculations], [groupBySector, deals.provinces.groupDeals, "Deal_MajorSector"])
-
 
     return premoneyValueReturn
   }
@@ -264,7 +263,7 @@ export function handler(event, context, callback) {
 
     // COLLECT INVESTOR DEALS
     do {
-      newinvestorDeals = await addDeals(`tables/IndvInvestorDeals/records?q.pageSize=1000`, investorPageNumber)
+      newinvestorDeals = await addDeals(`views/IndvInvestor_DealsDetails/records?q.pageSize=1000`, investorPageNumber)
       newinvestorDeals.forEach(element => {
         investorDeals.push(element)
       });
@@ -273,11 +272,11 @@ export function handler(event, context, callback) {
     const dealsByYear = await groupByYear(groupDeals, 'Group_NameAndSubmissionYear')
     const investorDealsByYear = await groupByYear(investorDeals, 'IndvInvestor_Email_Year')
     const dealsByProvince = await groupByProvince(groupDeals, 'Group_Province')
-    // const investorDealsByProvince = await groupByProvince(investorDeals, 'IndvInvestor_Email_Year')
-    return ({ 
+    const investorDealsByProvince = await groupByProvince(investorDeals, 'IndvInvestor_Province')
+    return ({
       years: { groupDeals: dealsByYear, investorDeals: investorDealsByYear },
-      provinces: { groupDeals: dealsByProvince, investorDeals: {} }
-     })
+      provinces: { groupDeals: dealsByProvince, investorDeals: investorDealsByProvince }
+    })
   }
 
   getAllDeals()

@@ -3204,7 +3204,7 @@ function handler(event, context, callback) {
 
       // COLLECT INVESTOR DEALS
       do {
-        newinvestorDeals = yield addDeals(`tables/IndvInvestorDeals/records?q.pageSize=1000`, investorPageNumber);
+        newinvestorDeals = yield addDeals(`views/IndvInvestor_DealsDetails/records?q.pageSize=1000`, investorPageNumber);
         newinvestorDeals.forEach(function (element) {
           investorDeals.push(element);
         });
@@ -3213,10 +3213,10 @@ function handler(event, context, callback) {
       const dealsByYear = yield groupByYear(groupDeals, 'Group_NameAndSubmissionYear');
       const investorDealsByYear = yield groupByYear(investorDeals, 'IndvInvestor_Email_Year');
       const dealsByProvince = yield groupByProvince(groupDeals, 'Group_Province');
-      // const investorDealsByProvince = await groupByProvince(investorDeals, 'IndvInvestor_Email_Year')
+      const investorDealsByProvince = yield groupByProvince(investorDeals, 'IndvInvestor_Province');
       return {
         years: { groupDeals: dealsByYear, investorDeals: investorDealsByYear },
-        provinces: { groupDeals: dealsByProvince, investorDeals: {} }
+        provinces: { groupDeals: dealsByProvince, investorDeals: investorDealsByProvince }
       };
     });
 
