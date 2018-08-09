@@ -136,10 +136,14 @@ export function handler(event, context, callback) {
 
   // FILTERING
 
+
   // UNFILTERED
 
-  function unfiltered(finalObject, dealSorter) {
-    return finalObject['unfiltered'] = dealSorter
+  function unfiltered(finalObject, chartFunctionArray, groupFunctionArray) {
+    let sortFunction = groupFunctionArray[0]
+    let dealsToSort = groupFunctionArray[1]
+    finalObject['unfiltered'] = chart(chartFunctionArray[0], chartFunctionArray[1], sortFunction(dealsToSort['unfiltered'], groupFunctionArray[2]))
+    return finalObject
   }
 
   // FILTERED BY YEAR
@@ -166,6 +170,8 @@ export function handler(event, context, callback) {
     return finalObject
   }
 
+  // Add new filters to end of this array
+  const filterArray = [unfiltered, yearFiltered, provinceFiltered]
 
   // PREMONEY VALUE
 
@@ -175,16 +181,11 @@ export function handler(event, context, callback) {
   }
 
   function premoneyValue(deals) {
-    // Not Filtered
     let premoneyValueReturn = {}
-    unfiltered(premoneyValueReturn, chart(sectors, premoneyValueCalculations, groupBySector(deals.years.groupDeals['unfiltered'], "Deal_MajorSector")))
-
-    //Filtered By Year
-    yearFiltered(premoneyValueReturn, [sectors, premoneyValueCalculations], [groupBySector, deals.years.groupDeals, "Deal_MajorSector"])
-
-    // Filtered By Province 
-    provinceFiltered(premoneyValueReturn, [sectors, premoneyValueCalculations], [groupBySector, deals.provinces.groupDeals, "Deal_MajorSector"])
-
+    const dealstoFilter = [deals.years.groupDeals, deals.years.groupDeals, deals.provinces.groupDeals]
+    filterArray.forEach((filterFunction, index) => {
+      filterFunction(premoneyValueReturn, [sectors, premoneyValueCalculations], [groupBySector, dealstoFilter[index], "Deal_MajorSector"])
+    })
     return premoneyValueReturn
   }
 

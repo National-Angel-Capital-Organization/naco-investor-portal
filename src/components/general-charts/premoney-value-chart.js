@@ -122,7 +122,7 @@ export default class PremoneyValueChart extends Component {
     const data = {
       labels: this.state.premoneyValueLabels,
       datasets: [{
-        label: 'Valuation ($)',
+        label: 'Average Valuation ($)',
         data: this.state.premoneyValueData,
         backgroundColor: [
           'rgba(255, 99, 132, 0.2)',
@@ -158,7 +158,7 @@ export default class PremoneyValueChart extends Component {
       },
       title: {
         display: true,
-        text: 'Valuation ($)'
+        text: 'Average Valuation ($)'
       },
       scales: {
         yAxes: [
