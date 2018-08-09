@@ -123,7 +123,7 @@ export function handler(event, context, callback) {
     return ({ sum: sumOfValues, count: valueArray.length })
   }
 
-  // CHART SPECIFIC FUNCTIONS
+  // CHART GENERAL FUNCTIONS
 
   function chart(sortArray, calculation, groupedDeals) {
     let returnObject = {}
@@ -153,7 +153,8 @@ export function handler(event, context, callback) {
     let sortFunction = groupFunctionArray[0]
     let dealsToSort = groupFunctionArray[1]
     years.forEach((year) => {
-      finalObject['years'][year] = chart(chartFunctionArray[0], chartFunctionArray[1], sortFunction(dealsToSort[year], groupFunctionArray[2]))
+      finalObject['years'][year] = {}
+      finalObject['years'][year]['unfiltered'] = chart(chartFunctionArray[0], chartFunctionArray[1], sortFunction(dealsToSort[year], groupFunctionArray[2]))
     })
     return finalObject
   }
@@ -165,13 +166,14 @@ export function handler(event, context, callback) {
     let sortFunction = groupFunctionArray[0]
     let dealsToSort = groupFunctionArray[1]
     provinces.forEach((province) => {
-      finalObject['provinces'][province] = chart(chartFunctionArray[0], chartFunctionArray[1], sortFunction(dealsToSort[province], groupFunctionArray[2]))
+      finalObject['provinces'][province] = {}
+      finalObject['provinces'][province]['unfiltered'] = chart(chartFunctionArray[0], chartFunctionArray[1], sortFunction(dealsToSort[province], groupFunctionArray[2]))
     })
     return finalObject
   }
 
-  // Add new filters to end of this array
-  const filterArray = [unfiltered, yearFiltered, provinceFiltered]
+
+  // CHART SPECIFIC FUNCTIONS
 
   // PREMONEY VALUE
 
@@ -182,6 +184,8 @@ export function handler(event, context, callback) {
 
   function premoneyValue(deals) {
     let premoneyValueReturn = {}
+    // Add new filters to end of these arrays
+    const filterArray = [unfiltered, yearFiltered, provinceFiltered]
     const dealstoFilter = [deals.years.groupDeals, deals.years.groupDeals, deals.provinces.groupDeals]
     filterArray.forEach((filterFunction, index) => {
       filterFunction(premoneyValueReturn, [sectors, premoneyValueCalculations], [groupBySector, dealstoFilter[index], "Deal_MajorSector"])
@@ -280,10 +284,34 @@ export function handler(event, context, callback) {
     })
   }
 
+  function objectTraverse(objectToTraverse) {
+    if (objectToTraverse.hasOwnProperty('unfiltered') || Object.keys(objectToTraverse).length > 1) {
+      Object.keys(objectToTraverse).forEach(filteredObjectType => {
+
+        if (filteredObjectType !== 'unfiltered' && Object.keys(objectToTraverse[filteredObjectType]).length >= 1) {
+
+          if (Object.keys(objectToTraverse[filteredObjectType]).length > 1) {
+            objectToTraverse[filteredObjectType]['tested'] = true;
+            objectTraverse(objectToTraverse[filteredObjectType])
+          }
+          if (objectToTraverse[filteredObjectType].hasOwnProperty('unfiltered')) {
+            objectToTraverse[filteredObjectType]['run function'] = true;
+          }
+        }
+      })
+      if (objectToTraverse.hasOwnProperty('unfiltered')) {
+      objectToTraverse['run function'] = true;
+      }
+    }
+  }
+
   getAllDeals()
     .then((res) => {
-      console.log(premoneyValue(res))
-      console.log(totalInvestmentDollar(res))
+      let premoneyObject = premoneyValue(res)
+      premoneyObject.years['2011'].addingThisToTest = 3
+      objectTraverse(premoneyObject)
+      console.log(premoneyObject)
+      // console.log(totalInvestmentDollar(res))
     })
     .catch((err) => {
       throw err
