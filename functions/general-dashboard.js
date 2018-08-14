@@ -3210,13 +3210,21 @@ function handler(event, context, callback) {
         });
         investorPageNumber++;
       } while (investorDeals.length % 1000 === 0 && newinvestorDeals.length !== 0);
-      const dealsByYear = yield groupByYear(groupDeals, 'Group_NameAndSubmissionYear');
-      const investorDealsByYear = yield groupByYear(investorDeals, 'IndvInvestor_Email_Year');
-      const dealsByProvince = yield groupByProvince(groupDeals, 'Group_Province');
-      const investorDealsByProvince = yield groupByProvince(investorDeals, 'IndvInvestor_Province');
+      const dealsByYear = groupByYear(groupDeals, 'Group_NameAndSubmissionYear');
+      const investorDealsByYear = groupByYear(investorDeals, 'IndvInvestor_Email_Year');
+      const dealsByProvince = groupByProvince(groupDeals, 'Group_Province');
+      const investorDealsByProvince = groupByProvince(investorDeals, 'IndvInvestor_Province');
       return {
-        years: { groupDeals: dealsByYear, investorDeals: investorDealsByYear },
-        provinces: { groupDeals: dealsByProvince, investorDeals: investorDealsByProvince }
+        groupDeals: {
+          unfiltered: groupDeals
+          // years: dealsByYear,
+          // provinces: dealsByProvince
+        },
+        investorDeals: {
+          unfiltered: investorDeals,
+          years: investorDealsByYear,
+          provinces: investorDealsByProvince
+        }
       };
     });
 
@@ -3224,6 +3232,8 @@ function handler(event, context, callback) {
       return _ref.apply(this, arguments);
     };
   })();
+
+  // LOOP THROUGH GROUPING FUNCTIONS AND APPLY TO CREATE OBJECT OF DEALS
 
   // USER Email From Client Context
   let userEmail = '';
@@ -3261,21 +3271,17 @@ function handler(event, context, callback) {
   // GROUP DEALS BY YEAR
 
   function groupByYear(dealArray, yearVariable) {
-    return new Promise((resolve, reject) => {
-      if (dealArray.length === 0) {
-        reject(console.log('Error: No deals.'));
-      }
-      let sortedDeals = { 'unfiltered': dealArray };
-      years.forEach(year => {
-        let dealsFromYear = dealArray.filter(deal => {
-          let dealYear = deal[yearVariable];
-          dealYear = dealYear.substr(dealYear.length - 4);
-          return dealYear === year;
-        });
-        sortedDeals[year] = dealsFromYear;
+    let sortedDeals = {};
+    years.forEach(year => {
+      let dealsFromYear = dealArray.filter(deal => {
+        let dealYear = deal[yearVariable];
+        dealYear = dealYear.substr(dealYear.length - 4);
+        return dealYear === year;
       });
-      resolve(sortedDeals);
+      sortedDeals[year] = {};
+      sortedDeals[year]['unfiltered'] = dealsFromYear;
     });
+    return sortedDeals;
   }
 
   // GROUP DEALS BY NEW/FOLLOW-ON
@@ -3317,118 +3323,15 @@ function handler(event, context, callback) {
         let dealProvince = deal[provinceVariable];
         return dealProvince === province;
       });
-      sortedDeals[province] = dealsFromProvince;
+      sortedDeals[province] = {};
+      sortedDeals[province]['unfiltered'] = dealsFromProvince;
     });
     return sortedDeals;
   }
 
-  // SUM DATA
+  // DEAL GROUP FUNCTION ARRAY
 
-  function sumData(dealArray, sectorVariable) {
-    let valueArray = [];
-    dealArray.forEach(deal => {
-      if (deal[sectorVariable] !== null) {
-        valueArray.push(deal[sectorVariable]);
-      }
-    });
-    let sumOfValues = 0;
-    const reducer = (accumulator, currentValue) => accumulator + currentValue;
-    if (valueArray.length > 0) {
-      sumOfValues = valueArray.reduce(reducer);
-    }
-    return { sum: sumOfValues, count: valueArray.length };
-  }
-
-  // CHART GENERAL FUNCTIONS
-
-  function chart(sortArray, calculation, groupedDeals) {
-    let returnObject = {};
-    sortArray.forEach(type => {
-      const calculatedValues = calculation(groupedDeals[type]);
-      returnObject[type] = calculatedValues;
-    });
-    return returnObject;
-  }
-
-  // FILTERING
-
-
-  // UNFILTERED
-
-  function unfiltered(finalObject, chartFunctionArray, groupFunctionArray) {
-    let sortFunction = groupFunctionArray[0];
-    let dealsToSort = groupFunctionArray[1];
-    finalObject['unfiltered'] = chart(chartFunctionArray[0], chartFunctionArray[1], sortFunction(dealsToSort['unfiltered'], groupFunctionArray[2]));
-    return finalObject;
-  }
-
-  // FILTERED BY YEAR
-
-  function yearFiltered(finalObject, chartFunctionArray, groupFunctionArray) {
-    finalObject['years'] = {};
-    let sortFunction = groupFunctionArray[0];
-    let dealsToSort = groupFunctionArray[1];
-    years.forEach(year => {
-      finalObject['years'][year] = {};
-      finalObject['years'][year]['unfiltered'] = chart(chartFunctionArray[0], chartFunctionArray[1], sortFunction(dealsToSort[year], groupFunctionArray[2]));
-    });
-    return finalObject;
-  }
-
-  // FILTERED BY PROVINCE
-
-  function provinceFiltered(finalObject, chartFunctionArray, groupFunctionArray) {
-    finalObject['provinces'] = {};
-    let sortFunction = groupFunctionArray[0];
-    let dealsToSort = groupFunctionArray[1];
-    provinces.forEach(province => {
-      finalObject['provinces'][province] = {};
-      finalObject['provinces'][province]['unfiltered'] = chart(chartFunctionArray[0], chartFunctionArray[1], sortFunction(dealsToSort[province], groupFunctionArray[2]));
-    });
-    return finalObject;
-  }
-
-  // CHART SPECIFIC FUNCTIONS
-
-  // PREMONEY VALUE
-
-  function premoneyValueCalculations(deals) {
-    const sectorSumCount = sumData(deals, 'Deal_PremoneyValue');
-    return sectorSumCount.sum / sectorSumCount.count;
-  }
-
-  function premoneyValue(deals) {
-    let premoneyValueReturn = {};
-    // Add new filters to end of these arrays
-    const filterArray = [unfiltered, yearFiltered, provinceFiltered];
-    const dealstoFilter = [deals.years.groupDeals, deals.years.groupDeals, deals.provinces.groupDeals];
-    filterArray.forEach((filterFunction, index) => {
-      filterFunction(premoneyValueReturn, [sectors, premoneyValueCalculations], [groupBySector, dealstoFilter[index], "Deal_MajorSector"]);
-    });
-    return premoneyValueReturn;
-  }
-
-  // TOTAL INVESTMENT DOLLAR
-
-  function totalInvestmentDollar(deals) {
-    // Not Filtered
-    const allGroupDealsByNewFollowOn = groupByNewFollowOn(deals.years.groupDeals['unfiltered'], "Deal_NewOrFollowon");
-    let totalInvestmentDollarReturn = { 'unfiltered': {} };
-    const newSum = sumData(allGroupDealsByNewFollowOn.new, 'Deal_DollarInvested');
-    totalInvestmentDollarReturn['unfiltered']['new'] = newSum.sum;
-    const followOnSum = sumData(allGroupDealsByNewFollowOn.followOn, 'Deal_DollarInvested');
-    totalInvestmentDollarReturn['unfiltered']['followOn'] = followOnSum.sum;
-    // Filtered by Year
-    years.forEach(year => {
-      totalInvestmentDollarReturn[year] = {};
-      const yearGroupDealsByNewFollowOn = groupByNewFollowOn(deals.years.groupDeals[year], "Deal_NewOrFollowon");
-      const newSum = sumData(yearGroupDealsByNewFollowOn.new, 'Deal_DollarInvested');
-      totalInvestmentDollarReturn[year]['new'] = newSum.sum;
-      const followOnSum = sumData(yearGroupDealsByNewFollowOn.followOn, 'Deal_DollarInvested');
-      totalInvestmentDollarReturn[year]['followOn'] = followOnSum.sum;
-    });
-    return totalInvestmentDollarReturn;
-  }
+  const dealGroupFunctionArray = [{ func: groupByYear, title: 'years', groupVariable: 'Group_NameAndSubmissionYear' }, { func: groupByProvince, title: 'provinces', groupVariable: 'Group_Province' }];
 
   // DEAL MANAGEMENT
 
@@ -3442,7 +3345,6 @@ function handler(event, context, callback) {
           accept: 'application/json',
           Authorization: `bearer ${cookies.token}`
         }
-
       }).then(res => {
         res.data.Result.forEach(element => {
           dealArray.push(element);
@@ -3454,37 +3356,158 @@ function handler(event, context, callback) {
     });
   }
 
-  function objectTraverse(objectToTraverse) {
-    if (objectToTraverse.hasOwnProperty('unfiltered') || Object.keys(objectToTraverse).length > 1) {
+  function arrangeDealsObject(objectToArrange) {
+    dealGroupFunctionArray.forEach(groupFunction => {
+      objectTraverse(objectToArrange, groupFunction.title, groupFunction.func, groupFunction.groupVariable);
+    });
+  }
+
+  // TRAVERSE OBJECT AND APPLY FUNCTION TO FURTHER GROUP 
+
+  function objectTraverse(objectToTraverse, sortingVariable, groupingFunction, groupingVariable) {
+    if (typeof objectToTraverse === 'object' && objectToTraverse !== null) {
       Object.keys(objectToTraverse).forEach(filteredObjectType => {
 
-        if (filteredObjectType !== 'unfiltered' && Object.keys(objectToTraverse[filteredObjectType]).length >= 1) {
+        if (typeof objectToTraverse[filteredObjectType] === 'object' && filteredObjectType !== 'unfiltered' && objectToTraverse[filteredObjectType] !== null) {
 
           if (Object.keys(objectToTraverse[filteredObjectType]).length > 1) {
-            objectToTraverse[filteredObjectType]['tested'] = true;
-            objectTraverse(objectToTraverse[filteredObjectType]);
+            objectToTraverse[filteredObjectType]['traversing further'] = true;
+            objectTraverse(objectToTraverse[filteredObjectType], sortingVariable, groupingFunction, groupingVariable);
           }
           if (objectToTraverse[filteredObjectType].hasOwnProperty('unfiltered')) {
-            objectToTraverse[filteredObjectType]['run function'] = true;
+            objectToTraverse[filteredObjectType][sortingVariable] = groupingFunction(objectToTraverse[filteredObjectType]['unfiltered'], groupingVariable);
           }
         }
       });
       if (objectToTraverse.hasOwnProperty('unfiltered')) {
-        objectToTraverse['run function'] = true;
+        objectToTraverse[sortingVariable] = groupingFunction(objectToTraverse['unfiltered'], groupingVariable);
       }
     }
   }
 
   getAllDeals().then(res => {
-    let premoneyObject = premoneyValue(res);
-    premoneyObject.years['2011'].addingThisToTest = 3;
-    objectTraverse(premoneyObject);
-    console.log(premoneyObject);
-    // console.log(totalInvestmentDollar(res))
+    let objectO = res.groupDeals;
+    arrangeDealsObject(objectO);
+    console.log(Object.keys(objectO['years']['2016']['provinces']['ON']['unfiltered']));
   }).catch(err => {
     throw err;
   });
 }
+
+// // SUM DATA
+
+// function sumData(dealArray, sectorVariable) {
+//   let valueArray = []
+//   dealArray.forEach(deal => {
+//     if (deal[sectorVariable] !== null) {
+//       valueArray.push(deal[sectorVariable])
+//     }
+//   })
+//   let sumOfValues = 0
+//   const reducer = (accumulator, currentValue) => accumulator + currentValue
+//   if (valueArray.length > 0) {
+//     sumOfValues = valueArray.reduce(reducer)
+//   }
+//   return ({ sum: sumOfValues, count: valueArray.length })
+// }
+
+// // CHART GENERAL FUNCTIONS
+
+// function chart(sortArray, calculation, groupedDeals) {
+//   let returnObject = {}
+//   sortArray.forEach((type) => {
+//     const calculatedValues = calculation(groupedDeals[type])
+//     returnObject[type] = calculatedValues
+//   })
+//   return returnObject
+// }
+
+// // FILTERING
+
+
+// // UNFILTERED
+
+// function unfiltered(finalObject, chartFunctionArray, groupFunctionArray) {
+//   let sortFunction = groupFunctionArray[0]
+//   let dealsToSort = groupFunctionArray[1]
+//   const newObject = finalObject
+//   newObject['unfiltered'] = chart(chartFunctionArray[0], chartFunctionArray[1], sortFunction(dealsToSort['unfiltered'], groupFunctionArray[2]))
+//   console.log(newObject)
+//   return newObject
+// }
+
+// // FILTERED BY YEAR
+
+// function yearFiltered(finalObject, chartFunctionArray, groupFunctionArray) {
+//   const newObject = finalObject
+//   newObject['years'] = {}
+//   let sortFunction = groupFunctionArray[0]
+//   let dealsToSort = groupFunctionArray[1]
+//   years.forEach((year) => {
+//     newObject['years'][year] = {}
+//     newObject['years'][year]['unfiltered'] = chart(chartFunctionArray[0], chartFunctionArray[1], sortFunction(dealsToSort[year], groupFunctionArray[2]))
+//   })
+//   console.log(newObject)
+//   return newObject
+// }
+
+// // FILTERED BY PROVINCE
+
+// function provinceFiltered(finalObject, chartFunctionArray, groupFunctionArray) {
+//   const newObject = finalObject
+//   newObject['provinces'] = {}
+//   let sortFunction = groupFunctionArray[0]
+//   let dealsToSort = groupFunctionArray[1]
+//   provinces.forEach((province) => {
+//     newObject['provinces'][province] = {}
+//     newObject['provinces'][province]['unfiltered'] = chart(chartFunctionArray[0], chartFunctionArray[1], sortFunction(dealsToSort[province], groupFunctionArray[2]))
+//   })
+//   console.log(newObject)
+//   return newObject
+// }
+
+
+// // CHART SPECIFIC FUNCTIONS
+
+// // PREMONEY VALUE
+
+// function premoneyValueCalculations(deals) {
+//   const sectorSumCount = sumData(deals, 'Deal_PremoneyValue')
+//   return sectorSumCount.sum / sectorSumCount.count
+// }
+
+// function premoneyValue(deals) {
+//   let premoneyValueReturn = {}
+//   // Add new filters to end of these arrays
+//   const filterArray = [unfiltered, yearFiltered, provinceFiltered]
+//   const dealstoFilter = [deals.years.groupDeals, deals.years.groupDeals, deals.provinces.groupDeals]
+//   filterArray.forEach((filterFunction, index) => {
+//     filterFunction(premoneyValueReturn, [sectors, premoneyValueCalculations], [groupBySector, dealstoFilter[index], "Deal_MajorSector"])
+//   })
+//   return premoneyValueReturn
+// }
+
+// // TOTAL INVESTMENT DOLLAR
+
+// function totalInvestmentDollar(deals) {
+//   // Not Filtered
+//   const allGroupDealsByNewFollowOn = groupByNewFollowOn(deals.years.groupDeals['unfiltered'], "Deal_NewOrFollowon")
+//   let totalInvestmentDollarReturn = { 'unfiltered': {} }
+//   const newSum = sumData(allGroupDealsByNewFollowOn.new, 'Deal_DollarInvested')
+//   totalInvestmentDollarReturn['unfiltered']['new'] = newSum.sum
+//   const followOnSum = sumData(allGroupDealsByNewFollowOn.followOn, 'Deal_DollarInvested')
+//   totalInvestmentDollarReturn['unfiltered']['followOn'] = followOnSum.sum
+//   // Filtered by Year
+//   years.forEach((year) => {
+//     totalInvestmentDollarReturn[year] = {}
+//     const yearGroupDealsByNewFollowOn = groupByNewFollowOn(deals.years.groupDeals[year], "Deal_NewOrFollowon")
+//     const newSum = sumData(yearGroupDealsByNewFollowOn.new, 'Deal_DollarInvested')
+//     totalInvestmentDollarReturn[year]['new'] = newSum.sum
+//     const followOnSum = sumData(yearGroupDealsByNewFollowOn.followOn, 'Deal_DollarInvested')
+//     totalInvestmentDollarReturn[year]['followOn'] = followOnSum.sum
+//   })
+//   return totalInvestmentDollarReturn
+// }
 
 /***/ })
 /******/ ])));
