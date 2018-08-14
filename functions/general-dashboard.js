@@ -3182,6 +3182,9 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 __webpack_require__(43).config();
 
 function handler(event, context, callback) {
+
+  // RETRIEVE ALL DEALS FROM DATABASE WITH API CALL
+
   let getAllDeals = (() => {
     var _ref = _asyncToGenerator(function* () {
       // GROUP DEAL VARIABLES
@@ -3217,8 +3220,6 @@ function handler(event, context, callback) {
       return {
         groupDeals: {
           unfiltered: groupDeals
-          // years: dealsByYear,
-          // provinces: dealsByProvince
         },
         investorDeals: {
           unfiltered: investorDeals,
@@ -3233,7 +3234,9 @@ function handler(event, context, callback) {
     };
   })();
 
-  // LOOP THROUGH GROUPING FUNCTIONS AND APPLY TO CREATE OBJECT OF DEALS
+  // DEAL SORTING
+
+  // VARIABLES
 
   // USER Email From Client Context
   let userEmail = '';
@@ -3258,13 +3261,7 @@ function handler(event, context, callback) {
       statusCode: 401,
       body: `No Cookies`
     });
-  }
-
-  // DEAL SORTING
-
-  // VARIABLES
-
-  const years = ['2010', '2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018'];
+  }const years = ['2010', '2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018'];
   const sectors = ['Clean Technologies', 'Energy', 'ICT', 'Life Sciences', 'Manufacturing', 'Services'];
   const provinces = ['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT'];
 
@@ -3329,9 +3326,10 @@ function handler(event, context, callback) {
     return sortedDeals;
   }
 
-  // DEAL GROUP FUNCTION ARRAY
+  // DEAL GROUP/INVESTOR FUNCTION ARRAYS
 
   const dealGroupFunctionArray = [{ func: groupByYear, title: 'years', groupVariable: 'Group_NameAndSubmissionYear' }, { func: groupByProvince, title: 'provinces', groupVariable: 'Group_Province' }];
+  const dealInvestorFunctionArray = [{ func: groupByYear, title: 'years', groupVariable: 'IndvInvestor_Email_Year' }, { func: groupByProvince, title: 'provinces', groupVariable: 'IndvInvestor_Province' }];
 
   // DEAL MANAGEMENT
 
@@ -3353,12 +3351,6 @@ function handler(event, context, callback) {
       }).catch(err => {
         reject(err);
       });
-    });
-  }
-
-  function arrangeDealsObject(objectToArrange) {
-    dealGroupFunctionArray.forEach(groupFunction => {
-      objectTraverse(objectToArrange, groupFunction.title, groupFunction.func, groupFunction.groupVariable);
     });
   }
 
@@ -3385,10 +3377,22 @@ function handler(event, context, callback) {
     }
   }
 
+  // LOOP THROUGH GROUPING FUNCTIONS AND APPLY TO CREATE OBJECT OF DEALS
+
+  function arrangeDealsObject(objectToArrange, groupingArray) {
+    groupingArray.forEach(groupFunction => {
+      objectTraverse(objectToArrange, groupFunction.title, groupFunction.func, groupFunction.groupVariable);
+    });
+  }
+
+  // FUNCTIONALITY
+
+
   getAllDeals().then(res => {
-    let objectO = res.groupDeals;
-    arrangeDealsObject(objectO);
-    console.log(Object.keys(objectO['years']['2016']['provinces']['ON']['unfiltered']));
+    let groupObject = res.groupDeals;
+    arrangeDealsObject(groupObject, dealGroupFunctionArray);
+    let investorObject = res.investorDeals;
+    arrangeDealsObject(investorObject, dealInvestorFunctionArray);
   }).catch(err => {
     throw err;
   });

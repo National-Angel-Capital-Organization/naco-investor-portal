@@ -31,6 +31,50 @@ export function handler(event, context, callback) {
     });
   }
 
+  // RETRIEVE ALL DEALS FROM DATABASE WITH API CALL
+
+  async function getAllDeals() {
+    // GROUP DEAL VARIABLES
+    let groupDeals = []
+    let newGroupDeals = []
+    let groupPageNumber = 1
+    // INVESTOR DEAL VARIABLES
+    let investorDeals = []
+    let newinvestorDeals = []
+    let investorPageNumber = 1
+
+    // COLLECT GROUP DEALS
+    do {
+      newGroupDeals = await addDeals(`views/IndvInvestor_DealsCharacteristic/records?q.pageSize=1000`, groupPageNumber)
+      newGroupDeals.forEach(element => {
+        groupDeals.push(element)
+      });
+      groupPageNumber++
+    } while (groupDeals.length % 1000 === 0 && newGroupDeals.length !== 0)
+
+    // COLLECT INVESTOR DEALS
+    do {
+      newinvestorDeals = await addDeals(`views/IndvInvestor_DealsDetails/records?q.pageSize=1000`, investorPageNumber)
+      newinvestorDeals.forEach(element => {
+        investorDeals.push(element)
+      });
+      investorPageNumber++
+    } while (investorDeals.length % 1000 === 0 && newinvestorDeals.length !== 0)
+    const dealsByYear = groupByYear(groupDeals, 'Group_NameAndSubmissionYear')
+    const investorDealsByYear = groupByYear(investorDeals, 'IndvInvestor_Email_Year')
+    const dealsByProvince = groupByProvince(groupDeals, 'Group_Province')
+    const investorDealsByProvince = groupByProvince(investorDeals, 'IndvInvestor_Province')
+    return ({
+      groupDeals: {
+        unfiltered: groupDeals
+      },
+      investorDeals: {
+        unfiltered: investorDeals,
+        years: investorDealsByYear,
+        provinces: investorDealsByProvince
+      }
+    })
+  }
 
   // DEAL SORTING
 
@@ -43,17 +87,17 @@ export function handler(event, context, callback) {
   // GROUP DEALS BY YEAR
 
   function groupByYear(dealArray, yearVariable) {
-      let sortedDeals = {}
-      years.forEach(year => {
-        let dealsFromYear = dealArray.filter(deal => {
-          let dealYear = deal[yearVariable]
-          dealYear = dealYear.substr(dealYear.length - 4)
-          return dealYear === year
-        })
-        sortedDeals[year] = {}
-        sortedDeals[year]['unfiltered'] = dealsFromYear
+    let sortedDeals = {}
+    years.forEach(year => {
+      let dealsFromYear = dealArray.filter(deal => {
+        let dealYear = deal[yearVariable]
+        dealYear = dealYear.substr(dealYear.length - 4)
+        return dealYear === year
       })
-      return sortedDeals
+      sortedDeals[year] = {}
+      sortedDeals[year]['unfiltered'] = dealsFromYear
+    })
+    return sortedDeals
   }
 
   // GROUP DEALS BY NEW/FOLLOW-ON
@@ -101,9 +145,10 @@ export function handler(event, context, callback) {
     return sortedDeals
   }
 
-  // DEAL GROUP FUNCTION ARRAY
+  // DEAL GROUP/INVESTOR FUNCTION ARRAYS
 
-  const dealGroupFunctionArray = [{ func: groupByYear, title: 'years', groupVariable: 'Group_NameAndSubmissionYear' }, { func: groupByProvince, title: 'provinces', groupVariable: 'Group_Province'}]
+  const dealGroupFunctionArray = [{ func: groupByYear, title: 'years', groupVariable: 'Group_NameAndSubmissionYear' }, { func: groupByProvince, title: 'provinces', groupVariable: 'Group_Province' }]
+  const dealInvestorFunctionArray = [{ func: groupByYear, title: 'years', groupVariable: 'IndvInvestor_Email_Year' }, { func: groupByProvince, title: 'provinces', groupVariable: 'IndvInvestor_Province' }]
 
 
   // DEAL MANAGEMENT
@@ -136,65 +181,12 @@ export function handler(event, context, callback) {
   }
 
 
-  async function getAllDeals() {
-    // GROUP DEAL VARIABLES
-    let groupDeals = []
-    let newGroupDeals = []
-    let groupPageNumber = 1
-    // INVESTOR DEAL VARIABLES
-    let investorDeals = []
-    let newinvestorDeals = []
-    let investorPageNumber = 1
-
-    // COLLECT GROUP DEALS
-    do {
-      newGroupDeals = await addDeals(`views/IndvInvestor_DealsCharacteristic/records?q.pageSize=1000`, groupPageNumber)
-      newGroupDeals.forEach(element => {
-        groupDeals.push(element)
-      });
-      groupPageNumber++
-    } while (groupDeals.length % 1000 === 0 && newGroupDeals.length !== 0)
-
-    // COLLECT INVESTOR DEALS
-    do {
-      newinvestorDeals = await addDeals(`views/IndvInvestor_DealsDetails/records?q.pageSize=1000`, investorPageNumber)
-      newinvestorDeals.forEach(element => {
-        investorDeals.push(element)
-      });
-      investorPageNumber++
-    } while (investorDeals.length % 1000 === 0 && newinvestorDeals.length !== 0)
-    const dealsByYear = groupByYear(groupDeals, 'Group_NameAndSubmissionYear')
-    const investorDealsByYear = groupByYear(investorDeals, 'IndvInvestor_Email_Year')
-    const dealsByProvince = groupByProvince(groupDeals, 'Group_Province')
-    const investorDealsByProvince = groupByProvince(investorDeals, 'IndvInvestor_Province')
-    return ({
-      groupDeals: {
-        unfiltered: groupDeals,
-        // years: dealsByYear,
-        // provinces: dealsByProvince
-      },
-      investorDeals: {
-        unfiltered: investorDeals,
-        years: investorDealsByYear,
-        provinces: investorDealsByProvince
-      }
-    })
-  }
-
-  // LOOP THROUGH GROUPING FUNCTIONS AND APPLY TO CREATE OBJECT OF DEALS
-  
-  function arrangeDealsObject(objectToArrange) {
-    dealGroupFunctionArray.forEach(groupFunction => {
-      objectTraverse(objectToArrange, groupFunction.title, groupFunction.func, groupFunction.groupVariable)
-    })
-  }
-
   // TRAVERSE OBJECT AND APPLY FUNCTION TO FURTHER GROUP 
 
   function objectTraverse(objectToTraverse, sortingVariable, groupingFunction, groupingVariable) {
     if (typeof objectToTraverse === 'object' && objectToTraverse !== null) {
       Object.keys(objectToTraverse).forEach(filteredObjectType => {
-  
+
         if (typeof objectToTraverse[filteredObjectType] === 'object' && filteredObjectType !== 'unfiltered' && objectToTraverse[filteredObjectType] !== null) {
 
           if (Object.keys(objectToTraverse[filteredObjectType]).length > 1) {
@@ -212,14 +204,25 @@ export function handler(event, context, callback) {
     }
   }
 
+  // LOOP THROUGH GROUPING FUNCTIONS AND APPLY TO CREATE OBJECT OF DEALS
+
+  function arrangeDealsObject(objectToArrange, groupingArray) {
+    groupingArray.forEach(groupFunction => {
+      objectTraverse(objectToArrange, groupFunction.title, groupFunction.func, groupFunction.groupVariable)
+    })
+  }
+
+
+
+  // FUNCTIONALITY
 
 
   getAllDeals()
     .then((res) => {
-      let objectO = res.groupDeals
-      arrangeDealsObject(objectO)
-      console.log(Object.keys(objectO['years']['2016']['provinces']['ON']['unfiltered']))
-
+      let groupObject = res.groupDeals
+      arrangeDealsObject(groupObject, dealGroupFunctionArray)
+      let investorObject = res.investorDeals
+      arrangeDealsObject(investorObject, dealInvestorFunctionArray)
     })
     .catch((err) => {
       throw err
