@@ -3386,18 +3386,52 @@ function handler(event, context, callback) {
 
   // SEARCH OBJECT FOR ARRAYS
 
-  function objectArraySearch(objectToSearch) {
+  function objectArraySearch(objectToSearch, func) {
     if (typeof objectToSearch === 'object' && objectToSearch !== null) {
       Object.keys(objectToSearch).forEach(obj => {
 
         if (typeof objectToSearch[obj] === 'object' && objectToSearch[obj] !== null) {
-          objectArraySearch(objectToSearch[obj]);
+          objectArraySearch(objectToSearch[obj], func);
         }
         if (Array.isArray(objectToSearch[obj]) && objectToSearch[obj] !== null) {
-          objectToSearch['contains array'] = true;
+          objectToSearch[obj] = func(objectToSearch[obj]);
         }
       });
     }
+  }
+
+  // CHART GENERAL FUNCTIONS
+
+  // SUM DATA
+
+  function sumData(dealArray, sectorVariable) {
+    let valueArray = [];
+    dealArray.forEach(deal => {
+      if (deal[sectorVariable] !== null) {
+        valueArray.push(deal[sectorVariable]);
+      }
+    });
+    let sumOfValues = 0;
+    const reducer = (accumulator, currentValue) => accumulator + currentValue;
+    if (valueArray.length > 0) {
+      sumOfValues = valueArray.reduce(reducer);
+    }
+    return { sum: sumOfValues, count: valueArray.length };
+  }
+
+  // CHART SPECIFIC FUNCTIONS
+
+  // TOTAL INVESTMENT DOLLAR
+
+  function totalInvestmentDollar(deals) {
+    const groupDealsByNewFollowOn = groupByNewFollowOn(deals, "Deal_NewOrFollowon");
+    let totalInvestmentDollarReturn = {};
+    const newSum = sumData(groupDealsByNewFollowOn.new, 'Deal_DollarInvested');
+    totalInvestmentDollarReturn['new'] = newSum.sum;
+    const followOnSum = sumData(groupDealsByNewFollowOn.followOn, 'Deal_DollarInvested');
+    totalInvestmentDollarReturn['followOn'] = followOnSum.sum;
+
+    return totalInvestmentDollarReturn;
   }
 
   // FUNCTIONALITY
@@ -3408,29 +3442,13 @@ function handler(event, context, callback) {
     arrangeDealsObject(groupObject, dealGroupFunctionArray);
     let investorObject = res.investorDeals;
     arrangeDealsObject(investorObject, dealInvestorFunctionArray);
-    objectArraySearch(investorObject);
-    console.log(investorObject.provinces.ON.unfiltered['0']);
+    console.log(totalInvestmentDollar);
+    objectArraySearch(groupObject, totalInvestmentDollar);
+    console.log(groupObject.years);
   }).catch(err => {
     throw err;
   });
 }
-
-// // SUM DATA
-
-// function sumData(dealArray, sectorVariable) {
-//   let valueArray = []
-//   dealArray.forEach(deal => {
-//     if (deal[sectorVariable] !== null) {
-//       valueArray.push(deal[sectorVariable])
-//     }
-//   })
-//   let sumOfValues = 0
-//   const reducer = (accumulator, currentValue) => accumulator + currentValue
-//   if (valueArray.length > 0) {
-//     sumOfValues = valueArray.reduce(reducer)
-//   }
-//   return ({ sum: sumOfValues, count: valueArray.length })
-// }
 
 // // CHART GENERAL FUNCTIONS
 
@@ -3506,28 +3524,6 @@ function handler(event, context, callback) {
 //     filterFunction(premoneyValueReturn, [sectors, premoneyValueCalculations], [groupBySector, dealstoFilter[index], "Deal_MajorSector"])
 //   })
 //   return premoneyValueReturn
-// }
-
-// // TOTAL INVESTMENT DOLLAR
-
-// function totalInvestmentDollar(deals) {
-//   // Not Filtered
-//   const allGroupDealsByNewFollowOn = groupByNewFollowOn(deals.years.groupDeals['unfiltered'], "Deal_NewOrFollowon")
-//   let totalInvestmentDollarReturn = { 'unfiltered': {} }
-//   const newSum = sumData(allGroupDealsByNewFollowOn.new, 'Deal_DollarInvested')
-//   totalInvestmentDollarReturn['unfiltered']['new'] = newSum.sum
-//   const followOnSum = sumData(allGroupDealsByNewFollowOn.followOn, 'Deal_DollarInvested')
-//   totalInvestmentDollarReturn['unfiltered']['followOn'] = followOnSum.sum
-//   // Filtered by Year
-//   years.forEach((year) => {
-//     totalInvestmentDollarReturn[year] = {}
-//     const yearGroupDealsByNewFollowOn = groupByNewFollowOn(deals.years.groupDeals[year], "Deal_NewOrFollowon")
-//     const newSum = sumData(yearGroupDealsByNewFollowOn.new, 'Deal_DollarInvested')
-//     totalInvestmentDollarReturn[year]['new'] = newSum.sum
-//     const followOnSum = sumData(yearGroupDealsByNewFollowOn.followOn, 'Deal_DollarInvested')
-//     totalInvestmentDollarReturn[year]['followOn'] = followOnSum.sum
-//   })
-//   return totalInvestmentDollarReturn
 // }
 
 /***/ })
