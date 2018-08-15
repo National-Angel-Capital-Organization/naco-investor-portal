@@ -190,7 +190,6 @@ export function handler(event, context, callback) {
         if (typeof objectToTraverse[filteredObjectType] === 'object' && filteredObjectType !== 'unfiltered' && objectToTraverse[filteredObjectType] !== null) {
 
           if (Object.keys(objectToTraverse[filteredObjectType]).length > 1) {
-            objectToTraverse[filteredObjectType]['traversing further'] = true;
             objectTraverse(objectToTraverse[filteredObjectType], sortingVariable, groupingFunction, groupingVariable)
           }
           if (objectToTraverse[filteredObjectType].hasOwnProperty('unfiltered')) {
@@ -213,6 +212,22 @@ export function handler(event, context, callback) {
   }
 
 
+  // SEARCH OBJECT FOR ARRAYS
+
+  function objectArraySearch(objectToSearch) {
+    if (typeof objectToSearch === 'object' && objectToSearch !== null) {
+      Object.keys(objectToSearch).forEach(obj => {
+
+        if (typeof objectToSearch[obj] === 'object' && objectToSearch[obj] !== null) {
+            objectArraySearch(objectToSearch[obj])
+        }
+        if (Array.isArray(objectToSearch[obj]) && objectToSearch[obj] !== null) {
+          objectToSearch['contains array'] = true;
+        }
+      })
+    }
+  }
+
 
   // FUNCTIONALITY
 
@@ -223,6 +238,8 @@ export function handler(event, context, callback) {
       arrangeDealsObject(groupObject, dealGroupFunctionArray)
       let investorObject = res.investorDeals
       arrangeDealsObject(investorObject, dealInvestorFunctionArray)
+      objectArraySearch(investorObject)
+      console.log(investorObject.provinces.ON.unfiltered['0'])
     })
     .catch((err) => {
       throw err
