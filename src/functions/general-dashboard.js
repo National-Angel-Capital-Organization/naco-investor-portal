@@ -214,15 +214,17 @@ export function handler(event, context, callback) {
 
   // SEARCH OBJECT FOR ARRAYS
 
-  function objectArraySearch(objectToSearch, func) {
+  function objectArraySearch(objectToSearch, func, argArray) {
+
     if (typeof objectToSearch === 'object' && objectToSearch !== null) {
       Object.keys(objectToSearch).forEach(obj => {
 
         if (typeof objectToSearch[obj] === 'object' && objectToSearch[obj] !== null) {
-          objectArraySearch(objectToSearch[obj], func)
+          objectArraySearch(objectToSearch[obj], func, argArray)
         }
         if (Array.isArray(objectToSearch[obj]) && objectToSearch[obj] !== null) {
-          objectToSearch[obj] = func(objectToSearch[obj])
+          let newArgArray = [objectToSearch[obj], ...argArray]
+          objectToSearch[obj] = func.apply(null, newArgArray)
         }
       })
     }
@@ -253,12 +255,12 @@ export function handler(event, context, callback) {
 
   // TOTAL INVESTMENT DOLLAR
 
-  function totalInvestmentDollar(deals) {
-    const groupDealsByNewFollowOn = groupByNewFollowOn(deals, "Deal_NewOrFollowon")
+  function totalInvestmentDollar(deals, newFollowOnVar, dollarInvestedVar) {
+    const groupDealsByNewFollowOn = groupByNewFollowOn(deals, newFollowOnVar)
     let totalInvestmentDollarReturn = {}
-    const newSum = sumData(groupDealsByNewFollowOn.new, 'Deal_DollarInvested')
+    const newSum = sumData(groupDealsByNewFollowOn.new, dollarInvestedVar)
     totalInvestmentDollarReturn['new'] = newSum.sum
-    const followOnSum = sumData(groupDealsByNewFollowOn.followOn, 'Deal_DollarInvested')
+    const followOnSum = sumData(groupDealsByNewFollowOn.followOn, dollarInvestedVar)
     totalInvestmentDollarReturn['followOn'] = followOnSum.sum
 
     return totalInvestmentDollarReturn
@@ -271,13 +273,17 @@ export function handler(event, context, callback) {
 
   getAllDeals()
     .then((res) => {
+      // separate group deals from investor deals and store in variables
       let groupObject = res.groupDeals
-      arrangeDealsObject(groupObject, dealGroupFunctionArray)
       let investorObject = res.investorDeals
+      // arrange both sets of deals
+      arrangeDealsObject(groupObject, dealGroupFunctionArray)
       arrangeDealsObject(investorObject, dealInvestorFunctionArray)
-      console.log(totalInvestmentDollar)
-      objectArraySearch(groupObject, totalInvestmentDollar)
-      console.log(groupObject.years)
+      // TOTAL INVESTMENT DOLLAR CHART
+      let groupTotalInvestmentDollar = JSON.parse(JSON.stringify(groupObject))
+      objectArraySearch(groupTotalInvestmentDollar, totalInvestmentDollar, ["Deal_NewOrFollowon", 'Deal_DollarInvested'])
+      let investorTotalInvestmentDollar = JSON.parse(JSON.stringify(investorObject))
+      objectArraySearch(investorTotalInvestmentDollar, totalInvestmentDollar, ["IndvInvestor_NeworFollowOn", 'IndvInvestor_DollarsInvested'])
     })
     .catch((err) => {
       throw err
