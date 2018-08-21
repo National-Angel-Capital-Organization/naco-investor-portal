@@ -289,6 +289,29 @@ export function handler(event, context, callback) {
     return totalInvestmentNumberReturn
   }
 
+  // TOTAL SECTOR DOLLAR
+
+  function totalSectorDollar(deals, sectorVar, dollarInvestedVar) {
+    const groupDealsBySector = groupBySector(deals, sectorVar)
+    let totalSectorDollarReturn = {}
+    for (let sector in groupDealsBySector) {
+      const sectorSumCount = sumAndCount(groupDealsBySector[sector], dollarInvestedVar)
+      totalSectorDollarReturn[sector] = sectorSumCount.sum
+    }
+    return totalSectorDollarReturn
+  }
+
+  // TOTAL SECTOR NUMBER
+
+  function totalSectorNumber(deals, sectorVar, numberInvestedVar) {
+    const groupDealsBySector = groupBySector(deals, sectorVar)
+    let totalSectorNumberReturn = {}
+    for (let sector in groupDealsBySector) {
+      const sectorSumCount = sumAndCount(groupDealsBySector[sector], numberInvestedVar)
+      totalSectorNumberReturn[sector] = sectorSumCount.count
+    }
+    return totalSectorNumberReturn
+  }
 
 
   // FUNCTIONALITY
@@ -315,6 +338,16 @@ export function handler(event, context, callback) {
       objectArraySearch(groupTotalInvestmentNumber, totalInvestmentNumber, ["Deal_NewOrFollowon", 'Deal_DollarInvested'])
       let investorTotalInvestmentNumber = JSON.parse(JSON.stringify(investorObject))
       objectArraySearch(investorTotalInvestmentNumber, totalInvestmentNumber, ["IndvInvestor_NeworFollowOn", 'IndvInvestor_DollarsInvested'])
+      // TOTAL SECTOR DOLLAR CHART
+      let groupTotalSectorDollar = JSON.parse(JSON.stringify(groupObject))
+      objectArraySearch(groupTotalSectorDollar, totalSectorDollar, ["Deal_MajorSector", 'Deal_DollarInvested'])
+      let investorTotalSectorDollar = JSON.parse(JSON.stringify(investorObject))
+      objectArraySearch(investorTotalSectorDollar, totalSectorDollar, ["IndvInvestor_CompanyMajorSector", 'IndvInvestor_DollarsInvested'])
+      // TOTAL SECTOR NUMBER CHART
+      let groupTotalSectorNumber = JSON.parse(JSON.stringify(groupObject))
+      objectArraySearch(groupTotalSectorNumber, totalSectorNumber, ["Deal_MajorSector", 'Deal_DollarInvested'])
+      let investorTotalSectorNumber = JSON.parse(JSON.stringify(investorObject))
+      objectArraySearch(investorTotalSectorNumber, totalSectorNumber, ["IndvInvestor_CompanyMajorSector", 'IndvInvestor_DollarsInvested'])
     })
     .catch((err) => {
       throw err
