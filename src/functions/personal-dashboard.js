@@ -31,6 +31,45 @@ export function handler(event, context, callback) {
     });
   }
 
+  // RETRIEVE ALL DEALS FROM DATABASE WITH API CALL
+
+  async function getAllDeals() {
+    // GROUP DEAL VARIABLES
+    let groupDeals = []
+    let newGroupDeals = []
+    let groupPageNumber = 1
+    // INVESTOR DEAL VARIABLES
+    let investorDeals = []
+    let newinvestorDeals = []
+    let investorPageNumber = 1
+
+    // COLLECT GROUP DEALS
+    do {
+      newGroupDeals = await addDeals(`views/IndvInvestor_DealsCharacteristic/records?q.pageSize=1000`, groupPageNumber)
+      newGroupDeals.forEach(element => {
+        groupDeals.push(element)
+      });
+      groupPageNumber++
+    } while (groupDeals.length % 1000 === 0 && newGroupDeals.length !== 0)
+
+    // COLLECT INVESTOR DEALS
+    do {
+      newinvestorDeals = await addDeals(`views/IndvInvestor_DealsDetails/records?q.pageSize=1000`, investorPageNumber)
+      newinvestorDeals.forEach(element => {
+        investorDeals.push(element)
+      });
+      investorPageNumber++
+    } while (investorDeals.length % 1000 === 0 && newinvestorDeals.length !== 0)
+
+    return ({
+      groupDeals: {
+        unfiltered: groupDeals
+      },
+      investorDeals: {
+        unfiltered: investorDeals
+      }
+    })
+  }
 
   // DEAL SORTING
 
@@ -42,85 +81,51 @@ export function handler(event, context, callback) {
   // GROUP DEALS BY YEAR
 
   function groupByYear(dealArray, yearVariable) {
-    return new Promise((resolve, reject) => {
-      if (dealArray.length === 0) {
-        reject(console.log('Error: No deals.'))
-      }
-      let sortedDeals = { 'all years': dealArray }
-      years.forEach(year => {
-        let dealsFromYear = dealArray.filter(deal => {
-          let dealYear = deal[yearVariable]
-          dealYear = dealYear.substr(dealYear.length - 4)
-          return dealYear === year
-        })
-        sortedDeals[year] = dealsFromYear
+    let sortedDeals = {}
+    years.forEach(year => {
+      let dealsFromYear = dealArray.filter(deal => {
+        let dealYear = deal[yearVariable]
+        dealYear = dealYear.substr(dealYear.length - 4)
+        return dealYear === year
       })
-      resolve(sortedDeals)
+      sortedDeals[year] = {}
+      sortedDeals[year]['unfiltered'] = dealsFromYear
     })
+    return sortedDeals
   }
-
 
   // GROUP DEALS BY NEW/FOLLOW-ON
   function groupByNewFollowOn(dealArray, newFollowOnVariable) {
-    return new Promise((resolve, reject) => {
-      if (dealArray.length === 0) {
-        reject(console.log('Error: No deals.'))
-      }
-      let sortedDeals = {}
-      let newDeals = dealArray.filter(deal => {
-        let dealNewOrFollowOn = deal[newFollowOnVariable]
-        return dealNewOrFollowOn.toLowerCase() === 'new'
-      })
-      let followOnDeals = dealArray.filter(deal => {
-        let dealNewOrFollowOn = deal[newFollowOnVariable]
-        return dealNewOrFollowOn.toLowerCase() === 'follow-on'
-      })
-      sortedDeals.new = newDeals
-      sortedDeals.followOn = followOnDeals
-      resolve(sortedDeals)
+    let sortedDeals = {}
+    let newDeals = dealArray.filter(deal => {
+      let dealNewOrFollowOn = deal[newFollowOnVariable]
+      return dealNewOrFollowOn.toLowerCase() === 'new'
     })
+    let followOnDeals = dealArray.filter(deal => {
+      let dealNewOrFollowOn = deal[newFollowOnVariable]
+      return dealNewOrFollowOn.toLowerCase() === 'follow-on'
+    })
+    sortedDeals.new = newDeals
+    sortedDeals.followOn = followOnDeals
+    return sortedDeals
   }
 
   // GROUP DEALS BY SECTOR
 
   function groupBySector(dealArray, sectorVariable) {
-    return new Promise((resolve, reject) => {
-      if (dealArray.length === 0) {
-        reject(console.log('Error: No deals.'))
-      }
-      let sortedDeals = {}
-      sectors.forEach(sector => {
-        let dealsFromSector = dealArray.filter(deal => {
-          let dealSector = deal[sectorVariable]
-          return dealSector === sector
-        })
-        sortedDeals[sector] = dealsFromSector
+    let sortedDeals = {}
+    sectors.forEach(sector => {
+      let dealsFromSector = dealArray.filter(deal => {
+        let dealSector = deal[sectorVariable]
+        return dealSector === sector
       })
-      resolve(sortedDeals)
+      sortedDeals[sector] = dealsFromSector
     })
+    return sortedDeals
   }
 
 
-  // GENERAL DATA FUNCTIONS
-
-  // SUM DATA
-
-  function sumData(dealArray, sectorVariable) {
-    return new Promise((resolve, reject) => {
-      if (dealArray.length === 0) {
-        reject(console.log('Error: No deals.'))
-      }
-      let valueArray = []
-      dealArray.forEach(deal => {
-        if (deal[sectorVariable] !== null) {
-          valueArray.push(deal[sectorVariable])
-        }
-      })
-      const reducer = (accumulator, currentValue) => accumulator + currentValue
-      resolve({ sum: valueArray.reduce(reducer), count: valueArray.length })
-    })
-  }
-
+  // DEAL MANAGEMENT
 
   // GET ALL DEALS AND ADD TO ARRAYS
 
@@ -129,13 +134,12 @@ export function handler(event, context, callback) {
       let dealArray = []
       axios
         .get(
-          `https://${process.env.API_INTEGRATION_URL}.caspio.com/rest/v2/tables/${path}&q.pageNumber=${pageNumber}`,
+          `https://${process.env.API_INTEGRATION_URL}.caspio.com/rest/v2/${path}&q.pageNumber=${pageNumber}`,
           {
             headers: {
               accept: 'application/json',
               Authorization: `bearer ${cookies.token}`,
             },
-
           }
         )
         .then(res => {
@@ -151,50 +155,95 @@ export function handler(event, context, callback) {
   }
 
 
-  async function getAllDeals() {
-    // GROUP DEAL VARIABLES
-    let groupDeals = []
-    let newGroupDeals = []
-    let groupPageNumber = 1
-    // INVESTOR DEAL VARIABLES
-    let investorDeals = []
-    let newinvestorDeals = []
-    let investorPageNumber = 1
+  // TRAVERSE OBJECT AND APPLY FUNCTION TO FURTHER GROUP 
 
-    // COLLECT GROUP DEALS
-    do {
-      newGroupDeals = await addDeals(`Deals/records?q.pageSize=1000`, groupPageNumber)
-      newGroupDeals.forEach(element => {
-        groupDeals.push(element)
-      });
-      groupPageNumber++
-    } while (groupDeals.length % 1000 === 0 && newGroupDeals.length !== 0)
+  function objectTraverse(objectToTraverse, sortingVariable, groupingFunction, groupingVariable) {
+    if (typeof objectToTraverse === 'object' && objectToTraverse !== null) {
+      Object.keys(objectToTraverse).forEach(filteredObjectType => {
 
-    // COLLECT INVESTOR DEALS
-    do {
-      newinvestorDeals = await addDeals(`IndvInvestorDeals/records?q.pageSize=1000`, investorPageNumber)
-      newinvestorDeals.forEach(element => {
-        investorDeals.push(element)
-      });
-      investorPageNumber++
-    } while (investorDeals.length % 1000 === 0 && newinvestorDeals.length !== 0)
-    const dealsByYear = await groupByYear(groupDeals, 'Group_NameAndSubmissionYear')
-    const investorDealsByYear = await groupByYear(investorDeals, 'IndvInvestor_Email_Year')
-    return ({ groupDeals: dealsByYear, investorDeals: investorDealsByYear })
+        if (typeof objectToTraverse[filteredObjectType] === 'object' && filteredObjectType !== 'unfiltered' && objectToTraverse[filteredObjectType] !== null) {
+
+          if (Object.keys(objectToTraverse[filteredObjectType]).length > 1) {
+            objectTraverse(objectToTraverse[filteredObjectType], sortingVariable, groupingFunction, groupingVariable)
+          }
+          if (objectToTraverse[filteredObjectType].hasOwnProperty('unfiltered')) {
+            objectToTraverse[filteredObjectType][sortingVariable] = groupingFunction(objectToTraverse[filteredObjectType]['unfiltered'], groupingVariable)
+          }
+        }
+      })
+      if (objectToTraverse.hasOwnProperty('unfiltered')) {
+        objectToTraverse[sortingVariable] = groupingFunction(objectToTraverse['unfiltered'], groupingVariable)
+      }
+    }
   }
 
-  // const dealsBySector = await groupBySector(groupDeals, 'Deal_MajorSector')
-  // const investorDealsBySector = await groupBySector(investorDeals, 'IndvInvestor_CompanyMajorSector')
-  // const dealsByNewFollowOn = await groupByNewFollowOn(groupDeals, 'Deal_NewOrFollowon')
-  // const investorDealsByNewFollowOn = await groupByNewFollowOn(investorDeals, 'IndvInvestor_NeworFollowOn')
-  // const groupPreMoneyValuation = await sumData(groupDeals, 'Deal_PremoneyValue')
-  // console.log(groupPreMoneyValuation.sum / groupPreMoneyValuation.count)
+
+  // SEARCH OBJECT FOR ARRAYS
+
+  function objectArraySearch(objectToSearch, func, argArray) {
+
+    if (typeof objectToSearch === 'object' && objectToSearch !== null) {
+      Object.keys(objectToSearch).forEach(obj => {
+
+        if (typeof objectToSearch[obj] === 'object' && objectToSearch[obj] !== null) {
+          objectArraySearch(objectToSearch[obj], func, argArray)
+        }
+        if (Array.isArray(objectToSearch[obj]) && objectToSearch[obj] !== null) {
+          let newArgArray = [objectToSearch[obj], ...argArray]
+          objectToSearch[obj] = func.apply(null, newArgArray)
+        }
+      })
+    }
+  }
+
+
+  // CHART GENERAL FUNCTIONS
+
+  // SUM DATA
+
+  function sumAndCount(dealArray, sectorVariable) {
+    let valueArray = []
+    dealArray.forEach(deal => {
+      if (deal[sectorVariable] !== null) {
+        valueArray.push(deal[sectorVariable])
+      }
+    })
+    let sumOfValues = 0
+    const reducer = (accumulator, currentValue) => accumulator + currentValue
+    if (valueArray.length > 0) {
+      sumOfValues = valueArray.reduce(reducer)
+    }
+    return ({ sum: sumOfValues, count: valueArray.length })
+  }
+
+
+  // CHART SPECIFIC FUNCTIONS
+
+
+
+  // FUNCTIONALITY
+
 
   getAllDeals()
     .then((res) => {
-      console.log(res.groupDeals['all years'].length)
+      // separate group deals from investor deals and store in variables
+      let groupObject = res.groupDeals
+      let investorObject = res.investorDeals
+      // arrange both sets of deals
+      objectTraverse(groupObject, 'years', groupByYear, 'Group_NameAndSubmissionYear')
+      objectTraverse(investorObject, 'years', groupByYear, 'IndvInvestor_Email_Year')
+      
+      const objectToSend = {}
+      callback(null, {
+        statusCode: 200,
+        body: `${JSON.stringify(objectToSend)}`
+      });
     })
     .catch((err) => {
-      throw err
+      console.log('ERROR', err)
+      callback(null, {
+        statusCode: 500,
+        body: `${err}`
+      });
     })
 }

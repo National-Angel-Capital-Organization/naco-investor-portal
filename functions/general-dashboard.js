@@ -3213,18 +3213,13 @@ function handler(event, context, callback) {
         });
         investorPageNumber++;
       } while (investorDeals.length % 1000 === 0 && newinvestorDeals.length !== 0);
-      const dealsByYear = groupByYear(groupDeals, 'Group_NameAndSubmissionYear');
-      const investorDealsByYear = groupByYear(investorDeals, 'IndvInvestor_Email_Year');
-      const dealsByProvince = groupByProvince(groupDeals, 'Group_Province');
-      const investorDealsByProvince = groupByProvince(investorDeals, 'IndvInvestor_Province');
+
       return {
         groupDeals: {
           unfiltered: groupDeals
         },
         investorDeals: {
-          unfiltered: investorDeals,
-          years: investorDealsByYear,
-          provinces: investorDealsByProvince
+          unfiltered: investorDeals
         }
       };
     });
