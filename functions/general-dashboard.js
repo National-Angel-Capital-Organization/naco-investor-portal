@@ -3406,7 +3406,7 @@ function handler(event, context, callback) {
 
   // SUM DATA
 
-  function sumData(dealArray, sectorVariable) {
+  function sumAndCount(dealArray, sectorVariable) {
     let valueArray = [];
     dealArray.forEach(deal => {
       if (deal[sectorVariable] !== null) {
@@ -3429,7 +3429,7 @@ function handler(event, context, callback) {
     const groupDealsBySector = groupBySector(deals, sectorVar);
     let averagePremoneyValueReturn = {};
     for (let sector in groupDealsBySector) {
-      const sectorSumCount = sumData(groupDealsBySector[sector], premoneyValueVar);
+      const sectorSumCount = sumAndCount(groupDealsBySector[sector], premoneyValueVar);
       averagePremoneyValueReturn[sector] = sectorSumCount.sum / sectorSumCount.count;
     }
     return averagePremoneyValueReturn;
@@ -3440,11 +3440,23 @@ function handler(event, context, callback) {
   function totalInvestmentDollar(deals, newFollowOnVar, dollarInvestedVar) {
     const groupDealsByNewFollowOn = groupByNewFollowOn(deals, newFollowOnVar);
     let totalInvestmentDollarReturn = {};
-    const newSum = sumData(groupDealsByNewFollowOn.new, dollarInvestedVar);
+    const newSum = sumAndCount(groupDealsByNewFollowOn.new, dollarInvestedVar);
     totalInvestmentDollarReturn['new'] = newSum.sum;
-    const followOnSum = sumData(groupDealsByNewFollowOn.followOn, dollarInvestedVar);
+    const followOnSum = sumAndCount(groupDealsByNewFollowOn.followOn, dollarInvestedVar);
     totalInvestmentDollarReturn['followOn'] = followOnSum.sum;
     return totalInvestmentDollarReturn;
+  }
+
+  // TOTAL INVESTMENT NUMBER
+
+  function totalInvestmentNumber(deals, newFollowOnVar, numberInvestedVar) {
+    const groupDealsByNewFollowOn = groupByNewFollowOn(deals, newFollowOnVar);
+    let totalInvestmentNumberReturn = {};
+    const newSum = sumAndCount(groupDealsByNewFollowOn.new, numberInvestedVar);
+    totalInvestmentNumberReturn['new'] = newSum.count;
+    const followOnSum = sumAndCount(groupDealsByNewFollowOn.followOn, numberInvestedVar);
+    totalInvestmentNumberReturn['followOn'] = followOnSum.count;
+    return totalInvestmentNumberReturn;
   }
 
   // FUNCTIONALITY
@@ -3465,6 +3477,11 @@ function handler(event, context, callback) {
     objectArraySearch(groupTotalInvestmentDollar, totalInvestmentDollar, ["Deal_NewOrFollowon", 'Deal_DollarInvested']);
     let investorTotalInvestmentDollar = JSON.parse(JSON.stringify(investorObject));
     objectArraySearch(investorTotalInvestmentDollar, totalInvestmentDollar, ["IndvInvestor_NeworFollowOn", 'IndvInvestor_DollarsInvested']);
+    // TOTAL INVESTMENT NUMBER CHART
+    let groupTotalInvestmentNumber = JSON.parse(JSON.stringify(groupObject));
+    objectArraySearch(groupTotalInvestmentNumber, totalInvestmentNumber, ["Deal_NewOrFollowon", 'Deal_DollarInvested']);
+    let investorTotalInvestmentNumber = JSON.parse(JSON.stringify(investorObject));
+    objectArraySearch(investorTotalInvestmentNumber, totalInvestmentNumber, ["IndvInvestor_NeworFollowOn", 'IndvInvestor_DollarsInvested']);
   }).catch(err => {
     throw err;
   });
