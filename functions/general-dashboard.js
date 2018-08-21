@@ -3423,6 +3423,18 @@ function handler(event, context, callback) {
 
   // CHART SPECIFIC FUNCTIONS
 
+  // AVERAGE PREMONEY VALUE
+
+  function averagePremoneyValue(deals, sectorVar, premoneyValueVar) {
+    const groupDealsBySector = groupBySector(deals, sectorVar);
+    let averagePremoneyValueReturn = {};
+    for (let sector in groupDealsBySector) {
+      const sectorSumCount = sumData(groupDealsBySector[sector], premoneyValueVar);
+      averagePremoneyValueReturn[sector] = sectorSumCount.sum / sectorSumCount.count;
+    }
+    return averagePremoneyValueReturn;
+  }
+
   // TOTAL INVESTMENT DOLLAR
 
   function totalInvestmentDollar(deals, newFollowOnVar, dollarInvestedVar) {
@@ -3432,7 +3444,6 @@ function handler(event, context, callback) {
     totalInvestmentDollarReturn['new'] = newSum.sum;
     const followOnSum = sumData(groupDealsByNewFollowOn.followOn, dollarInvestedVar);
     totalInvestmentDollarReturn['followOn'] = followOnSum.sum;
-
     return totalInvestmentDollarReturn;
   }
 
@@ -3446,6 +3457,9 @@ function handler(event, context, callback) {
     // arrange both sets of deals
     arrangeDealsObject(groupObject, dealGroupFunctionArray);
     arrangeDealsObject(investorObject, dealInvestorFunctionArray);
+    // AVERAGE PREMONEY VALUE CHART
+    let groupAveragePremoneyValue = JSON.parse(JSON.stringify(groupObject));
+    objectArraySearch(groupAveragePremoneyValue, averagePremoneyValue, ["Deal_MajorSector", 'Deal_PremoneyValue']);
     // TOTAL INVESTMENT DOLLAR CHART
     let groupTotalInvestmentDollar = JSON.parse(JSON.stringify(groupObject));
     objectArraySearch(groupTotalInvestmentDollar, totalInvestmentDollar, ["Deal_NewOrFollowon", 'Deal_DollarInvested']);
@@ -3455,82 +3469,6 @@ function handler(event, context, callback) {
     throw err;
   });
 }
-
-// // CHART GENERAL FUNCTIONS
-
-// function chart(sortArray, calculation, groupedDeals) {
-//   let returnObject = {}
-//   sortArray.forEach((type) => {
-//     const calculatedValues = calculation(groupedDeals[type])
-//     returnObject[type] = calculatedValues
-//   })
-//   return returnObject
-// }
-
-// // FILTERING
-
-
-// // UNFILTERED
-
-// function unfiltered(finalObject, chartFunctionArray, groupFunctionArray) {
-//   let sortFunction = groupFunctionArray[0]
-//   let dealsToSort = groupFunctionArray[1]
-//   const newObject = finalObject
-//   newObject['unfiltered'] = chart(chartFunctionArray[0], chartFunctionArray[1], sortFunction(dealsToSort['unfiltered'], groupFunctionArray[2]))
-//   console.log(newObject)
-//   return newObject
-// }
-
-// // FILTERED BY YEAR
-
-// function yearFiltered(finalObject, chartFunctionArray, groupFunctionArray) {
-//   const newObject = finalObject
-//   newObject['years'] = {}
-//   let sortFunction = groupFunctionArray[0]
-//   let dealsToSort = groupFunctionArray[1]
-//   years.forEach((year) => {
-//     newObject['years'][year] = {}
-//     newObject['years'][year]['unfiltered'] = chart(chartFunctionArray[0], chartFunctionArray[1], sortFunction(dealsToSort[year], groupFunctionArray[2]))
-//   })
-//   console.log(newObject)
-//   return newObject
-// }
-
-// // FILTERED BY PROVINCE
-
-// function provinceFiltered(finalObject, chartFunctionArray, groupFunctionArray) {
-//   const newObject = finalObject
-//   newObject['provinces'] = {}
-//   let sortFunction = groupFunctionArray[0]
-//   let dealsToSort = groupFunctionArray[1]
-//   provinces.forEach((province) => {
-//     newObject['provinces'][province] = {}
-//     newObject['provinces'][province]['unfiltered'] = chart(chartFunctionArray[0], chartFunctionArray[1], sortFunction(dealsToSort[province], groupFunctionArray[2]))
-//   })
-//   console.log(newObject)
-//   return newObject
-// }
-
-
-// // CHART SPECIFIC FUNCTIONS
-
-// // PREMONEY VALUE
-
-// function premoneyValueCalculations(deals) {
-//   const sectorSumCount = sumData(deals, 'Deal_PremoneyValue')
-//   return sectorSumCount.sum / sectorSumCount.count
-// }
-
-// function premoneyValue(deals) {
-//   let premoneyValueReturn = {}
-//   // Add new filters to end of these arrays
-//   const filterArray = [unfiltered, yearFiltered, provinceFiltered]
-//   const dealstoFilter = [deals.years.groupDeals, deals.years.groupDeals, deals.provinces.groupDeals]
-//   filterArray.forEach((filterFunction, index) => {
-//     filterFunction(premoneyValueReturn, [sectors, premoneyValueCalculations], [groupBySector, dealstoFilter[index], "Deal_MajorSector"])
-//   })
-//   return premoneyValueReturn
-// }
 
 /***/ })
 /******/ ])));
