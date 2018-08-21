@@ -3516,8 +3516,31 @@ function handler(event, context, callback) {
     objectArraySearch(groupTotalSectorNumber, totalSectorNumber, ["Deal_MajorSector", 'Deal_DollarInvested']);
     let investorTotalSectorNumber = JSON.parse(JSON.stringify(investorObject));
     objectArraySearch(investorTotalSectorNumber, totalSectorNumber, ["IndvInvestor_CompanyMajorSector", 'IndvInvestor_DollarsInvested']);
+    const objectToSend = {
+      group: {
+        averagePremoneyValue: groupAveragePremoneyValue,
+        totalInvestmentDollar: groupTotalInvestmentDollar,
+        totalInvestmentNumber: groupTotalInvestmentNumber,
+        totalSectorDollar: groupTotalSectorDollar,
+        totalSectorNumber: groupTotalSectorNumber
+      },
+      investor: {
+        totalInvestmentDollar: investorTotalInvestmentDollar,
+        totalInvestmentNumber: investorTotalInvestmentNumber,
+        totalSectorDollar: investorTotalSectorDollar,
+        totalSectorNumber: investorTotalSectorNumber
+      }
+    };
+    callback(null, {
+      statusCode: 200,
+      body: `${JSON.stringify(objectToSend)}`
+    });
   }).catch(err => {
-    throw err;
+    console.log('ERROR', err);
+    callback(null, {
+      statusCode: 500,
+      body: `${err}`
+    });
   });
 }
 
