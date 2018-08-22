@@ -3308,6 +3308,21 @@ function handler(event, context, callback) {
     return sortedDeals;
   }
 
+  // GROUP DEALS BY EMAIL
+
+  // function groupByEmail(dealArray, emailVariable, emailArray) {
+  //   let sortedDeals = {}
+  //   emailArray.forEach(email => {
+  //     let dealsFromEmail = dealArray.filter(deal => {
+  //       let dealEmail = deal[emailVariable]
+  //       return dealEmail === email
+  //     })
+  //     sortedDeals[email] = dealsFromEmail
+  //   })
+  //   return sortedDeals
+  // }
+
+
   // DEAL MANAGEMENT
 
   // GET ALL DEALS AND ADD TO ARRAYS
@@ -3392,6 +3407,29 @@ function handler(event, context, callback) {
 
   // CHART SPECIFIC FUNCTIONS
 
+  // AVERAGE INVESTMENT DOLLAR
+
+  function groupAverageInvestmentAmount(deals, numberOfInvestorsVar, dollarInvestedVar) {
+    const filteredDeals = deals.filter(deal => {
+      return deal[dollarInvestedVar] > 0 && deal[numberOfInvestorsVar] > 0;
+    });
+    const dollarSum = sumAndCount(filteredDeals, dollarInvestedVar);
+    const memberSum = sumAndCount(filteredDeals, numberOfInvestorsVar);
+    let averageInvestmentDollarReturn = dollarSum.sum / memberSum.sum;
+    return averageInvestmentDollarReturn;
+  }
+
+  function investorAverageInvestmentAmount(deals, dollarInvestedVar) {
+    const userDeals = deals.filter(deal => {
+      return deal['IndvInvestorDeals_IndvInvestor_Email'] === userEmail;
+    });
+    const notUserDeals = deals.filter(deal => {
+      return deal['IndvInvestorDeals_IndvInvestor_Email'] !== userEmail && deal['IndvInvestorDeals_IndvInvestor_Email'] !== null && deal['IndvInvestorDeals_IndvInvestor_Email'] !== '';
+    });
+    let uniqueEmails = [...new Set(notUserDeals.map(deal => deal['IndvInvestorDeals_IndvInvestor_Email']))];
+    // use uniqueEmails.length and notUserDeals.length
+    return { user: userDeals.length, averageInvestor: notUserDeals.length / uniqueEmails.length };
+  }
 
   // FUNCTIONALITY
 
@@ -3403,6 +3441,13 @@ function handler(event, context, callback) {
     // arrange both sets of deals
     objectTraverse(groupObject, 'years', groupByYear, 'Group_NameAndSubmissionYear');
     objectTraverse(investorObject, 'years', groupByYear, 'IndvInvestor_Email_Year');
+    // AVERAGE INVESTMENT DOLLAR CHART
+    let groupAverageInvestmentDollar = JSON.parse(JSON.stringify(groupObject));
+    objectArraySearch(groupAverageInvestmentDollar, groupAverageInvestmentAmount, ['Deal_MemberInvestors_Num', 'Deal_DollarInvested']);
+    let investorAverageInvestmentDollar = JSON.parse(JSON.stringify(investorObject));
+    objectArraySearch(investorAverageInvestmentDollar, investorAverageInvestmentAmount, ['IndvInvestor_DollarsInvested']);
+
+    console.log(investorAverageInvestmentDollar.years['2018']);
 
     const objectToSend = {};
     callback(null, {
