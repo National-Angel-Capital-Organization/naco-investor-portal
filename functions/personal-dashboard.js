@@ -3415,7 +3415,7 @@ function handler(event, context, callback) {
     });
     const dollarSum = sumAndCount(filteredDeals, dollarInvestedVar);
     const memberSum = sumAndCount(filteredDeals, numberOfInvestorsVar);
-    let averageInvestmentDollarReturn = dollarSum.sum / memberSum.sum;
+    let averageInvestmentDollarReturn = { sum: dollarSum.sum, memberNumber: memberSum.sum };
     return averageInvestmentDollarReturn;
   }
 
@@ -3426,9 +3426,10 @@ function handler(event, context, callback) {
     const notUserDeals = deals.filter(deal => {
       return deal['IndvInvestorDeals_IndvInvestor_Email'] !== userEmail && deal['IndvInvestorDeals_IndvInvestor_Email'] !== null && deal['IndvInvestorDeals_IndvInvestor_Email'] !== '';
     });
-    let uniqueEmails = [...new Set(notUserDeals.map(deal => deal['IndvInvestorDeals_IndvInvestor_Email']))];
-    // use uniqueEmails.length and notUserDeals.length
-    return { user: userDeals.length, averageInvestor: notUserDeals.length / uniqueEmails.length };
+    const uniqueEmails = [...new Set(notUserDeals.map(deal => deal['IndvInvestorDeals_IndvInvestor_Email']))];
+    const userDollarSum = sumAndCount(userDeals, dollarInvestedVar);
+    const otherDollarSum = sumAndCount(notUserDeals, dollarInvestedVar);
+    return { userSum: userDollarSum.sum, otherSum: otherDollarSum.sum, memberNumber: uniqueEmails.length };
   }
 
   // FUNCTIONALITY
@@ -3447,9 +3448,10 @@ function handler(event, context, callback) {
     let investorAverageInvestmentDollar = JSON.parse(JSON.stringify(investorObject));
     objectArraySearch(investorAverageInvestmentDollar, investorAverageInvestmentAmount, ['IndvInvestor_DollarsInvested']);
 
-    console.log(investorAverageInvestmentDollar.years['2018']);
-
-    const objectToSend = {};
+    const objectToSend = {
+      group: { averageInvestmentDollar: groupAverageInvestmentDollar },
+      investor: { averageInvestmentDollar: investorAverageInvestmentDollar }
+    };
     callback(null, {
       statusCode: 200,
       body: `${JSON.stringify(objectToSend)}`
