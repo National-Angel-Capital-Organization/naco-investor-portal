@@ -1,7 +1,6 @@
 
 
 import axios from 'axios'
-import { isNull } from 'util';
 require('dotenv').config()
 
 export function handler(event, context, callback) {

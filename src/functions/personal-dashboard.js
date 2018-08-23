@@ -1,7 +1,6 @@
 
 
 import axios from 'axios'
-import { isNull } from 'util';
 require('dotenv').config()
 
 export function handler(event, context, callback) {
@@ -125,21 +124,6 @@ export function handler(event, context, callback) {
   }
 
 
-  // GROUP DEALS BY EMAIL
-
-  // function groupByEmail(dealArray, emailVariable, emailArray) {
-  //   let sortedDeals = {}
-  //   emailArray.forEach(email => {
-  //     let dealsFromEmail = dealArray.filter(deal => {
-  //       let dealEmail = deal[emailVariable]
-  //       return dealEmail === email
-  //     })
-  //     sortedDeals[email] = dealsFromEmail
-  //   })
-  //   return sortedDeals
-  // }
-
-
   // DEAL MANAGEMENT
 
   // GET ALL DEALS AND ADD TO ARRAYS
@@ -242,7 +226,7 @@ export function handler(event, context, callback) {
     })
     const dollarSum = sumAndCount(filteredDeals, dollarInvestedVar)
     const memberSum = sumAndCount(filteredDeals, numberOfInvestorsVar)
-    let averageInvestmentDollarReturn = {sum: dollarSum.sum, memberNumber: memberSum.sum}
+    let averageInvestmentDollarReturn = { sum: dollarSum.sum, memberNumber: memberSum.sum }
     return averageInvestmentDollarReturn
   }
 
@@ -251,15 +235,88 @@ export function handler(event, context, callback) {
       return deal['IndvInvestorDeals_IndvInvestor_Email'] === userEmail
     })
     const notUserDeals = deals.filter(deal => {
-      return deal['IndvInvestorDeals_IndvInvestor_Email'] !== userEmail 
-      && deal['IndvInvestorDeals_IndvInvestor_Email'] !== null 
-      && deal['IndvInvestorDeals_IndvInvestor_Email'] !== ''
+      return deal['IndvInvestorDeals_IndvInvestor_Email'] !== userEmail
+        && deal['IndvInvestorDeals_IndvInvestor_Email'] !== null
+        && deal['IndvInvestorDeals_IndvInvestor_Email'] !== ''
     })
     const uniqueEmails = [...new Set(notUserDeals.map(deal => deal['IndvInvestorDeals_IndvInvestor_Email']))];
     const userDollarSum = sumAndCount(userDeals, dollarInvestedVar)
     const otherDollarSum = sumAndCount(notUserDeals, dollarInvestedVar)
-    return { userSum: userDollarSum.sum, otherSum: otherDollarSum.sum, memberNumber: uniqueEmails.length}
+    return { userSum: userDollarSum.sum, otherSum: otherDollarSum.sum, memberNumber: uniqueEmails.length }
   }
+
+  // AVERAGE INVESTMENT NUMBER
+
+  function investorAverageInvestmentNumber(deals, emailVar) {
+    const userDeals = deals.filter(deal => {
+      return deal[emailVar] === userEmail
+    })
+    const notUserDeals = deals.filter(deal => {
+      return deal[emailVar] !== userEmail
+        && deal[emailVar] !== null
+        && deal[emailVar] !== ''
+    })
+    const uniqueEmails = [...new Set(notUserDeals.map(deal => deal[emailVar]))];
+    return { userNumber: userDeals.length, otherNumber: notUserDeals.length / uniqueEmails.length }
+  }
+
+
+  // INVESTMENT DOLLAR CHART
+
+  function investmentDollars(deals, emailVar) {
+    const userDeals = deals.filter(deal => {
+      return deal[emailVar] === userEmail
+    })
+    let groupedUserDeals = groupByNewFollowOn(userDeals, 'IndvInvestor_NeworFollowOn')
+    let userNewDollars = sumAndCount(groupedUserDeals.new, 'IndvInvestor_DollarsInvested')
+    let userFollowOnDollars = sumAndCount(groupedUserDeals.followOn, 'IndvInvestor_DollarsInvested')
+    return { newDollars: userNewDollars.sum, followOnDollars: userFollowOnDollars.sum }
+  }
+
+  // INVESTMENT NUMBER CHART
+
+  function investmentNumbers(deals, emailVar) {
+    const userDeals = deals.filter(deal => {
+      return deal[emailVar] === userEmail
+    })
+    let groupedUserDeals = groupByNewFollowOn(userDeals, 'IndvInvestor_NeworFollowOn')
+    let userNewNumbers = sumAndCount(groupedUserDeals.new, 'IndvInvestor_DollarsInvested')
+    let userFollowOnNumbers = sumAndCount(groupedUserDeals.followOn, 'IndvInvestor_DollarsInvested')
+    return { newNumbers: userNewNumbers.count, followOnNumbers: userFollowOnNumbers.count }
+  }
+
+  // SECTOR DOLLAR CHART
+
+  function sectorDollars(deals, emailVar, dollarInvestedVar) {
+    const userDeals = deals.filter(deal => {
+      return deal[emailVar] === userEmail
+    })
+    let groupedUserDeals = groupBySector(userDeals, 'IndvInvestor_CompanyMajorSector')
+    let sectorDollarReturn = {}
+    for (let sector in groupedUserDeals) {
+      const sectorSumCount = sumAndCount(groupedUserDeals[sector], dollarInvestedVar)
+      sectorDollarReturn[sector] = sectorSumCount.sum
+    }
+    return sectorDollarReturn
+  }
+
+  // SECTOR NUMBER CHART
+
+  function sectorNumbers(deals, emailVar, numberInvestedVar) {
+    const userDeals = deals.filter(deal => {
+      return deal[emailVar] === userEmail
+    })
+    let groupedUserDeals = groupBySector(userDeals, 'IndvInvestor_CompanyMajorSector')
+    let sectorNumberReturn = {}
+    for (let sector in groupedUserDeals) {
+      const sectorSumCount = sumAndCount(groupedUserDeals[sector], numberInvestedVar)
+      sectorNumberReturn[sector] = sectorSumCount.count
+    }
+    return sectorNumberReturn
+  }
+
+
+
 
   // FUNCTIONALITY
 
@@ -277,10 +334,33 @@ export function handler(event, context, callback) {
       objectArraySearch(groupAverageInvestmentDollar, groupAverageInvestmentAmount, ['Deal_MemberInvestors_Num', 'Deal_DollarInvested'])
       let investorAverageInvestmentDollar = JSON.parse(JSON.stringify(investorObject))
       objectArraySearch(investorAverageInvestmentDollar, investorAverageInvestmentAmount, ['IndvInvestor_DollarsInvested'])
-      
-      const objectToSend = { 
-        group: { averageInvestmentDollar: groupAverageInvestmentDollar }, 
-        investor: { averageInvestmentDollar: investorAverageInvestmentDollar, }
+      // AVERAGE INVESTMENT NUMBER CHART
+      let investorAverageNumberOfInvestments = JSON.parse(JSON.stringify(investorObject))
+      objectArraySearch(investorAverageNumberOfInvestments, investorAverageInvestmentNumber, ['IndvInvestorDeals_IndvInvestor_Email'])
+      // INVESTMENT DOLLAR CHART
+      let investorDollarDeals = JSON.parse(JSON.stringify(investorObject))
+      objectArraySearch(investorDollarDeals, investmentDollars, ['IndvInvestorDeals_IndvInvestor_Email'])
+      // INVESTMENT NUMBER CHART
+      let investorNumberOfDeals = JSON.parse(JSON.stringify(investorObject))
+      objectArraySearch(investorNumberOfDeals, investmentNumbers, ['IndvInvestorDeals_IndvInvestor_Email'])
+      // SECTOR DOLLAR CHART
+      let dealsDollarBySector = JSON.parse(JSON.stringify(investorObject))
+      objectArraySearch(dealsDollarBySector, sectorDollars, ['IndvInvestorDeals_IndvInvestor_Email', 'IndvInvestor_DollarsInvested'])
+      // SECTOR NUMBER CHART
+      let numberOfDealsBySector = JSON.parse(JSON.stringify(investorObject))
+      objectArraySearch(numberOfDealsBySector, sectorNumbers, ['IndvInvestorDeals_IndvInvestor_Email', 'IndvInvestor_DollarsInvested'])
+
+
+      const objectToSend = {
+        group: { averageInvestmentDollar: groupAverageInvestmentDollar },
+        investor: {
+          averageInvestmentDollar: investorAverageInvestmentDollar,
+          averageNumberOfInvestments: investorAverageNumberOfInvestments,
+          userInvestmentDollars: investorDollarDeals,
+          userInvestmentNumber: investorNumberOfDeals,
+          dollarsBySector: dealsDollarBySector,
+          numberBySector: numberOfDealsBySector
+        }
       }
       callback(null, {
         statusCode: 200,

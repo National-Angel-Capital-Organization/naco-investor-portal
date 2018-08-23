@@ -3176,8 +3176,6 @@ var _axios = __webpack_require__(15);
 
 var _axios2 = _interopRequireDefault(_axios);
 
-var _util = __webpack_require__(14);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
@@ -3308,21 +3306,6 @@ function handler(event, context, callback) {
     return sortedDeals;
   }
 
-  // GROUP DEALS BY EMAIL
-
-  // function groupByEmail(dealArray, emailVariable, emailArray) {
-  //   let sortedDeals = {}
-  //   emailArray.forEach(email => {
-  //     let dealsFromEmail = dealArray.filter(deal => {
-  //       let dealEmail = deal[emailVariable]
-  //       return dealEmail === email
-  //     })
-  //     sortedDeals[email] = dealsFromEmail
-  //   })
-  //   return sortedDeals
-  // }
-
-
   // DEAL MANAGEMENT
 
   // GET ALL DEALS AND ADD TO ARRAYS
@@ -3432,6 +3415,73 @@ function handler(event, context, callback) {
     return { userSum: userDollarSum.sum, otherSum: otherDollarSum.sum, memberNumber: uniqueEmails.length };
   }
 
+  // AVERAGE INVESTMENT NUMBER
+
+  function investorAverageInvestmentNumber(deals, emailVar) {
+    const userDeals = deals.filter(deal => {
+      return deal[emailVar] === userEmail;
+    });
+    const notUserDeals = deals.filter(deal => {
+      return deal[emailVar] !== userEmail && deal[emailVar] !== null && deal[emailVar] !== '';
+    });
+    const uniqueEmails = [...new Set(notUserDeals.map(deal => deal[emailVar]))];
+    return { userNumber: userDeals.length, otherNumber: notUserDeals.length / uniqueEmails.length };
+  }
+
+  // INVESTMENT DOLLAR CHART
+
+  function investmentDollars(deals, emailVar) {
+    const userDeals = deals.filter(deal => {
+      return deal[emailVar] === userEmail;
+    });
+    let groupedUserDeals = groupByNewFollowOn(userDeals, 'IndvInvestor_NeworFollowOn');
+    let userNewDollars = sumAndCount(groupedUserDeals.new, 'IndvInvestor_DollarsInvested');
+    let userFollowOnDollars = sumAndCount(groupedUserDeals.followOn, 'IndvInvestor_DollarsInvested');
+    return { newDollars: userNewDollars.sum, followOnDollars: userFollowOnDollars.sum };
+  }
+
+  // INVESTMENT NUMBER CHART
+
+  function investmentNumbers(deals, emailVar) {
+    const userDeals = deals.filter(deal => {
+      return deal[emailVar] === userEmail;
+    });
+    let groupedUserDeals = groupByNewFollowOn(userDeals, 'IndvInvestor_NeworFollowOn');
+    let userNewNumbers = sumAndCount(groupedUserDeals.new, 'IndvInvestor_DollarsInvested');
+    let userFollowOnNumbers = sumAndCount(groupedUserDeals.followOn, 'IndvInvestor_DollarsInvested');
+    return { newNumbers: userNewNumbers.count, followOnNumbers: userFollowOnNumbers.count };
+  }
+
+  // SECTOR DOLLAR CHART
+
+  function sectorDollars(deals, emailVar, dollarInvestedVar) {
+    const userDeals = deals.filter(deal => {
+      return deal[emailVar] === userEmail;
+    });
+    let groupedUserDeals = groupBySector(userDeals, 'IndvInvestor_CompanyMajorSector');
+    let sectorDollarReturn = {};
+    for (let sector in groupedUserDeals) {
+      const sectorSumCount = sumAndCount(groupedUserDeals[sector], dollarInvestedVar);
+      sectorDollarReturn[sector] = sectorSumCount.sum;
+    }
+    return sectorDollarReturn;
+  }
+
+  // SECTOR NUMBER CHART
+
+  function sectorNumbers(deals, emailVar, numberInvestedVar) {
+    const userDeals = deals.filter(deal => {
+      return deal[emailVar] === userEmail;
+    });
+    let groupedUserDeals = groupBySector(userDeals, 'IndvInvestor_CompanyMajorSector');
+    let sectorNumberReturn = {};
+    for (let sector in groupedUserDeals) {
+      const sectorSumCount = sumAndCount(groupedUserDeals[sector], numberInvestedVar);
+      sectorNumberReturn[sector] = sectorSumCount.count;
+    }
+    return sectorNumberReturn;
+  }
+
   // FUNCTIONALITY
 
 
@@ -3447,10 +3497,32 @@ function handler(event, context, callback) {
     objectArraySearch(groupAverageInvestmentDollar, groupAverageInvestmentAmount, ['Deal_MemberInvestors_Num', 'Deal_DollarInvested']);
     let investorAverageInvestmentDollar = JSON.parse(JSON.stringify(investorObject));
     objectArraySearch(investorAverageInvestmentDollar, investorAverageInvestmentAmount, ['IndvInvestor_DollarsInvested']);
+    // AVERAGE INVESTMENT NUMBER CHART
+    let investorAverageNumberOfInvestments = JSON.parse(JSON.stringify(investorObject));
+    objectArraySearch(investorAverageNumberOfInvestments, investorAverageInvestmentNumber, ['IndvInvestorDeals_IndvInvestor_Email']);
+    // INVESTMENT DOLLAR CHART
+    let investorDollarDeals = JSON.parse(JSON.stringify(investorObject));
+    objectArraySearch(investorDollarDeals, investmentDollars, ['IndvInvestorDeals_IndvInvestor_Email']);
+    // INVESTMENT NUMBER CHART
+    let investorNumberOfDeals = JSON.parse(JSON.stringify(investorObject));
+    objectArraySearch(investorNumberOfDeals, investmentNumbers, ['IndvInvestorDeals_IndvInvestor_Email']);
+    // SECTOR DOLLAR CHART
+    let dealsDollarBySector = JSON.parse(JSON.stringify(investorObject));
+    objectArraySearch(dealsDollarBySector, sectorDollars, ['IndvInvestorDeals_IndvInvestor_Email', 'IndvInvestor_DollarsInvested']);
+    // SECTOR NUMBER CHART
+    let numberOfDealsBySector = JSON.parse(JSON.stringify(investorObject));
+    objectArraySearch(numberOfDealsBySector, sectorNumbers, ['IndvInvestorDeals_IndvInvestor_Email', 'IndvInvestor_DollarsInvested']);
 
     const objectToSend = {
       group: { averageInvestmentDollar: groupAverageInvestmentDollar },
-      investor: { averageInvestmentDollar: investorAverageInvestmentDollar }
+      investor: {
+        averageInvestmentDollar: investorAverageInvestmentDollar,
+        averageNumberOfInvestments: investorAverageNumberOfInvestments,
+        userInvestmentDollars: investorDollarDeals,
+        userInvestmentNumber: investorNumberOfDeals,
+        dollarsBySector: dealsDollarBySector,
+        numberBySector: numberOfDealsBySector
+      }
     };
     callback(null, {
       statusCode: 200,
