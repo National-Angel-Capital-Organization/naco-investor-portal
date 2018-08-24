@@ -1,4 +1,6 @@
 import React, { Component } from 'react'
+import axios from 'axios'
+import axiosHeaders from '../axios-headers'
 import SelectField from 'material-ui/SelectField'
 import MenuItem from 'material-ui/MenuItem'
 import PremoneyValueChart from '../components/general-charts/premoney-value-chart'
@@ -16,8 +18,30 @@ export default class IndexPage extends Component {
   state = {
     currentYear: 'all years.',
     error: '',
-    yearList: ['all years.', '2018.', '2017.', '2016.', '2015.', '2014.', '2013.', '2012.', '2011.', '2010.']
+    yearList: ['all years.', '2018.', '2017.', '2016.', '2015.', '2014.', '2013.', '2012.', '2011.', '2010.'],
+    data: {},
+    isLoading: true
   }
+
+  componentDidMount() {
+    axiosHeaders.generateHeaders().then((headers) => {
+      axios('/.netlify/functions/general-dashboard', {
+        method: 'GET',
+        headers
+      }
+      )
+        .then(res => {
+          this.setState({ data: res.data })
+          this.setState({isLoading: false})
+        })
+        .catch(error => {
+          throw error
+        })
+    })
+      .catch(error => {
+        console.log(error)
+      })
+    }
 
   handleDropdownChange = (event, index, value) => {
     this.setState({ currentYear: value })
@@ -27,10 +51,9 @@ export default class IndexPage extends Component {
     let currentYear = yearString;
 
     if (yearString === 'all years.') {
-      currentYear = '%25'
+      currentYear = 'unfiltered'
     } else {
       currentYear = yearString.slice(0, -1)
-      currentYear = `%25${currentYear}%25`
     }
     return currentYear;
   }
@@ -63,14 +86,14 @@ export default class IndexPage extends Component {
           </SelectField>
         </div>
         <div className='chart-wrapper'>
-          <div className='chart-container doughnut'>
+          {/* <div className='chart-container doughnut'>
             <TotalInvestmentNumberChart year={this.handleYear(this.state.currentYear)} />
             <TotalInvestmentDollarChart year={this.handleYear(this.state.currentYear)} />
-          </div>
+          </div> */}
           <div className='chart-container bar'>
-            <PremoneyValueChart year={this.handleYear(this.state.currentYear)} />
-            <TotalSectorNumberChart year={this.handleYear(this.state.currentYear)} />
-            <TotalSectorDollarChart year={this.handleYear(this.state.currentYear)} />
+            <PremoneyValueChart isLoading={this.state.isLoading} year={this.handleYear(this.state.currentYear)} data={Object.keys(this.state.data).length > 0 ? this.state.data.group.averagePremoneyValue.years['2017'].unfiltered : {}} />
+            {/* <TotalSectorNumberChart year={this.handleYear(this.state.currentYear)} />
+            <TotalSectorDollarChart year={this.handleYear(this.state.currentYear)} /> */}
           </div>
         </div>
       </div>
