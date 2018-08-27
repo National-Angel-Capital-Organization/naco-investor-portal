@@ -58,7 +58,37 @@ export default class IndexPage extends Component {
     return currentYear;
   }
 
+  dataForChart(chart, year, invdInvestorData) {
+    let data = {}
+    if (invdInvestorData) {
+      if (Object.keys(this.state.data).length <= 0) {
+        data = {}
+      } else if (year === 'unfiltered') {
+        for (let dataPoint in this.state.data.group[chart]['unfiltered']) {
+          data[dataPoint] = this.state.data.group[chart]['unfiltered'][dataPoint] + this.state.data.investor[chart]['unfiltered'][dataPoint]
+        }
+      } else {
+        for (let dataPoint in this.state.data.group[chart].years[year].unfiltered) {
+          data[dataPoint] = this.state.data.group[chart].years[year].unfiltered[dataPoint] + this.state.data.investor[chart].years[year].unfiltered[dataPoint]
+        }
+      }
+    } else {
+    if (Object.keys(this.state.data).length <= 0) {
+      data = {}
+    } else if (year === 'unfiltered') {
+      data = this.state.data.group[chart]['unfiltered']
+    } else {
+      data = this.state.data.group[chart].years[year].unfiltered
+    }
+  }
+    return data
+  }
+
   render() {
+    let year = this.handleYear(this.state.currentYear)
+
+    console.log(this.dataForChart('totalInvestmentDollar', year, true))
+
     return (
       <div>
         <h1>General Dashboard</h1>
@@ -70,7 +100,7 @@ export default class IndexPage extends Component {
             iconStyle={{ fill: '#0079c1' }}
             selectedMenuItemStyle={{ color: 'rgba(0, 0, 0, 0.8)' }}
             onChange={this.handleDropdownChange}
-            labelStyle={this.styles}
+            labelStyle={this.styles} 
             errorText={this.state.error}
           >
             {this.state.yearList.map(i => (
@@ -86,12 +116,12 @@ export default class IndexPage extends Component {
           </SelectField>
         </div>
         <div className='chart-wrapper'>
-          {/* <div className='chart-container doughnut'>
-            <TotalInvestmentNumberChart year={this.handleYear(this.state.currentYear)} />
-            <TotalInvestmentDollarChart year={this.handleYear(this.state.currentYear)} />
-          </div> */}
+          <div className='chart-container doughnut'>
+            {/* <TotalInvestmentNumberChart year={this.handleYear(this.state.currentYear)} /> */}
+            <TotalInvestmentDollarChart isLoading={this.state.isLoading} data={this.dataForChart('totalInvestmentDollar', year, true)} />
+          </div>
           <div className='chart-container bar'>
-            <PremoneyValueChart isLoading={this.state.isLoading} year={this.handleYear(this.state.currentYear)} data={Object.keys(this.state.data).length > 0 ? this.state.data.group.averagePremoneyValue.years['2017'].unfiltered : {}} />
+            <PremoneyValueChart isLoading={this.state.isLoading} data={this.dataForChart('averagePremoneyValue', year, false)} />
             {/* <TotalSectorNumberChart year={this.handleYear(this.state.currentYear)} />
             <TotalSectorDollarChart year={this.handleYear(this.state.currentYear)} /> */}
           </div>

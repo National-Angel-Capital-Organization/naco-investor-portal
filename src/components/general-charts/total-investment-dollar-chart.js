@@ -14,85 +14,29 @@ export default class TotalInvestmentDollarChart extends Component {
     isLoading: true,
   }
 
-  fetchData = (year) => {
-
-    // GET SUM OF INVESTMENT FROM ANGEL GROUPS
-
-    axiosHeaders.generateHeaders().then((headers) => {
-      axios('/.netlify/functions/get', {
-        method: 'GET',
-        headers,
-        params: { path: "rest/v2/tables/Deals/records", select: { 0: 'Deal_NewOrFollowon', 1: 'SUM(Deal_DollarInvested)%20AS%20DealDollarInvested' }, where: { Group_NameAndSubmissionYear: { query: year, type: '%20LIKE%20' } }, groupBy: 'Deal_NewOrFollowon' }
-      }
-      )
-        .then(res => {
-          let newFollowOn = [{ label: 'New', DealDollarInvested: 0, IndvInvestorDealDollarInvested: 0 }, { label: 'Follow-On', DealDollarInvested: 0, IndvInvestorDealDollarInvested: 0 }];
-          res.data.Result.forEach(type => {
-
-            switch (type.Deal_NewOrFollowon.toLowerCase()) {
-              case newFollowOn[0].label.toLowerCase():
-                newFollowOn[0].DealDollarInvested = type.DealDollarInvested
-                break
-              case newFollowOn[1].label.toLowerCase():
-                newFollowOn[1].DealDollarInvested = type.DealDollarInvested
-                break
-            }
-          });
-          // GET SUM OF INVESTMENT FROM INDIVIDUAL INVESTORS
-          axios('/.netlify/functions/get', {
-            method: 'GET',
-            headers,
-            params: { path: "rest/v2/tables/IndvInvestorDeals/records", select: { 0: 'IndvInvestor_NeworFollowOn', 1: 'SUM(IndvInvestor_DollarsInvested)%20AS%20IndvInvestorDealDollarInvested' }, where: { IndvInvestor_Email_Year: { query: year, type: '%20LIKE%20' } }, groupBy: 'IndvInvestor_NeworFollowOn' }
-          }
-          )
-            .then(res => {
-              res.data.Result.forEach(indvInvestorType => {
-
-                switch (indvInvestorType.IndvInvestor_NeworFollowOn.toLowerCase()) {
-                  case newFollowOn[0].label.toLowerCase():
-                    newFollowOn[0].IndvInvestorDealDollarInvested = indvInvestorType.IndvInvestorDealDollarInvested
-                    break
-                  case newFollowOn[1].label.toLowerCase():
-                    newFollowOn[1].IndvInvestorDealDollarInvested = indvInvestorType.IndvInvestorDealDollarInvested
-                    break
-                }
-              });
-
-              let totalInvestmentDollarLabels = []
-              let totalInvestmentDollarData = []
-              newFollowOn.forEach(type => {
-                //SET STATE WITH LIST OF LABELS
-                totalInvestmentDollarLabels.push(type.label)
-                //SET STATE WITH SUM OF INVESTMENT VALUE
-                totalInvestmentDollarData.push(Math.round(type.IndvInvestorDealDollarInvested + type.DealDollarInvested))
-              })
-              this.setState({ isData: dashboardFunctions.checkForData(totalInvestmentDollarData) })
-              this.setState({ TotalInvestmentDollarLabels: totalInvestmentDollarLabels })
-              this.setState({ TotalInvestmentDollarData: totalInvestmentDollarData })
-              this.setState({ isLoading: false })
-            })
-            .catch(error => {
-              throw error;
-            })
-        })
-        .catch(error => {
-          throw error
-        })
-    })
-      .catch(error => {
-        console.log(error)
-      })
-
+  newData = (data, loading) => {
+    let TotalInvestmentDollarLabels = []
+    let TotalInvestmentDollarData = []
+    for (let sector in data) {
+      TotalInvestmentDollarLabels.push(sector)
+      TotalInvestmentDollarData.push(Math.round(data[sector]))
+    }
+    this.setState({ isData: dashboardFunctions.checkForData(TotalInvestmentDollarData) })
+    this.setState({ TotalInvestmentDollarLabels: TotalInvestmentDollarLabels })
+    this.setState({ TotalInvestmentDollarData: TotalInvestmentDollarData })
+    if (!loading) {
+      this.setState({ isLoading: false })
+    }
   }
 
   componentDidMount() {
-    this.fetchData('%25')
+    this.newData(this.props.data, true)
 
   }
 
 
   componentWillReceiveProps(newProps) {
-    this.fetchData(newProps.year)
+    this.newData(newProps.data, newProps.isLoading)
   }
 
   render() {
