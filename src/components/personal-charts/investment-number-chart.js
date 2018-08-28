@@ -1,7 +1,5 @@
 import React, { Component } from 'react'
 import { Doughnut } from 'react-chartjs-2';
-import axios from 'axios'
-import axiosHeaders from '../../axios-headers'
 import dashboardFunctions from '../../dashboard-functions'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
@@ -14,51 +12,35 @@ export default class InvestmentNumberChart extends Component {
     isLoading: true,
   }
 
-  fetchData = (year) => {
-
-    axiosHeaders.generateHeaders().then((headers) => {
-
-      // GET NUMBER OF INVESTMENTS FROM INVESTOR
-      axios('/.netlify/functions/get', {
-        method: 'GET',
-        headers,
-        params: { path: "rest/v2/tables/IndvInvestorDeals/records", select: { 0: 'IndvInvestor_NeworFollowOn', 1: 'COUNT(IndvInvestor_GUID)%20AS%20numberOfInvestments' }, where: { userSpecific: true, IndvInvestor_Email_Year: { query: year, type: '%20LIKE%20' } }, groupBy: 'IndvInvestor_NeworFollowOn' }
+  newData = (data, loading) => {
+    let investmentNumberLabels = []
+    let investmentNumberData = []
+    for (let newFollowOn in data) {
+      if (newFollowOn === 'newNumbers') {
+        investmentNumberLabels.push('New')
       }
-      )
-        .then(res => {
-          let newFollowOn = res.data.Result
-          let investmentNumberLabels = []
-          let investmentNumberData = []
-          newFollowOn.forEach(type => {
-            //SET STATE WITH LIST OF LABELS
-            investmentNumberLabels.push(type.IndvInvestor_NeworFollowOn)
-            //SET STATE WITH SUM OF INVESTMENT VALUE
-            investmentNumberData.push(Math.round(type.numberOfInvestments))
-          })
-          this.setState({ isData: dashboardFunctions.checkForData(investmentNumberData) })
-          this.setState({ investmentNumberLabels: investmentNumberLabels })
-          this.setState({ investmentNumberData: investmentNumberData })
-          this.setState({ isLoading: false })
-        })
-        .catch(error => {
-          throw error;
-        })
-    })
-      .catch(error => {
-        console.log(error)
-      })
-
+      if (newFollowOn === 'followOnNumbers') {
+        investmentNumberLabels.push('Follow On')
+      }
+      investmentNumberData.push(Math.round(data[newFollowOn]))
+    }
+    this.setState({ isData: dashboardFunctions.checkForData(investmentNumberData) })
+    this.setState({ investmentNumberLabels: investmentNumberLabels })
+    this.setState({ investmentNumberData: investmentNumberData })
+    if (!loading) {
+      this.setState({ isLoading: false })
+    }
   }
 
   componentDidMount() {
-    this.fetchData('%25')
+    this.newData(this.props.data, true)
 
   }
-
 
   componentWillReceiveProps(newProps) {
-    this.fetchData(newProps.year)
+    this.newData(newProps.data, newProps.isLoading)
   }
+
 
   render() {
     const data = {

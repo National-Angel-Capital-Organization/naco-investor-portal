@@ -13,86 +13,31 @@ export default class AverageInvestmentNumberChart extends Component {
     isLoading: true,
   }
 
-  fetchData = (year) => {
-    // GET USER INVESTMENT NUMBER
-
-    axiosHeaders.generateHeaders().then((headers) => {
-      axios('/.netlify/functions/get', {
-        method: 'GET',
-        headers,
-        params: {
-          path: "rest/v2/tables/IndvInvestorDeals/records", select: { 0: 'COUNT(IndvInvestor_GUID)%20AS%20userInvestmentNumber' }, where: { userSpecific: true, IndvInvestor_Email_Year: { query: year, type: '%20LIKE%20' } }
-        }
-      })
-        .then(res => {
-          const personalNumber = res.data.Result[0]
-          let averages = [];
-          averages.push({ label: 'Your Number of Investments (#)', investmentNumber: personalNumber.userInvestmentNumber, })
-
-          // GET NUMBER OF DEALS FROM OTHER INDIVIDUAL INVESTORS
-          axios('/.netlify/functions/get', {
-            method: 'GET',
-            headers,
-            params: { path: "rest/v2/tables/IndvInvestorDeals/records", select: { 0: 'COUNT(IndvInvestor_GUID)%20AS%20indvInvestorDealsNumber' }, where: { notUser: true, IndvInvestor_Email_Year: { query: year, type: '%20LIKE%20' } } }
-          }
-          )
-            .then(res => {
-              const indvInvestorDealsNumber = res.data.Result[0].indvInvestorDealsNumber
-
-              // GET NUMBER OF INDIVIDUAL INVESTORS
-              axios('/.netlify/functions/get', {
-                method: 'GET',
-                headers,
-                params: { path: "rest/v2/tables/IndvInvestorDeals/records", select: { 0: 'COUNT(DISTINCT%20IndvInvestor_Email)%20AS%20indvInvestorsNumber' }, where: { notUser: true, IndvInvestor_Email_Year: { query: year, type: '%20LIKE%20' } } }
-              }
-              )
-                .then(res => {
-                  const indvInvestorsNumber = res.data.Result[0].indvInvestorsNumber
-                  const dealsPerIndvInvestor = indvInvestorDealsNumber / indvInvestorsNumber
-
-                  averages.push({ label: ["Other Angels' Average", "Number of Investments (#)"], investmentNumber: dealsPerIndvInvestor })
-
-                  let averageInvestmentNumberLabels = []
-                  let averageInvestmentNumberData = []
-                  averages.forEach(average => {
-                    //SET STATE WITH LIST OF LABELS
-                    averageInvestmentNumberLabels.push(average.label)
-                    //SET STATE WITH AVERAGES
-                    averageInvestmentNumberData.push((Math.round(average.investmentNumber * 100) / 100))
-                  })
-                  this.setState({ isData: dashboardFunctions.checkForData(averageInvestmentNumberData) })
-                  this.setState({ averageInvestmentNumberLabels: averageInvestmentNumberLabels })
-                  this.setState({ averageInvestmentNumberData: averageInvestmentNumberData })
-                  this.setState({ isLoading: false })
-
-                })
-                .catch(error => {
-                  throw error;
-                })
-
-            })
-            .catch(error => {
-              throw error;
-            })
-        })
-        .catch(error => {
-          throw error
-        })
-    })
-      .catch(error => {
-        console.log(error)
-      })
+  newData = (data, loading) => {
+    let averageInvestmentNumberLabels = []
+    let averageInvestmentNumberData = []
+    for (let userOrAverage in data) {
+      averageInvestmentNumberLabels.push(userOrAverage)
+      averageInvestmentNumberData.push((Math.round((data[userOrAverage] * 100 ))) / 100)
+    }
+    this.setState({ isData: dashboardFunctions.checkForData(averageInvestmentNumberData) })
+    this.setState({ averageInvestmentNumberLabels: averageInvestmentNumberLabels })
+    this.setState({ averageInvestmentNumberData: averageInvestmentNumberData })
+    if (!loading) {
+      this.setState({ isLoading: false })
+    }
   }
 
   componentDidMount() {
-    this.fetchData('%25')
+    this.newData(this.props.data, true)
 
   }
 
 
   componentWillReceiveProps(newProps) {
-    this.fetchData(newProps.year)
+    this.newData(newProps.data, newProps.isLoading)
   }
+
 
   render() {
     const data = {

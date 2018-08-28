@@ -1,7 +1,5 @@
 import React, { Component } from 'react'
 import { Doughnut } from 'react-chartjs-2';
-import axios from 'axios'
-import axiosHeaders from '../../axios-headers'
 import dashboardFunctions from '../../dashboard-functions'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
@@ -14,48 +12,34 @@ export default class InvestmentDollarChart extends Component {
     isLoading: true,
   }
 
-  fetchData = (year) => {
-    axiosHeaders.generateHeaders().then((headers) => {
-
-      // GET SUM OF INVESTMENT FROM INVESTOR
-      axios('/.netlify/functions/get', {
-        method: 'GET',
-        headers,
-        params: { path: "rest/v2/tables/IndvInvestorDeals/records", select: { 0: 'IndvInvestor_NeworFollowOn', 1: 'SUM(IndvInvestor_DollarsInvested)%20AS%20dollarInvested' }, where: { userSpecific: true, IndvInvestor_Email_Year: { query: year, type: '%20LIKE%20' } }, groupBy: 'IndvInvestor_NeworFollowOn' }
+  newData = (data, loading) => {
+    let investmentDollarLabels = []
+    let investmentDollarData = []
+    for (let newFollowOn in data) {
+      if (newFollowOn === 'newDollars') {
+        investmentDollarLabels.push('New')
       }
-      )
-        .then(res => {
-          let newFollowOn = res.data.Result
-          let investmentDollarLabels = []
-          let investmentDollarData = []
-          newFollowOn.forEach(type => {
-            //SET STATE WITH LIST OF LABELS
-            investmentDollarLabels.push(type.IndvInvestor_NeworFollowOn)
-            //SET STATE WITH SUM OF INVESTMENT VALUE
-            investmentDollarData.push(Math.round(type.dollarInvested))
-          })
-          this.setState({ isData: dashboardFunctions.checkForData(investmentDollarData) })
-          this.setState({ investmentDollarLabels: investmentDollarLabels })
-          this.setState({ investmentDollarData: investmentDollarData })
-          this.setState({ isLoading: false })
-        })
-        .catch(error => {
-          throw error;
-        })
-    })
-      .catch(error => {
-        console.log(error)
-      })
+      if (newFollowOn === 'followOnDollars') {
+        investmentDollarLabels.push('Follow On')
+      }
+      investmentDollarData.push(Math.round(data[newFollowOn]))
+    }
+    this.setState({ isData: dashboardFunctions.checkForData(investmentDollarData) })
+    this.setState({ investmentDollarLabels: investmentDollarLabels })
+    this.setState({ investmentDollarData: investmentDollarData })
+    if (!loading) {
+      this.setState({ isLoading: false })
+    }
   }
 
   componentDidMount() {
-    this.fetchData('%25')
+    this.newData(this.props.data, true)
 
   }
 
 
   componentWillReceiveProps(newProps) {
-    this.fetchData(newProps.year)
+    this.newData(newProps.data, newProps.isLoading)
   }
 
 

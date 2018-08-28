@@ -1,7 +1,5 @@
 import React, { Component } from 'react'
 import { Bar } from 'react-chartjs-2';
-import axios from 'axios'
-import axiosHeaders from '../../axios-headers'
 import dashboardFunctions from '../../dashboard-functions'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
@@ -14,58 +12,30 @@ export default class SectorDollarChart extends Component {
     isLoading: true,
   }
 
-  fetchData = (year) => {
-    // GET INVESTMENT DOLLAR AMOUNTS
-
-    axiosHeaders.generateHeaders().then((headers) => {
-      axios('/.netlify/functions/get', {
-        method: 'GET',
-        headers,
-        params: {
-          path: "rest/v2/tables/IndvInvestorDeals/records", select: { 0: 'IndvInvestor_CompanyMajorSector', 1: 'SUM(IndvInvestor_DollarsInvested)%20AS%20sectorDollar' }, where: { userSpecific: true, IndvInvestor_Email_Year: { query: year, type: '%20LIKE%20' } }, groupBy: 'IndvInvestor_CompanyMajorSector'
-        }
-      }
-      )
-        .then(res => {
-          let sectors = [];
-          res.data.Result.forEach(sector => {
-            if (sector.IndvInvestor_CompanyMajorSector !== '' && sector.IndvInvestor_CompanyMajorSector !== 'Other') {
-              sectors.push({ label: sector.IndvInvestor_CompanyMajorSector, sectorDollar: sector.sectorDollar })
-            }
-          });
-
-          let sectorDollarLabels = []
-          let sectorDollarData = []
-          sectors.forEach(sector => {
-            //SET STATE WITH LIST OF LABELS
-            sectorDollarLabels.push(sector.label)
-            //SET STATE WITH SUM OF DEAL DOLLARS
-            sectorDollarData.push(Math.round(sector.sectorDollar))
-          })
-          this.setState({ isData: dashboardFunctions.checkForData(sectorDollarData) })
-          this.setState({ sectorDollarLabels: sectorDollarLabels })
-          this.setState({ sectorDollarData: sectorDollarData })
-          this.setState({ isLoading: false })
-        })
-        .catch(error => {
-          throw error
-        })
-    })
-      .catch(error => {
-        console.log(error)
-      })
+  newData = (data, loading) => {
+    let sectorDollarLabels = []
+    let sectorDollarData = []
+    for (let sector in data) {
+        sectorDollarLabels.push(sector)
+      sectorDollarData.push(Math.round(data[sector]))
+    }
+    this.setState({ isData: dashboardFunctions.checkForData(sectorDollarData) })
+    this.setState({ sectorDollarLabels: sectorDollarLabels })
+    this.setState({ sectorDollarData: sectorDollarData })
+    if (!loading) {
+      this.setState({ isLoading: false })
+    }
   }
-
 
   componentDidMount() {
-    this.fetchData('%25')
+    this.newData(this.props.data, true)
 
   }
-
 
   componentWillReceiveProps(newProps) {
-    this.fetchData(newProps.year)
+    this.newData(newProps.data, newProps.isLoading)
   }
+
 
   render() {
     const data = {

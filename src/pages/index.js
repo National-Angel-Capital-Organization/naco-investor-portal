@@ -87,8 +87,6 @@ export default class IndexPage extends Component {
   render() {
     let year = this.handleYear(this.state.currentYear)
 
-    console.log(this.dataForChart('totalInvestmentDollar', year, true))
-
     return (
       <div>
         <h1>General Dashboard</h1>
