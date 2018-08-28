@@ -32,7 +32,6 @@ export default class PersonalDashboard extends Component {
       }
       )
         .then(res => {
-          console.log(res)
           this.setState({ data: res.data })
           this.setState({ isLoading: false })
         })

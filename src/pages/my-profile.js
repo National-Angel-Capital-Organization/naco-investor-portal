@@ -5,42 +5,7 @@ import axiosHeaders from '../axios-headers'
 
 export default class MyProfile extends Component {
 
-  componentDidMount() {
-    axiosHeaders.generateHeaders().then((headers) => {
-      axios('/.netlify/functions/general-dashboard', {
-        method: 'GET',
-        headers
-      }
-      )
-        .then(res => {
-          console.log(res)
-        })
-        .catch(error => {
-          throw error
-        })
-    })
-      .catch(error => {
-        console.log(error)
-      })
 
-
-    axiosHeaders.generateHeaders().then((headers) => {
-      axios('/.netlify/functions/personal-dashboard', {
-        method: 'GET',
-        headers
-      }
-      )
-        .then(res => {
-          console.log(res)
-        })
-        .catch(error => {
-          throw error
-        })
-    })
-      .catch(error => {
-        console.log(error)
-      })
-  }
 
   render() {
     return (
