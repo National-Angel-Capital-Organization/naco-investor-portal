@@ -1,7 +1,5 @@
 import React, { Component } from 'react'
 import { Doughnut } from 'react-chartjs-2';
-import axios from 'axios'
-import axiosHeaders from '../../axios-headers'
 import dashboardFunctions from '../../dashboard-functions'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
@@ -14,84 +12,34 @@ export default class TotalInvestmentNumberChart extends Component {
     isLoading: true,
   }
 
-  fetchData = (year) => {
-
-    // GET COUNT OF DEALS FROM ANGEL GROUPS
-
-    axiosHeaders.generateHeaders().then((headers) => {
-      axios('/.netlify/functions/get', {
-        method: 'GET',
-        headers,
-        params: { path: "rest/v2/tables/Deals/records", select: { 0: 'Deal_NewOrFollowon', 1: 'COUNT(Deal_DealRef)%20AS%20DealInvestmentNumber' }, where: { Group_NameAndSubmissionYear: { query: year, type: '%20LIKE%20' } }, groupBy: 'Deal_NewOrFollowon' }
+  newData = (data, loading) => {
+    let TotalInvestmentNumberLabels = []
+    let TotalInvestmentNumberData = []
+    for (let newFollowOn in data) {
+      if (newFollowOn === 'new') {
+        TotalInvestmentNumberLabels.push('New')
       }
-      )
-        .then(res => {
-          let newFollowOn = [{ label: 'New', dealNumber: 0, indvInvestorDealNumber: 0 }, { label: 'Follow-On', dealNumber: 0, indvInvestorDealNumber: 0 }];
-          res.data.Result.forEach(type => {
-            switch (type.Deal_NewOrFollowon.toLowerCase()) {
-              case newFollowOn[0].label.toLowerCase():
-                newFollowOn[0].dealNumber = type.DealInvestmentNumber
-                break
-              case newFollowOn[1].label.toLowerCase():
-                newFollowOn[1].dealNumber = type.DealInvestmentNumber
-                break
-            }
-          });
-
-          // GET COUNT OF DEALS FROM INDIVIDUAL INVESTORS
-          axios('/.netlify/functions/get', {
-            method: 'GET',
-            headers,
-            params: { path: "rest/v2/tables/IndvInvestorDeals/records", select: { 0: 'IndvInvestor_NeworFollowOn', 1: 'COUNT(IndvInvestor_DealRef)%20AS%20IndvInvestorDealInvestmentNumber' }, where: { IndvInvestor_Email_Year: { query: year, type: '%20LIKE%20' } }, groupBy: 'IndvInvestor_NeworFollowOn' }
-          }
-          )
-            .then(res => {
-              res.data.Result.forEach(indvInvestorType => {
-                switch (indvInvestorType.IndvInvestor_NeworFollowOn.toLowerCase()) {
-                  case newFollowOn[0].label.toLowerCase():
-                    newFollowOn[0].indvInvestorDealNumber = indvInvestorType.IndvInvestorDealInvestmentNumber
-                    break
-                  case newFollowOn[1].label.toLowerCase():
-                    newFollowOn[1].indvInvestorDealNumber = indvInvestorType.IndvInvestorDealInvestmentNumber
-                    break
-                }
-
-              });
-              let totalInvestmentNumberLabels = []
-              let totalInvestmentNumberData = []
-              newFollowOn.forEach(type => {
-                //SET STATE WITH LIST OF LABELS
-                totalInvestmentNumberLabels.push(type.label)
-                //SET STATE WITH SUM OF DEAL NUMBERS
-                totalInvestmentNumberData.push(type.indvInvestorDealNumber + type.dealNumber)
-              })
-              this.setState({ isData: dashboardFunctions.checkForData(totalInvestmentNumberData) })
-              this.setState({ TotalInvestmentNumberLabels: totalInvestmentNumberLabels })
-              this.setState({ TotalInvestmentNumberData: totalInvestmentNumberData })
-              this.setState({ isLoading: false })
-            })
-            .catch(error => {
-              throw error;
-            })
-        })
-        .catch(error => {
-          throw error
-        })
-    })
-      .catch(error => {
-        console.log(error)
-      })
-
+      if (newFollowOn === 'followOn') {
+        TotalInvestmentNumberLabels.push('Follow On')
+      }
+      TotalInvestmentNumberData.push(Math.round(data[newFollowOn]))
+    }
+    this.setState({ isData: dashboardFunctions.checkForData(TotalInvestmentNumberData) })
+    this.setState({ TotalInvestmentNumberLabels: TotalInvestmentNumberLabels })
+    this.setState({ TotalInvestmentNumberData: TotalInvestmentNumberData })
+    if (!loading) {
+      this.setState({ isLoading: false })
+    }
   }
 
   componentDidMount() {
-    this.fetchData('%25')
+    this.newData(this.props.data, true)
 
   }
 
 
   componentWillReceiveProps(newProps) {
-    this.fetchData(newProps.year)
+    this.newData(newProps.data, newProps.isLoading)
   }
 
   render() {

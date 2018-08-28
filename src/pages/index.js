@@ -117,13 +117,13 @@ export default class IndexPage extends Component {
         </div>
         <div className='chart-wrapper'>
           <div className='chart-container doughnut'>
-            {/* <TotalInvestmentNumberChart year={this.handleYear(this.state.currentYear)} /> */}
+            <TotalInvestmentNumberChart isLoading={this.state.isLoading} data={this.dataForChart('totalInvestmentNumber', year, true)} />
             <TotalInvestmentDollarChart isLoading={this.state.isLoading} data={this.dataForChart('totalInvestmentDollar', year, true)} />
           </div>
           <div className='chart-container bar'>
             <PremoneyValueChart isLoading={this.state.isLoading} data={this.dataForChart('averagePremoneyValue', year, false)} />
-            {/* <TotalSectorNumberChart year={this.handleYear(this.state.currentYear)} />
-            <TotalSectorDollarChart year={this.handleYear(this.state.currentYear)} /> */}
+            <TotalSectorNumberChart isLoading={this.state.isLoading} data={this.dataForChart('totalSectorNumber', year, true)} />
+            <TotalSectorDollarChart isLoading={this.state.isLoading} data={this.dataForChart('totalSectorDollar', year, true)} />
           </div>
         </div>
       </div>

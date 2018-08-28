@@ -1,7 +1,5 @@
 import React, { Component } from 'react'
 import { Doughnut } from 'react-chartjs-2';
-import axios from 'axios'
-import axiosHeaders from '../../axios-headers'
 import dashboardFunctions from '../../dashboard-functions'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
@@ -17,9 +15,14 @@ export default class TotalInvestmentDollarChart extends Component {
   newData = (data, loading) => {
     let TotalInvestmentDollarLabels = []
     let TotalInvestmentDollarData = []
-    for (let sector in data) {
-      TotalInvestmentDollarLabels.push(sector)
-      TotalInvestmentDollarData.push(Math.round(data[sector]))
+    for (let newFollowOn in data) {
+      if (newFollowOn === 'new') {
+        TotalInvestmentDollarLabels.push('New')
+      }
+      if (newFollowOn === 'followOn') {
+        TotalInvestmentDollarLabels.push('Follow On')
+      }
+      TotalInvestmentDollarData.push(Math.round(data[newFollowOn]))
     }
     this.setState({ isData: dashboardFunctions.checkForData(TotalInvestmentDollarData) })
     this.setState({ TotalInvestmentDollarLabels: TotalInvestmentDollarLabels })
