@@ -10,6 +10,7 @@ import axiosHeaders from '../axios-headers'
 import { navigateTo, Link } from "gatsby-link"
 
 const provinceOptions = ['AB', 'BC', 'MB', 'NB', 'NL', 'NT', 'NS', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT', 'N/A']
+const geographicFocusOptions = ['No Geographic Focus', 'City Borders', 'Region Within Province', 'Provincial Borders', 'Region Spanning Multiple Provinces and/or States', 'National Borders', 'Other (Please Specify']
 
 export default class MyProfile extends Component {
 
@@ -22,7 +23,7 @@ export default class MyProfile extends Component {
     IndvInvestor_City: "",
     IndvInvestor_Province: "",
     IndvInvestor_PostCode: "",
-    IndvInvestor_GeographicFocus: "",
+    IndvInvestor_GeographicFocus: '',
     IndvInvestor_OtherGeograhicFocus: "",
     IndvInvestor_PartOfGroup: false,
     IndvInvestor_GrpMembership: [],
@@ -56,7 +57,6 @@ export default class MyProfile extends Component {
       }
       )
         .then(res => {
-          console.log(res)
           const resProfile = res.data.Result[0];
           const oldState = this.state;
           const newState = oldState;
@@ -187,26 +187,24 @@ export default class MyProfile extends Component {
       IndvInvestor_GrpMembershipCustom
     }
 
-    console.log(dealSubmission)
-
-    // axiosHeaders.generateHeaders().then((headers) => {
-    //   axios('/.netlify/functions/put', {
-    //     method: 'PUT',
-    //     headers,
-    //     data: dealSubmission,
-    //     params: { path: "rest/v2/tables/IndvInvestorDetails/records", userSpecific: true }
-    //   }
-    //   )
-    //     .catch(error => {
-    //       throw error
-    //     })
-    // })
-    //   .then(() => {
-    //     navigateTo('/personal-dashboard')
-    //   })
-    //   .catch(error => {
-    //     console.log(error)
-    //   })
+    axiosHeaders.generateHeaders().then((headers) => {
+      axios('/.netlify/functions/put', {
+        method: 'PUT',
+        headers,
+        data: dealSubmission,
+        params: { path: "rest/v2/tables/IndvInvestorDetails/records", userSpecific: true }
+      }
+      )
+        .catch(error => {
+          throw error
+        })
+    })
+      .then(() => {
+        navigateTo('/personal-dashboard')
+      })
+      .catch(error => {
+        console.log(error)
+      })
 
   }
 
@@ -228,7 +226,7 @@ export default class MyProfile extends Component {
           <TextField
             underlineDisabledStyle={{ 'border-style': 'none' }}
             disabled={true}
-            hintText="Enter your first name"
+            hintText="Your first name"
             name="IndvInvestor_FirstName"
             floatingLabelText="First Name"
             onChange={this.handleChange}
@@ -241,10 +239,76 @@ export default class MyProfile extends Component {
             value={this.state.IndvInvestor_FirstName}
           />
           <br />
+          <TextField
+            underlineDisabledStyle={{ 'border-style': 'none' }}
+            disabled={true}
+            hintText="Your last name"
+            name="IndvInvestor_LastName"
+            floatingLabelText="Last Name"
+            onChange={this.handleChange}
+            floatingLabelFixed={true}
+            style={{
+              width: '450px',
+              cursor: 'default'
+            }}
+            errorText={this.state.IndvInvestor_LastNameError}
+            value={this.state.IndvInvestor_LastName}
+          />
+          <br />
+          <TextField
+            underlineDisabledStyle={{ 'border-style': 'none' }}
+            disabled={true}
+            hintText="Your email address"
+            name="IndvInvestor_Email"
+            floatingLabelText="Email Address"
+            onChange={this.handleChange}
+            floatingLabelFixed={true}
+            style={{
+              width: '450px',
+              cursor: 'default'
+            }}
+            errorText={this.state.IndvInvestor_EmailError}
+            value={this.state.IndvInvestor_Email}
+          />
+          <br />
 
 
           <h2>Address</h2>
           <hr />
+          <TextField
+            hintText="Your physical address"
+            name="IndvInvestor_Address1"
+            floatingLabelText="Address Line 1"
+            onChange={this.handleChange}
+            floatingLabelFixed={true}
+            style={this.styles}
+            errorText={this.state.IndvInvestor_Address1Error}
+            value={this.state.IndvInvestor_Address1}
+          />
+          <br />
+          <TextField
+            hintText="Your physical address"
+            name="IndvInvestor_Address2"
+            floatingLabelText="Address Line 2"
+            onChange={this.handleChange}
+            floatingLabelFixed={true}
+            style={this.styles}
+            errorText={this.state.IndvInvestor_Address2Error}
+            value={this.state.IndvInvestor_Address2}
+          />
+          <br />
+          <TextField
+            hintText="Your City"
+            name="IndvInvestor_City"
+            floatingLabelText="City"
+            onChange={this.handleChange}
+            floatingLabelFixed={true}
+            style={this.styles}
+            errorText={this.state.IndvInvestor_CityError}
+            value={this.state.IndvInvestor_City}
+          />
+          <br />
+
           <SelectField
             floatingLabelFixed={true}
             floatingLabelText="Province"
@@ -264,11 +328,54 @@ export default class MyProfile extends Component {
             ))}
           </SelectField>
           <br />
+          <TextField
+            hintText="Your Postal Code"
+            name="IndvInvestor_PostCode"
+            floatingLabelText="Postal Code"
+            onChange={this.handleChange}
+            floatingLabelFixed={true}
+            style={this.styles}
+            errorText={this.state.IndvInvestor_PostCodeError}
+            value={this.state.IndvInvestor_PostCode}
+          />
+          <br />
 
           <h2>Focus / Group Membership</h2>
           <hr />
+
+          <SelectField
+            floatingLabelFixed={true}
+            floatingLabelText="Geographic Focus"
+            value={this.state.IndvInvestor_GeographicFocus}
+            onChange={this.handleDropdownChange}
+            style={this.styles}
+            hintText="-- Select --"
+            labelStyle={this.styles}
+          >
+            {geographicFocusOptions.map(i => (
+              <MenuItem
+                key={i}
+                value={i}
+                primaryText={i}
+                name='IndvInvestor_GeographicFocus'
+              />
+            ))}
+          </SelectField>
+
           <br />
 
+          <TextField
+            hintText="Please Specify an Area of Geographic Focus"
+            name="IndvInvestor_OtherGeograhicFocus"
+            floatingLabelText="Other Area of Geographic Focus"
+            onChange={this.handleChange}
+            floatingLabelFixed={true}
+            style={this.styles}
+            errorText={this.state.IndvInvestor_OtherGeograhicFocusError}
+            value={this.state.IndvInvestor_OtherGeograhicFocus}
+          />
+          <br />
+          <br />
           <Toggle
             label="Are you an Angel Group Member?"
             name="IndvInvestor_PartOfGroup"
