@@ -7,6 +7,7 @@ import RaisedButton from 'material-ui/RaisedButton'
 import TextField from 'material-ui/TextField'
 import submissionFunctions from '../submission-functions'
 import axiosHeaders from '../axios-headers'
+import netlifyIdentity from 'netlify-identity-widget'
 import { navigateTo, Link } from "gatsby-link"
 
 const provinceOptions = ['AB', 'BC', 'MB', 'NB', 'NL', 'NT', 'NS', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT', 'N/A']
@@ -209,6 +210,35 @@ export default class MyProfile extends Component {
   }
 
 
+  handleReset = event => {
+    event.preventDefault()
+    const userEmail = netlifyIdentity.currentUser().email
+    let recoveryPath = 'https://determined-dijkstra-25288a.netlify.com/.netlify/identity/recover'
+    if (location.host !== 'localhost:8000') {
+      recoveryPath = '/.netlify/identity/recover'
+    }
+     
+    axiosHeaders.generateHeaders().then((headers) => {
+      axios(recoveryPath, {
+        method: 'POST',
+        headers,
+        data: { email: userEmail }
+      }
+      )
+        .catch(error => {
+          throw error
+        })
+    })
+      .then(() => {
+        navigateTo('/personal-dashboard')
+      })
+      .catch(error => {
+        console.log(error)
+      })
+
+  }
+
+
   styles = {
     width: '450px',
   }
@@ -269,6 +299,13 @@ export default class MyProfile extends Component {
             }}
             errorText={this.state.IndvInvestor_EmailError}
             value={this.state.IndvInvestor_Email}
+          />
+          <br />
+          <br />
+          <RaisedButton
+            label="Reset Password"
+            primary={false}
+            onClick={this.handleReset}
           />
           <br />
 
@@ -420,6 +457,7 @@ export default class MyProfile extends Component {
             onClick={this.handleSubmit}
           />
         </div>
+
       </div>
     )
   }
