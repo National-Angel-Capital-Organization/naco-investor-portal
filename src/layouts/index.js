@@ -13,6 +13,7 @@ import { Link } from 'react-router-dom';
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faChartBar, faChartPie } from '@fortawesome/free-solid-svg-icons'
+import Registration from '../components/registration';
 
 library.add(faChartBar, faChartPie)
 
@@ -40,6 +41,7 @@ export default class Layout extends Component {
     validToken: false,
     loggedIn: false,
     loading: true,
+    registered: false
   }
 
   checkForToken() {
@@ -68,6 +70,9 @@ export default class Layout extends Component {
     netlifyIdentity.on("login", (user) => {
       netlifyIdentity.close()
       this.setState({ loggedIn: true })
+      if (user.user_metadata.registered) {
+        this.setState({ registered: true })
+      }
     });
     netlifyIdentity.on("logout", (user) => {
       netlifyIdentity.close()
@@ -118,15 +123,30 @@ export default class Layout extends Component {
   }
 
   loggedIn = () => {
-    const { data, children } = this.props
+    const { data, children, siteTitle } = this.props
     if (this.state.loading) {
       return (<div>Loading</div>)
     }
     else if (this.state.loggedIn) {
-      return (<div>
-        <Header siteTitle={data.site.siteMetadata.title} />
-        <div className="body-wrapper">{children()}</div>
-        </div>);
+      if (this.state.registered) {
+        return (<div>
+          <Header siteTitle={data.site.siteMetadata.title} />
+          <div className="body-wrapper">{children()}</div>
+        </div>)
+      } else {
+        return (
+          <div>
+            <div id="header">
+              <div id="header-img">
+                <img alt={this.props.siteTitle} src="https://d3lut3gzcpx87s.cloudfront.net/image_encoded/aHR0cHM6Ly9zaWxrc3RhcnQuczMuYW1hem9uYXdzLmNvbS8yMzUxYjhkZC05NzRiLTE3OGQtODc3Ny0wYmM0ZTQ5Y2M3NTMucG5n/540x100fPNG" />
+              </div>
+            </div>
+            <div className="body-wrapper">
+              <Registration siteTitle={siteTitle} id="header" />
+            </div>
+          </div>
+        );
+      }
     } else {
       return (<div>
         <button onClick={this.handleLogIn} >Log In</button>
@@ -149,7 +169,6 @@ export default class Layout extends Component {
             ]}>
 
           </Helmet>
-
           {this.loggedIn()}
         </div>
       </MuiThemeProvider>

@@ -13,7 +13,7 @@ import { navigateTo, Link } from "gatsby-link"
 const provinceOptions = ['AB', 'BC', 'MB', 'NB', 'NL', 'NT', 'NS', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT', 'N/A']
 const geographicFocusOptions = ['No Geographic Focus', 'City Borders', 'Region Within Province', 'Provincial Borders', 'Region Spanning Multiple Provinces and/or States', 'National Borders', 'Other (Please Specify']
 
-export default class MyProfile extends Component {
+export default class Registration extends Component {
 
   state = {
     IndvInvestor_FirstName: "",
@@ -50,52 +50,7 @@ export default class MyProfile extends Component {
 
   componentDidMount() {
 
-    axiosHeaders.generateHeaders().then((headers) => {
-      axios('/.netlify/functions/get', {
-        method: 'GET',
-        headers,
-        params: { path: `rest/v2/tables/IndvInvestorDetails/records`, where: { userSpecific: true } }
-      }
-      )
-        .then(res => {
-          const resProfile = res.data.Result[0];
-          const oldState = this.state;
-          const newState = oldState;
-          newState.IndvInvestor_Email = resProfile.IndvInvestor_Email
-          newState.IndvInvestor_Address1 = resProfile.IndvInvestor_Address1
-          newState.IndvInvestor_Address2 = resProfile.IndvInvestor_Address2
-          newState.IndvInvestor_City = resProfile.IndvInvestor_City
-          newState.IndvInvestor_FirstName = resProfile.IndvInvestor_FirstName
-          newState.IndvInvestor_LastName = resProfile.IndvInvestor_LastName
-          newState.IndvInvestor_GeographicFocus = resProfile.IndvInvestor_GeographicFocus
-          newState.IndvInvestor_OtherGeograhicFocus = resProfile.IndvInvestor_OtherGeograhicFocus
-          newState.IndvInvestor_GrpMembershipCustom = resProfile.IndvInvestor_GrpMembershipCustom
-          newState.IndvInvestor_PostCode = resProfile.IndvInvestor_PostCode
-          newState.IndvInvestor_Province = resProfile.IndvInvestor_Province
-
-
-          if (resProfile.IndvInvestor_PartOfGroup === "Yes") {
-            newState.IndvInvestor_PartOfGroup = true
-          } else {
-            newState.IndvInvestor_PartOfGroup = false
-          }
-
-          if (resProfile.IndvInvestor_GrpMembership) {
-            let angelGroupNames = []
-            for (let angelGroup in resProfile.IndvInvestor_GrpMembership) {
-              angelGroupNames.push(resProfile.IndvInvestor_GrpMembership[angelGroup])
-            }
-            newState.IndvInvestor_GrpMembership = angelGroupNames
-          }
-          this.setState(newState)
-        })
-        .catch(error => {
-          throw error
-        })
-    })
-      .catch(error => {
-        console.log(error)
-      })
+    this.setState({ IndvInvestor_Email: netlifyIdentity.currentUser().email })
 
     // GET ANGEL GROUP NAMES
 
@@ -161,6 +116,7 @@ export default class MyProfile extends Component {
   handleSubmit = event => {
     event.preventDefault()
     let {
+      IndvInvestor_Email,
       IndvInvestor_Address1,
       IndvInvestor_Address2,
       IndvInvestor_City,
@@ -175,7 +131,8 @@ export default class MyProfile extends Component {
     IndvInvestor_GrpMembership = submissionFunctions.findListNumber(IndvInvestor_GrpMembership, this.state.importedLists.angelGroupNames, this.state.importedLists.angelGroupNumbers)
     IndvInvestor_PartOfGroup = submissionFunctions.toggleSubmit(IndvInvestor_PartOfGroup)
 
-    const profileSubmission = {
+    const registrationSubmission = {
+      IndvInvestor_Email,
       IndvInvestor_Address1,
       IndvInvestor_Address2,
       IndvInvestor_City,
@@ -187,57 +144,54 @@ export default class MyProfile extends Component {
       IndvInvestor_GrpMembership,
       IndvInvestor_GrpMembershipCustom
     }
+    console.log(registrationSubmission)
 
-    axiosHeaders.generateHeaders().then((headers) => {
-      axios('/.netlify/functions/put', {
-        method: 'PUT',
-        headers,
-        data: profileSubmission,
-        params: { path: "rest/v2/tables/IndvInvestorDetails/records", userSpecific: true }
-      }
-      )
-        .catch(error => {
-          throw error
-        })
-    })
-      .then(() => {
-        navigateTo('/personal-dashboard')
-      })
-      .catch(error => {
-        console.log(error)
-      })
+    // axiosHeaders.generateHeaders().then((headers) => {
+    //   axios('/.netlify/functions/post', {
+    //     method: 'POST',
+    //     headers,
+    //     data: registrationSubmission,
+    //     params: { path: "rest/v2/tables/IndvInvestorDetails/records" }
+    //   }
+    //   )
+    //     .catch(error => {
+    //       throw error
+    //     })
+    // })
+    //   .then(() => {
+    //     let rolePath = 'https://determined-dijkstra-25288a.netlify.com/.netlify/identity/user'
+    //     if (location.host !== 'localhost:8000') {
+    //       rolePath = '/.netlify/identity/user'
+    //     }
 
-  }
-
-
-  handleReset = event => {
-    event.preventDefault()
-    const userEmail = netlifyIdentity.currentUser().email
-    let recoveryPath = 'https://determined-dijkstra-25288a.netlify.com/.netlify/identity/recover'
-    if (location.host !== 'localhost:8000') {
-      recoveryPath = '/.netlify/identity/recover'
-    }
-     
-    axiosHeaders.generateHeaders().then((headers) => {
-      axios(recoveryPath, {
-        method: 'POST',
-        headers,
-        data: { email: userEmail }
-      }
-      )
-        .catch(error => {
-          throw error
-        })
-    })
-      .then(() => {
-        navigateTo('/personal-dashboard')
-      })
-      .catch(error => {
-        console.log(error)
-      })
+    //     axiosHeaders.generateHeaders().then((headers) => {
+    //       axios(rolePath, {
+    //         method: 'PUT',
+    //         headers,
+    //         data: {
+    //           "data": {
+    //             "registered": true
+    //           }
+    //         }
+    //       }
+    //       )
+    //         .catch(error => {
+    //           throw error
+    //         })
+    //         .then((res) => {
+    //           console.log(res)
+    //         })
+    //     })
+    //       .catch(error => {
+    //         console.log(error)
+    //       })
+    //     navigateTo('/')
+    //   })
+    //   .catch(error => {
+    //     console.log(error)
+    //   })
 
   }
-
 
   styles = {
     width: '450px',
@@ -248,66 +202,35 @@ export default class MyProfile extends Component {
 
     return (
       <div>
-        <h1>Profile</h1>
-        <p>Update your profile using the fields below.</p>
+
+        <h1>Register</h1>
+        <p>Register for full access to Angel Investment Data.</p>
         <div className="form-container">
           <h2>Personal</h2>
           <hr />
           <TextField
-            underlineDisabledStyle={{ 'border-style': 'none' }}
-            disabled={true}
             hintText="Your first name"
             name="IndvInvestor_FirstName"
             floatingLabelText="First Name"
             onChange={this.handleChange}
             floatingLabelFixed={true}
-            style={{
-              width: '450px',
-              cursor: 'default'
-            }}
+            style={this.styles}
             errorText={this.state.IndvInvestor_FirstNameError}
             value={this.state.IndvInvestor_FirstName}
           />
           <br />
           <TextField
-            underlineDisabledStyle={{ 'border-style': 'none' }}
-            disabled={true}
             hintText="Your last name"
             name="IndvInvestor_LastName"
             floatingLabelText="Last Name"
             onChange={this.handleChange}
             floatingLabelFixed={true}
-            style={{
-              width: '450px',
-              cursor: 'default'
-            }}
+            style={this.styles}
             errorText={this.state.IndvInvestor_LastNameError}
             value={this.state.IndvInvestor_LastName}
           />
           <br />
-          <TextField
-            underlineDisabledStyle={{ 'border-style': 'none' }}
-            disabled={true}
-            hintText="Your email address"
-            name="IndvInvestor_Email"
-            floatingLabelText="Email Address"
-            onChange={this.handleChange}
-            floatingLabelFixed={true}
-            style={{
-              width: '450px',
-              cursor: 'default'
-            }}
-            errorText={this.state.IndvInvestor_EmailError}
-            value={this.state.IndvInvestor_Email}
-          />
-          <br />
-          <br />
-          <RaisedButton
-            label="Reset Password"
-            primary={false}
-            onClick={this.handleReset}
-          />
-          <br />
+
 
 
           <h2>Address</h2>
@@ -452,7 +375,7 @@ export default class MyProfile extends Component {
           <br />
           <br />
           <RaisedButton
-            label="Update"
+            label="Register"
             primary={true}
             onClick={this.handleSubmit}
           />
