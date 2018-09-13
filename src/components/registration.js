@@ -165,20 +165,21 @@ export default class Registration extends Component {
         params: { path: "rest/v2/tables/IndvInvestorDetails/records" }
       }
       )
-        .then((res) => {
+        .then(() => {
           axios('/.netlify/functions/register-user', {
             method: 'PUT',
-            headers
+            headers,
+            credentials: "include"
           }
           )
             .then((res) => {
               console.log(res)
+              console.log(netlifyIdentity.currentUser())
             })
 
             .catch(error => {
               throw error
             })
-          console.log(res)
         })
 
         .catch(error => {
