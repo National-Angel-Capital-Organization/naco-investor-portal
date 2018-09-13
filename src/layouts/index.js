@@ -61,6 +61,7 @@ export default class Layout extends Component {
     netlifyIdentity.init();
     const user = netlifyIdentity.currentUser();
     if (user) {
+      console.log(user.role)
       this.setState({ loggedIn: true })
       this.setState({ loading: false })
     } else {
@@ -122,6 +123,10 @@ export default class Layout extends Component {
     netlifyIdentity.open()
   }
 
+  handleRegistration = () => {
+    this.setState({registered: true})
+  }
+
   loggedIn = () => {
     const { data, children, siteTitle } = this.props
     if (this.state.loading) {
@@ -142,7 +147,7 @@ export default class Layout extends Component {
               </div>
             </div>
             <div className="body-wrapper">
-              <Registration siteTitle={siteTitle} id="header" />
+              <Registration siteTitle={siteTitle} id="header" handleRegistration={this.handleRegistration} />
             </div>
           </div>
         );

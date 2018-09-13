@@ -4,10 +4,20 @@
 @import 'dashboards';
 @import url('https://fonts.googleapis.com/css?family=Roboto:300,400,500');
 
+/* Background pattern from Toptal Subtle Patterns */
+
 html {
   font-family: 'Roboto', sans-serif;
 }
 
+body {
+  background-image: url('../img/gplaypattern.png');
+}
+
 .body-wrapper {
   margin: 50px 10% 30px 10%;
+  background: #FFF;
+  padding: 50px 80px;
+  max-width: 1200px;
+  box-shadow: 0px 3px 15px rgba(0,0,0,0.2);
 }

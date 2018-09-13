@@ -21,6 +21,7 @@ export function handler(event, context, callback) {
 
   let path = event.queryStringParameters.path
 
+
   axios({
     method: 'POST',
     url: `https://${process.env.API_INTEGRATION_URL}.caspio.com/${path}`,
@@ -37,10 +38,10 @@ export function handler(event, context, callback) {
       });
     })
     .catch(error => {
-      console.log(error.statusText)
+      console.log(error)
       callback(null, {
         statusCode: 500,
-        body: `${error}`
+        body: `${error.data.Message}`
       });
     })
 

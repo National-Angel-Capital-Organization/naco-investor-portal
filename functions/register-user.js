@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 51);
+/******/ 	return __webpack_require__(__webpack_require__.s = 53);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -3162,7 +3162,9 @@ module.exports = require("path");
 /* 48 */,
 /* 49 */,
 /* 50 */,
-/* 51 */
+/* 51 */,
+/* 52 */,
+/* 53 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3183,32 +3185,21 @@ __webpack_require__(43).config();
 
 function handler(event, context, callback) {
 
-  let cookies = {};
+  const { identity, user } = context.clientContext;
 
-  if (event.headers.cookie) {
-    let cookieString = event.headers.cookie;
-    cookieString = cookieString.split("; ");
-    for (let cookie of cookieString) {
-      let splitCookie = cookie.split("=");
-      cookies[splitCookie[0]] = splitCookie[1];
-    }
-  } else {
-    callback(null, {
-      statusCode: 401,
-      body: `No Cookies`
-    });
+  const userID = user.sub;
+
+  let userUrl = `https://determined-dijkstra-25288a.netlify.com/.netlify/identity/admin/users/${userID}`;
+  if (location.host !== 'localhost:8000') {
+    userUrl = `/.netlify/identity/admin/users/${userID}`;
   }
-
-  let path = event.queryStringParameters.path;
+  const adminAuthHeader = "Bearer " + identity.token;
 
   (0, _axios2.default)({
-    method: 'POST',
-    url: `https://${process.env.API_INTEGRATION_URL}.caspio.com/${path}`,
-    headers: {
-      accept: 'application/json',
-      Authorization: `bearer ${cookies.token}`
-    },
-    data: JSON.parse(event.body)
+    method: 'PUT',
+    url: userUrl,
+    headers: { Authorization: adminAuthHeader },
+    data: JSON.stringify({ app_metadata: { roles: ["registered"] } })
   }).then(res => {
     callback(null, {
       statusCode: 200,

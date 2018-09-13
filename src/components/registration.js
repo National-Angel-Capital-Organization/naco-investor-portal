@@ -3,12 +3,12 @@ import axios from 'axios'
 import SelectField from 'material-ui/SelectField'
 import MenuItem from 'material-ui/MenuItem'
 import Toggle from 'material-ui/Toggle'
+import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton';
 import RaisedButton from 'material-ui/RaisedButton'
 import TextField from 'material-ui/TextField'
 import submissionFunctions from '../submission-functions'
 import axiosHeaders from '../axios-headers'
 import netlifyIdentity from 'netlify-identity-widget'
-import { navigateTo, Link } from "gatsby-link"
 
 const provinceOptions = ['AB', 'BC', 'MB', 'NB', 'NL', 'NT', 'NS', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT', 'N/A']
 const geographicFocusOptions = ['No Geographic Focus', 'City Borders', 'Region Within Province', 'Provincial Borders', 'Region Spanning Multiple Provinces and/or States', 'National Borders', 'Other (Please Specify']
@@ -26,6 +26,8 @@ export default class Registration extends Component {
     IndvInvestor_PostCode: "",
     IndvInvestor_GeographicFocus: '',
     IndvInvestor_OtherGeograhicFocus: "",
+    IndvInvestor_Gender: "",
+    IndvInvestor_CustomGender: "",
     IndvInvestor_PartOfGroup: false,
     IndvInvestor_GrpMembership: [],
     IndvInvestor_GrpMembershipCustom: "",
@@ -116,6 +118,8 @@ export default class Registration extends Component {
   handleSubmit = event => {
     event.preventDefault()
     let {
+      IndvInvestor_FirstName,
+      IndvInvestor_LastName,
       IndvInvestor_Email,
       IndvInvestor_Address1,
       IndvInvestor_Address2,
@@ -124,14 +128,19 @@ export default class Registration extends Component {
       IndvInvestor_PostCode,
       IndvInvestor_GeographicFocus,
       IndvInvestor_OtherGeograhicFocus,
+      IndvInvestor_Gender,
+      IndvInvestor_CustomGender,
       IndvInvestor_PartOfGroup,
       IndvInvestor_GrpMembership,
       IndvInvestor_GrpMembershipCustom } = this.state
 
     IndvInvestor_GrpMembership = submissionFunctions.findListNumber(IndvInvestor_GrpMembership, this.state.importedLists.angelGroupNames, this.state.importedLists.angelGroupNumbers)
     IndvInvestor_PartOfGroup = submissionFunctions.toggleSubmit(IndvInvestor_PartOfGroup)
+    let Active = true;
 
     const registrationSubmission = {
+      IndvInvestor_FirstName,
+      IndvInvestor_LastName,
       IndvInvestor_Email,
       IndvInvestor_Address1,
       IndvInvestor_Address2,
@@ -140,56 +149,45 @@ export default class Registration extends Component {
       IndvInvestor_PostCode,
       IndvInvestor_GeographicFocus,
       IndvInvestor_OtherGeograhicFocus,
+      IndvInvestor_Gender,
+      IndvInvestor_CustomGender,
       IndvInvestor_PartOfGroup,
       IndvInvestor_GrpMembership,
-      IndvInvestor_GrpMembershipCustom
+      IndvInvestor_GrpMembershipCustom,
+      Active
     }
-    console.log(registrationSubmission)
 
-    // axiosHeaders.generateHeaders().then((headers) => {
-    //   axios('/.netlify/functions/post', {
-    //     method: 'POST',
-    //     headers,
-    //     data: registrationSubmission,
-    //     params: { path: "rest/v2/tables/IndvInvestorDetails/records" }
-    //   }
-    //   )
-    //     .catch(error => {
-    //       throw error
-    //     })
-    // })
-    //   .then(() => {
-    //     let rolePath = 'https://determined-dijkstra-25288a.netlify.com/.netlify/identity/user'
-    //     if (location.host !== 'localhost:8000') {
-    //       rolePath = '/.netlify/identity/user'
-    //     }
+    axiosHeaders.generateHeaders().then((headers) => {
+      axios('/.netlify/functions/post', {
+        method: 'POST',
+        headers,
+        data: registrationSubmission,
+        params: { path: "rest/v2/tables/IndvInvestorDetails/records" }
+      }
+      )
+        .then((res) => {
+          axios('/.netlify/functions/register-user', {
+            method: 'PUT',
+            headers
+          }
+          )
+            .then((res) => {
+              console.log(res)
+            })
 
-    //     axiosHeaders.generateHeaders().then((headers) => {
-    //       axios(rolePath, {
-    //         method: 'PUT',
-    //         headers,
-    //         data: {
-    //           "data": {
-    //             "registered": true
-    //           }
-    //         }
-    //       }
-    //       )
-    //         .catch(error => {
-    //           throw error
-    //         })
-    //         .then((res) => {
-    //           console.log(res)
-    //         })
-    //     })
-    //       .catch(error => {
-    //         console.log(error)
-    //       })
-    //     navigateTo('/')
-    //   })
-    //   .catch(error => {
-    //     console.log(error)
-    //   })
+            .catch(error => {
+              throw error
+            })
+          console.log(res)
+        })
+
+        .catch(error => {
+          throw error
+        })
+    })
+      .catch(error => {
+        console.log(error)
+      })
 
   }
 
@@ -230,6 +228,38 @@ export default class Registration extends Component {
             value={this.state.IndvInvestor_LastName}
           />
           <br />
+          <p style={{ "marginTop": "20px", "marginBottom": "12px" }}>Gender</p>
+          <RadioButtonGroup
+            name="IndvInvestor_Gender"
+            valueSelected={this.state.IndvInvestor_Gender}
+            onChange={this.handleChange}>
+            <RadioButton
+              value="Male"
+              label="Male"
+            />
+            <RadioButton
+              value="Female"
+              label="Female"
+            />
+            <RadioButton
+              value="Rather Not Say"
+              label="Rather Not Say"
+            />
+            <RadioButton
+              value="Other (Please Specify)"
+              label="Other (Please Specify)"
+            />
+          </RadioButtonGroup>
+          <TextField
+            hintText="Please Specify Gender"
+            name="IndvInvestor_CustomGender"
+            floatingLabelText="Gender"
+            onChange={this.handleChange}
+            floatingLabelFixed={true}
+            style={this.styles}
+            errorText={this.state.IndvInvestor_CustomGenderError}
+            value={this.state.IndvInvestor_CustomGender}
+          />
 
 
 
