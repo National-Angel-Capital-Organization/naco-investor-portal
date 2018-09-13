@@ -3199,7 +3199,7 @@ function handler(event, context, callback) {
     method: 'PUT',
     url: userUrl,
     headers: { Authorization: adminAuthHeader },
-    data: JSON.stringify({ app_metadata: { roles: ["registered"] } })
+    data: JSON.stringify({ role: "registered" })
   }).then(res => {
     callback(null, {
       statusCode: 200,
