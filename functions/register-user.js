@@ -3190,7 +3190,7 @@ function handler(event, context, callback) {
   const userID = user.sub;
 
   let userUrl = `https://determined-dijkstra-25288a.netlify.com/.netlify/identity/admin/users/${userID}`;
-  if (location.host !== 'localhost:8000') {
+  if (event.headers.host !== 'localhost:8000') {
     userUrl = `/.netlify/identity/admin/users/${userID}`;
   }
   const adminAuthHeader = "Bearer " + identity.token;
