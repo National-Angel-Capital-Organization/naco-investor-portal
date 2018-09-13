@@ -30,7 +30,7 @@ export function handler(event, context, callback) {
       console.log(error)
       callback(null, {
         statusCode: 500,
-        body: `${error.data.Message}`
+        body: `${error}`
       });
     })
 
