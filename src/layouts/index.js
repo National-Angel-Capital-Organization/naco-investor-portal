@@ -61,7 +61,7 @@ export default class Layout extends Component {
     netlifyIdentity.init();
     const user = netlifyIdentity.currentUser();
     if (user) {
-      console.log(user.role)
+      console.log(user)
       this.setState({ loggedIn: true })
       this.setState({ loading: false })
     } else {
