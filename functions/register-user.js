@@ -3190,9 +3190,9 @@ function handler(event, context, callback) {
   const userID = user.sub;
 
   let userUrl = `https://determined-dijkstra-25288a.netlify.com/.netlify/identity/admin/users/${userID}`;
-  if (event.headers.host !== 'localhost:8000') {
-    userUrl = `/.netlify/identity/admin/users/${userID}`;
-  }
+  // if (event.headers.host !== 'localhost:8000') {
+  //   userUrl = `/.netlify/identity/admin/users/${userID}`
+  // }
   const adminAuthHeader = "Bearer " + identity.token;
 
   (0, _axios2.default)({
