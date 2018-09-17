@@ -61,13 +61,19 @@ export default class Layout extends Component {
     netlifyIdentity.init();
     const user = netlifyIdentity.currentUser();
     if (user) {
-      const registered = this.registrationStatus()
-      console.log('inside component mount registered: ', registered)
-      if (registered) {
-        this.setState({registered: true})
-      }
-      this.setState({ loggedIn: true })
-      this.setState({ loading: false })
+      this.registrationStatus()
+      .then((status) => {
+        console.log('inside component mount registered: ', status)
+        // if (status) {
+        //   this.setState({ registered: true })
+        // }
+        this.setState({ loggedIn: true })
+        this.setState({ loading: false })
+      })
+      .catch( err => {
+        throw err
+      })
+
     } else {
       this.setState({ loggedIn: false })
       this.setState({ loading: false })
@@ -120,9 +126,9 @@ export default class Layout extends Component {
       })
   }
 
-  registrationStatus = () => {
+  registrationStatus = new Promise ((resolve, reject) => {
     if (process.env.NODE_ENV === 'development') {
-      return true
+      resolve(true)
     } else {
     axiosHeaders.generateHeaders().then((headers) => {
       axios('/.netlify/functions/registration-status', {
@@ -133,7 +139,7 @@ export default class Layout extends Component {
       )
         .then((res) => {
           console.log('inside registrationStatus: ', res.data)
-          return res.data
+          resolve(res.data)
         })
 
         .catch(error => {
@@ -141,10 +147,10 @@ export default class Layout extends Component {
         })
     })
       .catch(error => {
-        console.log(error)
+        reject(error)
       })
     }
-  }
+  })
 
 
   handleLogIn() {
