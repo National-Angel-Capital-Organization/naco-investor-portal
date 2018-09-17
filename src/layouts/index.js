@@ -54,6 +54,7 @@ export default class Layout extends Component {
   }
 
   componentWillMount() {
+    this.registrationStatus()
     this.checkForToken()
   }
 
@@ -61,7 +62,6 @@ export default class Layout extends Component {
     netlifyIdentity.init();
     const user = netlifyIdentity.currentUser();
     if (user) {
-      console.log(user)
       this.setState({ loggedIn: true })
       this.setState({ loading: false })
     } else {
@@ -71,9 +71,6 @@ export default class Layout extends Component {
     netlifyIdentity.on("login", (user) => {
       netlifyIdentity.close()
       this.setState({ loggedIn: true })
-      if (user.user_metadata.registered) {
-        this.setState({ registered: true })
-      }
     });
     netlifyIdentity.on("logout", (user) => {
       netlifyIdentity.close()
@@ -119,12 +116,34 @@ export default class Layout extends Component {
       })
   }
 
+  registrationStatus() {
+    axiosHeaders.generateHeaders().then((headers) => {
+      axios('/.netlify/functions/registration-status', {
+        method: 'GET',
+        headers,
+        credentials: "include"
+      }
+      )
+        .then((res) => {
+          console.log(res)
+        })
+
+        .catch(error => {
+          throw error
+        })
+    })
+      .catch(error => {
+        console.log(error)
+      })
+  }
+
+
   handleLogIn() {
     netlifyIdentity.open()
   }
 
   handleRegistration = () => {
-    this.setState({registered: true})
+    this.setState({ registered: true })
   }
 
   loggedIn = () => {

@@ -172,9 +172,8 @@ export default class Registration extends Component {
             credentials: "include"
           }
           )
-            .then((res) => {
-              console.log(res)
-              console.log(netlifyIdentity.currentUser())
+            .then(() => {
+             this.props.handleRegistration()
             })
 
             .catch(error => {
