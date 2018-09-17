@@ -64,9 +64,9 @@ export default class Layout extends Component {
       this.registrationStatus()
       .then((status) => {
         console.log('inside component mount registered: ', status)
-        // if (status) {
-        //   this.setState({ registered: true })
-        // }
+        if (status) {
+          this.setState({ registered: true })
+        }
         this.setState({ loggedIn: true })
         this.setState({ loading: false })
       })
@@ -126,7 +126,8 @@ export default class Layout extends Component {
       })
   }
 
-  registrationStatus = new Promise ((resolve, reject) => {
+  registrationStatus = () => { 
+    return new Promise ((resolve, reject) => {
     if (process.env.NODE_ENV === 'development') {
       resolve(true)
     } else {
@@ -151,6 +152,7 @@ export default class Layout extends Component {
       })
     }
   })
+}
 
 
   handleLogIn() {
