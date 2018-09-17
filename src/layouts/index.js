@@ -63,7 +63,6 @@ export default class Layout extends Component {
     if (user) {
       this.registrationStatus()
       .then((status) => {
-        console.log('inside component mount registered: ', status)
         if (status) {
           this.setState({ registered: true })
         }
@@ -80,7 +79,17 @@ export default class Layout extends Component {
     }
     netlifyIdentity.on("login", (user) => {
       netlifyIdentity.close()
-      this.setState({ loggedIn: true })
+      this.registrationStatus()
+        .then((status) => {
+          if (status) {
+            this.setState({ registered: true })
+          }
+          this.setState({ loggedIn: true })
+        })
+        .catch(err => {
+          throw err
+        })
+      
     });
     netlifyIdentity.on("logout", (user) => {
       netlifyIdentity.close()
@@ -139,7 +148,6 @@ export default class Layout extends Component {
       }
       )
         .then((res) => {
-          console.log('inside registrationStatus: ', res.data)
           resolve(res.data)
         })
 

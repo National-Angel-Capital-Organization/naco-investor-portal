@@ -3480,35 +3480,42 @@ function handler(event, context, callback) {
 
 
   getAllDeals().then(res => {
+    console.log('got the deals');
     // separate group deals from investor deals and store in variables
     let groupObject = res.groupDeals;
     let investorObject = res.investorDeals;
     // arrange both sets of deals
     arrangeDealsObject(groupObject, dealGroupFunctionArray);
     arrangeDealsObject(investorObject, dealInvestorFunctionArray);
+    console.log('arranged all deals');
     // AVERAGE PREMONEY VALUE CHART
     let groupAveragePremoneyValue = JSON.parse(JSON.stringify(groupObject));
     objectArraySearch(groupAveragePremoneyValue, averagePremoneyValue, ["Deal_MajorSector", 'Deal_PremoneyValue']);
+    console.log('AVERAGE PREMONEY VALUE CHART');
     // TOTAL INVESTMENT DOLLAR CHART
     let groupTotalInvestmentDollar = JSON.parse(JSON.stringify(groupObject));
     objectArraySearch(groupTotalInvestmentDollar, totalInvestmentDollar, ["Deal_NewOrFollowon", 'Deal_DollarInvested']);
     let investorTotalInvestmentDollar = JSON.parse(JSON.stringify(investorObject));
     objectArraySearch(investorTotalInvestmentDollar, totalInvestmentDollar, ["IndvInvestor_NeworFollowOn", 'IndvInvestor_DollarsInvested']);
+    console.log('TOTAL INVESTMENT DOLLAR CHART');
     // TOTAL INVESTMENT NUMBER CHART
     let groupTotalInvestmentNumber = JSON.parse(JSON.stringify(groupObject));
     objectArraySearch(groupTotalInvestmentNumber, totalInvestmentNumber, ["Deal_NewOrFollowon", 'Deal_DollarInvested']);
     let investorTotalInvestmentNumber = JSON.parse(JSON.stringify(investorObject));
     objectArraySearch(investorTotalInvestmentNumber, totalInvestmentNumber, ["IndvInvestor_NeworFollowOn", 'IndvInvestor_DollarsInvested']);
+    console.log('TOTAL INVESTMENT NUMBER CHART');
     // TOTAL SECTOR DOLLAR CHART
     let groupTotalSectorDollar = JSON.parse(JSON.stringify(groupObject));
     objectArraySearch(groupTotalSectorDollar, totalSectorDollar, ["Deal_MajorSector", 'Deal_DollarInvested']);
     let investorTotalSectorDollar = JSON.parse(JSON.stringify(investorObject));
     objectArraySearch(investorTotalSectorDollar, totalSectorDollar, ["IndvInvestor_CompanyMajorSector", 'IndvInvestor_DollarsInvested']);
+    console.log('TOTAL SECTOR DOLLAR CHART');
     // TOTAL SECTOR NUMBER CHART
     let groupTotalSectorNumber = JSON.parse(JSON.stringify(groupObject));
     objectArraySearch(groupTotalSectorNumber, totalSectorNumber, ["Deal_MajorSector", 'Deal_DollarInvested']);
     let investorTotalSectorNumber = JSON.parse(JSON.stringify(investorObject));
     objectArraySearch(investorTotalSectorNumber, totalSectorNumber, ["IndvInvestor_CompanyMajorSector", 'IndvInvestor_DollarsInvested']);
+    console.log('TOTAL SECTOR NUMBER CHART');
     const objectToSend = {
       group: {
         averagePremoneyValue: groupAveragePremoneyValue,
@@ -3524,6 +3531,7 @@ function handler(event, context, callback) {
         totalSectorNumber: investorTotalSectorNumber
       }
     };
+    console.log('arranged final object');
     callback(null, {
       statusCode: 200,
       body: `${JSON.stringify(objectToSend)}`
