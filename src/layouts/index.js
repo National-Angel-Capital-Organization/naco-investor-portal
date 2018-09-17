@@ -120,7 +120,7 @@ export default class Layout extends Component {
       })
   }
 
-  registrationStatus() {
+  registrationStatus = () => {
     if (process.env.NODE_ENV === 'development') {
       return true
     } else {
