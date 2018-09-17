@@ -61,7 +61,10 @@ export default class Layout extends Component {
     netlifyIdentity.init();
     const user = netlifyIdentity.currentUser();
     if (user) {
-      this.registrationStatus()
+      const registered = this.registrationStatus()
+      if (registered) {
+        this.setState({registered: true})
+      }
       this.setState({ loggedIn: true })
       this.setState({ loading: false })
     } else {
@@ -117,6 +120,9 @@ export default class Layout extends Component {
   }
 
   registrationStatus() {
+    if (process.env.NODE_ENV === 'development') {
+      return true
+    } else {
     axiosHeaders.generateHeaders().then((headers) => {
       axios('/.netlify/functions/registration-status', {
         method: 'GET',
@@ -135,6 +141,7 @@ export default class Layout extends Component {
       .catch(error => {
         console.log(error)
       })
+    }
   }
 
 

@@ -166,19 +166,23 @@ export default class Registration extends Component {
       }
       )
         .then(() => {
-          axios('/.netlify/functions/register-user', {
-            method: 'PUT',
-            headers,
-            credentials: "include"
-          }
-          )
-            .then(() => {
-             this.props.handleRegistration()
-            })
+          if (process.env.NODE_ENV === 'development') {
+            this.props.handleRegistration()
+          } else {
+            axios('/.netlify/functions/register-user', {
+              method: 'PUT',
+              headers,
+              credentials: "include"
+            }
+            )
+              .then(() => {
+                this.props.handleRegistration()
+              })
 
-            .catch(error => {
-              throw error
-            })
+              .catch(error => {
+                throw error
+              })
+          }
         })
 
         .catch(error => {

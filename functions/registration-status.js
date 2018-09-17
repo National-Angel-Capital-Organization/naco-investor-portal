@@ -3201,7 +3201,7 @@ function handler(event, context, callback) {
   }).then(res => {
     callback(null, {
       statusCode: 200,
-      body: `${JSON.stringify(res.data)}`
+      body: `${JSON.stringify(res.data.data.user_metadata.registered)}`
     });
   }).catch(error => {
     console.log(error);
