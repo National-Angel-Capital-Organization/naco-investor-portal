@@ -54,7 +54,6 @@ export default class Layout extends Component {
   }
 
   componentWillMount() {
-    this.registrationStatus()
     this.checkForToken()
   }
 
@@ -62,6 +61,7 @@ export default class Layout extends Component {
     netlifyIdentity.init();
     const user = netlifyIdentity.currentUser();
     if (user) {
+      this.registrationStatus()
       this.setState({ loggedIn: true })
       this.setState({ loading: false })
     } else {
