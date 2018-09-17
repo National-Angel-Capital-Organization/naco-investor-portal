@@ -62,6 +62,7 @@ export default class Layout extends Component {
     const user = netlifyIdentity.currentUser();
     if (user) {
       const registered = this.registrationStatus()
+      console.log('inside component mount registered: ', registered)
       if (registered) {
         this.setState({registered: true})
       }
@@ -131,6 +132,7 @@ export default class Layout extends Component {
       }
       )
         .then((res) => {
+          console.log('inside registrationStatus: ', res.data)
           return res.data
         })
 
